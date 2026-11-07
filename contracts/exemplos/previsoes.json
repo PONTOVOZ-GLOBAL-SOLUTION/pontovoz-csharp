@@ -1,0 +1,55 @@
+{
+  "paradaId": 1,
+  "codigoExternoParada": "SIM-P001",
+  "nomeParada": "Parada Demonstração Centro",
+  "status": "Disponivel",
+  "origem": "Simulado",
+  "dadosSimulados": true,
+  "consultadoEm": "2026-11-10T14:32:00-03:00",
+  "previsoes": [
+    {
+      "linhaId": 2,
+      "codigoLinha": "SIM-L002",
+      "letreiro": "SIM-102",
+      "previstaPara": "2026-11-10T14:33:00-03:00",
+      "esperaMinutos": 1,
+      "prefixoVeiculo": "SIM-V2001",
+      "nivelConfirmacao": "Previsao"
+    },
+    {
+      "linhaId": 4,
+      "codigoLinha": "SIM-L004",
+      "letreiro": "SIM-104",
+      "previstaPara": "2026-11-10T14:40:00-03:00",
+      "esperaMinutos": 8,
+      "prefixoVeiculo": "SIM-V4001",
+      "nivelConfirmacao": "Previsao"
+    },
+    {
+      "linhaId": 2,
+      "codigoLinha": "SIM-L002",
+      "letreiro": "SIM-102",
+      "previstaPara": "2026-11-10T14:51:00-03:00",
+      "esperaMinutos": 19,
+      "prefixoVeiculo": "SIM-V2002",
+      "nivelConfirmacao": "Previsao"
+    }
+  ],
+  "linhasSemPrevisao": [
+    {
+      "linhaId": 1,
+      "codigoLinha": "SIM-L001",
+      "letreiro": "SIM-101"
+    }
+  ],
+  "avisos": [
+    {
+      "codigo": "DadosSimulados",
+      "mensagem": "Dados simulados para demonstração. Não representam a operação real da SPTrans."
+    },
+    {
+      "codigo": "PrevisaoParcial",
+      "mensagem": "Não há previsão de chegada para algumas linhas desta parada."
+    }
+  ]
+}

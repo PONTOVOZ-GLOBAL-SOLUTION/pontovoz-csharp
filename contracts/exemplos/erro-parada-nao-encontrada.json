@@ -1,0 +1,9 @@
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+  "title": "Parada não encontrada",
+  "status": 404,
+  "detail": "Não existe parada ativa com o id 99.",
+  "instance": "/api/v1/paradas/99/previsoes",
+  "codigo": "ParadaNaoEncontrada",
+  "traceId": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-00"
+}

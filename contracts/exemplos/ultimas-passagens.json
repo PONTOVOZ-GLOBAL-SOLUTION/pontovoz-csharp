@@ -1,0 +1,71 @@
+{
+  "paradaId": 1,
+  "codigoExternoParada": "SIM-P001",
+  "nomeParada": "Parada Demonstração Centro",
+  "dadosSimulados": true,
+  "consultadoEm": "2026-11-10T14:32:00-03:00",
+  "limiteDesatualizacaoMinutos": 60,
+  "passagens": [
+    {
+      "id": 15,
+      "linhaId": 4,
+      "codigoLinha": "SIM-L004",
+      "letreiro": "SIM-104",
+      "observadaEm": "2026-11-10T14:24:00-03:00",
+      "registradaEm": "2026-11-10T14:25:10-03:00",
+      "minutosDesdeObservacao": 8,
+      "desatualizada": false,
+      "prefixoVeiculo": null,
+      "nivelConfirmacao": "RegistroManual",
+      "verificada": false,
+      "oficialSptrans": false,
+      "origemRegistro": "operador-local",
+      "dadosSimulados": true,
+      "aviso": {
+        "codigo": "RegistroManualNaoVerificado",
+        "mensagem": "Registro manual sem verificação independente. Não é um dado oficial da SPTrans."
+      }
+    },
+    {
+      "id": 7,
+      "linhaId": 2,
+      "codigoLinha": "SIM-L002",
+      "letreiro": "SIM-102",
+      "observadaEm": "2026-11-08T08:45:00-03:00",
+      "registradaEm": "2026-11-08T09:00:00-03:00",
+      "minutosDesdeObservacao": 3227,
+      "desatualizada": true,
+      "prefixoVeiculo": "SIM-V2003",
+      "nivelConfirmacao": "ObservacaoSimulada",
+      "verificada": false,
+      "oficialSptrans": false,
+      "origemRegistro": null,
+      "dadosSimulados": true,
+      "aviso": {
+        "codigo": "ObservacaoSimulada",
+        "mensagem": "Observação simulada criada com os dados de demonstração. Não é um registro oficial da SPTrans."
+      }
+    }
+  ],
+  "linhasSemRegistro": [
+    {
+      "linhaId": 1,
+      "codigoLinha": "SIM-L001",
+      "letreiro": "SIM-101"
+    }
+  ],
+  "avisos": [
+    {
+      "codigo": "DadosSimulados",
+      "mensagem": "Dados simulados para demonstração. Não representam a operação real da SPTrans."
+    },
+    {
+      "codigo": "PassagemDesatualizada",
+      "mensagem": "Algumas passagens foram observadas há mais de 60 minutos e podem não refletir a situação atual."
+    },
+    {
+      "codigo": "PassagemNaoRegistrada",
+      "mensagem": "Não há passagem registrada para algumas linhas desta parada."
+    }
+  ]
+}

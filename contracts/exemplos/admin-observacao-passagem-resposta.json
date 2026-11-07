@@ -1,0 +1,21 @@
+{
+  "paradaId": 1,
+  "id": 15,
+  "linhaId": 4,
+  "codigoLinha": "SIM-L004",
+  "letreiro": "SIM-104",
+  "observadaEm": "2026-11-10T14:24:00-03:00",
+  "registradaEm": "2026-11-10T14:25:10-03:00",
+  "minutosDesdeObservacao": 1,
+  "desatualizada": false,
+  "prefixoVeiculo": null,
+  "nivelConfirmacao": "RegistroManual",
+  "verificada": false,
+  "oficialSptrans": false,
+  "origemRegistro": "operador-local",
+  "dadosSimulados": true,
+  "aviso": {
+    "codigo": "RegistroManualNaoVerificado",
+    "mensagem": "Registro manual sem verificação independente. Não é um dado oficial da SPTrans."
+  }
+}

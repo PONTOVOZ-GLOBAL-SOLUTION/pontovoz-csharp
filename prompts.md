@@ -781,3 +781,678 @@ recusou o modo antigo, e removeu o `coverlet.collector`, incompatível com ela. 
 e trocou o exemplo de `/health` pela resposta real. Repetiu as validações e criou o
 primeiro commit local, sem repositório remoto. Os resultados estão em
 `backend/docs/evidencias/B0-inicializacao.md`.
+
+### Prompt 07 — Etapa B0.2: conexão e publicação no GitHub (06/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+ETAPA B0.2 — CONEXÃO E PUBLICAÇÃO NO GITHUB
+Concluímos a inicialização e auditoria do backend C# do PontoVoz.
+Criei um repositório GitHub dentro da organização oficial da equipe.
+Repositório: https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+URL remota: https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp.git
+Diretório local: C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz
+Sua tarefa é conectar o repositório Git local ao GitHub e publicar o commit inicial existente, respeitando rigorosamente as instruções abaixo.
+1. Verificação do projeto local
+Antes de qualquer alteração, execute as verificações necessárias para confirmar:
+
+* Estamos no diretório correto.
+* O repositório Git local já existe.
+* A branch atual é main.
+* O commit inicial `0c0bf4a7af967abf8f9dbe2b7f08a47c0f2ad043` está presente.
+* A árvore de trabalho está limpa.
+* Os arquivos do backend, contratos e documentação estão preservados.
+
+Não inicialize outro repositório Git.
+2. Auditoria de segurança antes da publicação
+Examine os arquivos rastreados e o histórico que será enviado.
+Confirme que não existem:
+
+* Tokens ou chaves de API.
+* Senhas e credenciais.
+* Arquivos de ambiente sensíveis.
+* Bancos de dados locais.
+* Arquivos binários ou de compilação desnecessários.
+* Informações pessoais ou privadas indevidas, inclusive dentro do prompts.md.
+* Conteúdo acadêmico ou documentação marcada incorretamente como concluída.
+
+O repositório pode ser público posteriormente, portanto considere também a exposição futura do histórico Git.
+Se encontrar algum problema relevante, interrompa a publicação e informe o motivo. Não reescreva o histórico automaticamente.
+3. Conexão ao GitHub
+Confirme que o repositório remoto informado corresponde à organização PONTOVOZ-GLOBAL-SOLUTION.
+Verifique se já existe um remote chamado origin.
+Se não existir, configure:
+git remote add origin https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp.git
+Depois confirme a configuração com:
+git remote -v
+Confira também se o repositório remoto está vazio, evitando conflitos com históricos existentes.
+Não utilize force push.
+4. Publicação
+Se todas as verificações forem satisfatórias, publique a branch main utilizando:
+git push -u origin main
+Se o GitHub solicitar autenticação, utilize o fluxo oficial de login do Git ou Git Credential Manager.
+Não solicite que eu compartilhe senhas ou tokens diretamente na conversa.
+Se a autenticação falhar, explique o que aconteceu e interrompa a operação, sem tentar soluções inseguras.
+5. Verificação após publicação
+Após o push, confirme:
+
+1. Se a branch main foi publicada.
+2. Se o remote origin está configurado corretamente.
+3. Se o commit inicial aparece no GitHub.
+4. Se os arquivos README.md, prompts.md, backend/ e contracts/ foram enviados.
+5. Se o repositório local continua com a árvore limpa.
+6. Se não houve alterações inesperadas.
+7. Se o endereço do repositório está correto.
+
+6. Relatório final
+Apresente:
+
+* URL do repositório publicado.
+* Hash do commit remoto.
+* Resultado real do git push.
+* Branch local e remota.
+* Confirmação dos arquivos publicados.
+* Eventuais problemas encontrados.
+* Próxima etapa recomendada.
+
+Importante: não implemente nenhuma funcionalidade nova. Não avance para B1, não modifique a arquitetura e não crie commits adicionais sem necessidade.
+Esta etapa é exclusivamente para conectar e publicar o backend já desenvolvido.
+Ao concluir, pare e aguarde minha revisão.
+````
+
+**Resumo da resposta (não é transcrição):** a IA conferiu o repositório local e o remoto, que
+estava vazio e já era público, e auditou os arquivos antes de publicar. Encontrou o e-mail pessoal
+do integrante nos metadados do commit e perguntou como prosseguir. O integrante escolheu o e-mail
+*noreply* do GitHub. A IA configurou esse e-mail só no repositório local e refez o autor do commit,
+que ainda não tinha sido publicado, sem alterar nenhum arquivo. Depois conectou o `origin`,
+executou `git push -u origin main` sem force push e conferiu no GitHub que os 25 arquivos
+publicados eram iguais aos locais. Commit publicado: `f7a8ccf`.
+
+### Prompt 08 — Bloco B1: contratos REST e diretriz permanente (07/11/2026)
+
+O prompt foi enviado em uma única mensagem, com duas partes.
+
+**Texto original — parte 1:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B1 — DEFINIÇÃO E DOCUMENTAÇÃO DOS CONTRATOS REST
+O Bloco B0 foi concluído e publicado com sucesso no GitHub.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+A arquitetura definida na Etapa 01.1 foi aprovada.
+Agora você deverá executar exclusivamente o Bloco B1 — Contratos da API, preparando a documentação técnica que será utilizada pelo backend C# e pelos demais integrantes da Global Solution.
+Não implemente funcionalidades de negócio nesta etapa.
+1. Contexto obrigatório
+O PontoVoz é uma solução CitizenTech para mobilidade urbana em São Paulo.
+A proposta consiste em um totem inteligente instalado em pontos de ônibus, permitindo interação por voz e tela.
+O cidadão poderá:
+
+1. Consultar previsões de chegada.
+2. Consultar a última passagem registrada.
+3. Obter alternativas de deslocamento.
+4. Conversar com um assistente de IA que utilizará informações do backend.
+
+A disciplina C# Software Development exige POO, Web API, EF Core, LINQ, async/await, interfaces, injeção de dependência, testes unitários e qualidade de código.
+A documentação produzida neste bloco deve preservar a arquitetura aprovada e orientar a implementação futura desses conceitos.
+2. Verificação inicial
+Antes de editar, confirme:
+
+* A pasta de trabalho correta.
+* A presença da solução ASP.NET Core.
+* O estado atual do Git.
+* A branch main.
+* O remote origin.
+* A existência do commit publicado.
+* Os documentos atuais em contracts/.
+
+Não sobrescreva alterações preexistentes sem inspecioná-las.
+Se houver diferenças inesperadas no repositório, interrompa e informe.
+3. Contratos REST a documentar
+Mantenha os endpoints definidos na arquitetura consolidada.
+Consultas públicas:
+
+1. GET /api/v1/paradas
+2. GET /api/v1/paradas/{id}
+3. GET /api/v1/linhas
+4. GET /api/v1/destinos
+5. GET /api/v1/paradas/{id}/previsoes
+6. GET /api/v1/paradas/{id}/ultimas-passagens
+7. GET /api/v1/paradas/{id}/alternativas
+8. GET /api/v1/paradas/{id}/resumo
+
+Operações administrativas:
+
+9. POST /api/v1/admin/paradas
+10. PUT /api/v1/admin/paradas/{id}
+11. POST /api/v1/admin/linhas
+12. PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}
+13. POST /api/v1/admin/observacoes-passagem
+
+Verificação de saúde:
+GET /health
+O endpoint /health já existe no projeto.
+Os demais endpoints estão planejados e NÃO devem ser descritos como implementados.
+Caso identifique inconsistências na lista, explique-as antes de fazer alterações de escopo.
+4. Documentação obrigatória de cada endpoint
+Para cada operação, documente:
+
+* Método HTTP.
+* Rota completa.
+* Finalidade.
+* Quem utilizará o endpoint.
+* Parâmetros de rota.
+* Query parameters.
+* Corpo da requisição, quando aplicável.
+* Tipos de dados.
+* Campos obrigatórios e opcionais.
+* Exemplo JSON de sucesso.
+* Códigos HTTP esperados.
+* Exemplos de erros.
+* Regras de validação.
+* Restrições de acesso.
+* Dependências de outros módulos.
+
+Os exemplos devem representar contratos planejados, não resultados de execuções que ainda não aconteceram.
+Utilize JSON válido e convenções consistentes.
+5. Padronização dos contratos
+Defina convenções claras para:
+
+* JSON em camelCase.
+* Nomes dos campos em português.
+* IDs internos e códigos externos de linhas e paradas.
+* Datas em ISO 8601 e tratamento correto de UTC e fuso de São Paulo.
+* Valores nulos.
+* Paginação.
+* Filtros e ordenação.
+* Enums representados como texto.
+* ProblemDetails para erros.
+* Campos de origem e confiabilidade dos dados.
+* Versionamento da API.
+* Cancelamento e indisponibilidade de serviços externos.
+
+As convenções devem ser fáceis de consumir por um frontend ou assistente de IA.
+6. Regras específicas de negócio
+Previsões de chegada
+As respostas deverão distinguir:
+
+* Previsão disponível.
+* Ausência de previsão.
+* Provedor indisponível.
+* Dados simulados.
+
+Inclua origem dos dados, horário da consulta e aviso quando necessário.
+Não invente dados da SPTrans.
+Última passagem
+Diferencie:
+
+* Observação simulada.
+* Registro manual sem verificação.
+* Passagem confirmada por fonte confiável, ainda não implementada.
+
+A resposta deve deixar claro o nível de confirmação e nunca apresentar uma observação simulada como registro oficial.
+Alternativas de deslocamento
+O MVP considera somente linhas diretas entre a parada e um destino cadastrado.
+A comparação deve utilizar:
+tempo total estimado = espera prevista + tempo estimado de percurso.
+Não classifique como mais rápida uma alternativa sem dados suficientes.
+Se não houver previsão, defina explicitamente como a alternativa será representada, incluindo valores nulos e sua posição na ordenação.
+Não utilize rotas inventadas como se fossem reais.
+Resumo do totem
+O endpoint de resumo deve permitir que a interface obtenha em uma chamada:
+
+* Informações da parada.
+* Linhas disponíveis.
+* Previsões de chegada.
+* Últimas passagens registradas.
+* Avisos e estados de disponibilidade.
+
+O resumo deverá continuar útil mesmo quando o provedor de previsões estiver indisponível.
+7. Operações administrativas
+Documente as operações administrativas separadamente das consultas públicas.
+O planejamento prevê um cabeçalho:
+X-PontoVoz-Admin-Key
+A implementação futura deverá distinguir ambientes Development e ambientes externos, conforme a estratégia de segurança já aprovada.
+Não coloque nenhuma chave real nos exemplos.
+Utilize placeholders claramente identificados.
+8. Arquivos a produzir
+Organize a documentação em contracts/, preferencialmente com:
+
+* contracts/README.md
+* contracts/api-v1.md
+* contracts/exemplos/
+
+Crie exemplos JSON úteis para as funcionalidades principais, incluindo:
+
+* Listagem de paradas.
+* Previsões de chegada.
+* Última passagem.
+* Alternativas de deslocamento.
+* Resumo para o totem.
+* Uma requisição administrativa.
+* Erro no padrão ProblemDetails.
+
+Não crie dezenas de arquivos desnecessários. Use uma estrutura objetiva e fácil de consultar pelos colegas.
+Os exemplos deverão ser válidos e coerentes entre si.
+Se ainda não existir o OpenAPI completo gerado pela API, não fabrique um arquivo afirmando que o contrato já está implementado.
+O documento OpenAPI gerado automaticamente pela aplicação somente poderá representar endpoints efetivamente implementados.
+9. Compatibilidade com a equipe
+A documentação deverá explicar como outros integrantes poderão consumir os endpoints.
+Inclua:
+
+* URL base local da API.
+* Padrões de respostas.
+* Como consultar uma parada.
+* Como consultar previsões.
+* Como localizar um destino.
+* Como obter alternativas.
+* Como utilizar o resumo.
+* Como interpretar avisos e dados simulados.
+
+Forneça um exemplo simples da jornada:
+"O cidadão está na parada X, pergunta pelo ônibus e recebe a previsão e uma possível alternativa."
+Explique quais operações pertencem ao backend e quais dependem do componente de IA ou interface.
+Não implemente a IA conversacional.
+10. Conferência de consistência
+Antes de concluir:
+
+* Confirme que as rotas não entram em conflito.
+* Confirme que os exemplos JSON são válidos.
+* Verifique os relacionamentos entre IDs.
+* Verifique os códigos de status.
+* Confirme que os campos de data são coerentes.
+* Confirme que a documentação diferencia recursos planejados dos implementados.
+* Confira que nenhuma funcionalidade foge da proposta PontoVoz.
+
+Estabeleça uma política coerente para respostas vazias, recursos inexistentes e serviços indisponíveis.
+Se alguma decisão do planejamento anterior precisar ser corrigida, documente a divergência e a justificativa. Não faça alterações silenciosas.
+11. Registro e Git
+Atualize prompts.md com o prompt recebido nesta etapa, preservando o registro do uso da IA.
+Não modifique o código-fonte da API, exceto se houver uma correção documental estritamente necessária em seus arquivos de configuração. Nesse caso, explique antes.
+Não realize commit automaticamente.
+Não execute git push.
+O repositório é público, e quero revisar a documentação antes de publicá-la.
+12. Relatório final obrigatório
+Ao finalizar, apresente:
+
+1. Resumo da documentação criada.
+2. Árvore dos novos arquivos.
+3. Relação completa dos endpoints.
+4. Principais decisões contratuais.
+5. Exemplos JSON produzidos.
+6. Resultado das validações.
+7. Compatibilidade com a arquitetura C#.
+8. Compatibilidade com a proposta CitizenTech.
+9. Divergências identificadas e soluções propostas.
+10. Estado atual do Git.
+11. Pendências para aprovação.
+12. Checklist para iniciar o Bloco B2 — Domínio e POO.
+
+Não avance para o B2.
+Pare ao concluir a documentação e aguarde minha aprovação.
+Nosso objetivo é entregar uma Web API altamente coerente com o PontoVoz, tecnicamente consistente e alinhada à rubrica da FIAP.
+````
+
+**Texto original — parte 2:**
+
+````text
+DIRETRIZ PERMANENTE — PADRONIZAÇÃO DO CÓDIGO E DOS COMMITS
+A partir desta etapa, adote as seguintes diretrizes em todo o desenvolvimento do PontoVoz:
+
+1. Código profissional: todos os arquivos devem seguir as boas práticas de desenvolvimento C#/.NET, com nomes claros, comentários técnicos pertinentes e organização consistente.
+2. Sem marcas automáticas de ferramentas: não adicione cabeçalhos, comentários, banners, badges ou mensagens promocionais como "Generated by Claude", "AI Generated" ou equivalentes nos arquivos de código.
+3. Mensagens de commit: utilize mensagens convencionais, técnicas e objetivas, como `feat: add bus stop domain entities` ou `fix: validate arrival predictions`. Não acrescente textos automáticos de divulgação ou assinaturas de ferramentas às mensagens.
+4. Autoria e histórico: mantenha os metadados de autoria corretos, preserve o histórico existente e não reescreva commits para ocultar informações. Antes de qualquer commit, apresente a mensagem proposta para revisão.
+5. Transparência acadêmica: preserve o arquivo `prompts.md` e registre o uso de IA conforme as orientações da FIAP, sem inserir referências redundantes nos demais arquivos.
+6. Documentação: o README deve priorizar o problema CitizenTech, a arquitetura, as funcionalidades, as tecnologias, as instruções de execução e as evidências técnicas.
+7. Aplicação permanente: considere estas diretrizes em todas as próximas etapas do projeto, mantendo-as compatíveis com os requisitos acadêmicos.
+
+Neste Bloco B1, não realize commit nem push. Aguarde minha aprovação após a auditoria da documentação.
+````
+
+**Resumo da resposta (não é transcrição):** a IA escreveu o rascunho do contrato v1 em
+`contracts/api-v1.md` e o guia da equipe em `contracts/README.md`. Os documentos trazem as
+convenções, a política de respostas, os 13 endpoints planejados e o `/health` implementado, os
+catálogos de erros e avisos, a conferência das rotas e as divergências em relação à Etapa 01.1.
+Gerou 12 exemplos JSON fictícios e coerentes entre si em `contracts/exemplos/` e os validou com
+um script. Nenhum código-fonte da API foi alterado, e nenhum commit foi feito.
+
+### Prompt 09 — Bloco B1.1: revisão técnica final dos contratos REST (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B1.1 — REVISÃO TÉCNICA FINAL DOS CONTRATOS REST
+O relatório do Bloco B1 foi analisado.
+A documentação foi considerada bem estruturada, mas precisamos corrigir e validar alguns aspectos antes de aprovar os contratos e avançar para a implementação do domínio C#.
+Sua tarefa é revisar os arquivos reais existentes em contracts/, preservar o trabalho correto e realizar exclusivamente os ajustes necessários.
+Não implemente endpoints, não modifique o código C#, não crie commits e não execute git push.
+1. Semântica dos códigos HTTP
+Reavalie o comportamento do endpoint:
+GET /api/v1/paradas/{id}/previsoes
+Adote uma política consistente:
+
+* 200 quando houver previsões disponíveis.
+* 200 com status SemPrevisoes quando a consulta funcionar, mas não houver previsão.
+* 503 quando a dependência de previsões estiver indisponível e a consulta não puder ser atendida.
+* 404 quando a parada não existir.
+* 422 quando a linha informada não atender à parada, conforme as regras do domínio.
+
+Para:
+GET /api/v1/paradas/{id}/resumo
+Mantenha 200 quando for possível retornar informações parciais úteis, mesmo com o provedor de previsões indisponível.
+Inclua avisos estruturados e status explícitos nas respostas parciais.
+Ajuste a documentação e os exemplos para eliminar divergências.
+2. Datas e simulação
+Confirme que os horários fixos de 10/11/2026 pertencem apenas aos exemplos documentais.
+A implementação futura do provedor simulado deverá calcular horários relativos ao TimeProvider.
+Isso permitirá executar a aplicação em qualquer data sem apresentar previsões vencidas.
+Não modifique código da aplicação nesta etapa. Registre essa regra como requisito para os próximos blocos.
+Revise também a estratégia de registros de passagem simulados, evitando que o seed produza um histórico que se torne enganoso após alguns dias.
+3. Identificação de parada pelo totem
+O totem poderá conhecer o codigoExterno da parada, como SIM-P001, sem conhecer o ID interno do banco.
+Garanta que GET /api/v1/paradas?codigoExterno=... permita identificar a parada corretamente.
+Documente a sequência completa:
+
+1. Totem conhece o código externo.
+2. Consulta o endpoint de busca.
+3. Obtém o identificador interno.
+4. Consulta previsões, últimas passagens, alternativas ou resumo.
+
+Confirme a consistência dos exemplos JSON.
+4. Registros de passagem
+Revise a mudança no limite temporal de sete dias para 24 horas.
+Diferencie claramente:
+
+* Validação temporal de um novo registro manual.
+* Persistência histórica no banco de dados.
+* Consulta da última passagem registrada.
+* Indicação de registro antigo ou desatualizado.
+* Ausência de registros.
+
+Defina uma regra simples, coerente e testável.
+Não apresente previsões nem observações manuais como passagens oficialmente confirmadas.
+Documente as decisões no contrato, inclusive os casos sem registros.
+5. Alternativas de deslocamento
+Verifique:
+
+* Uso do tempo total estimado de viagem.
+* Cálculo da espera somada ao percurso.
+* Ordenação das alternativas efetivamente comparáveis.
+* Tratamento de linhas sem previsão.
+* Uso de null quando um valor não puder ser determinado.
+* Semântica de comparacaoCompleta.
+* Status e avisos quando nenhuma alternativa puder ser comparada.
+
+Não declare que determinada linha é a mais rápida em termos absolutos se os dados forem incompletos.
+O MVP permanece restrito a trajetos diretos cadastrados, sem baldeações.
+Os tempos simulados devem ser identificados explicitamente.
+6. Revisão das dez divergências
+No relatório B1 você informou dez divergências, D1 a D10.
+Revisite todas elas individualmente.
+Apresente uma matriz contendo:
+
+* Identificador da divergência.
+* Comportamento anterior.
+* Comportamento consolidado.
+* Justificativa técnica.
+* Arquivo de documentação afetado.
+* Impacto na implementação futura.
+
+Não faça mudanças silenciosas.
+7. Consistência e reprodutibilidade
+Valide novamente os arquivos de contracts/.
+Confira:
+
+* Sintaxe dos JSONs.
+* Coerência de IDs e códigos externos.
+* Datas, fusos e cálculos.
+* Status HTTP.
+* Avisos e erros.
+* Tipos, campos opcionais e valores nulos.
+* Paginação.
+* Nomes de enums.
+* Relação entre rotas e funcionalidades do PontoVoz.
+* Coerência com o plano C# aprovado.
+
+Informe exatamente quais verificações foram executadas e quais resultados foram obtidos.
+Se a validação depender de um script temporário, considere preservar um verificador simples e reproduzível dentro de contracts/, com instruções de execução. Evite dependências adicionais desnecessárias.
+Não apresente a quantidade de verificações como garantia absoluta de correção.
+8. Escopo acadêmico
+Confirme que todos os contratos continuam relacionados à ideia do totem inteligente da Global Solution CitizenTech.
+Não acrescente funcionalidades desvinculadas da mobilidade urbana.
+Preserve os requisitos da disciplina C#:
+
+* POO.
+* Interfaces.
+* Injeção de dependência.
+* Web API.
+* Entity Framework Core e LINQ.
+* Async/Await.
+* Testes unitários.
+* Qualidade de código.
+
+Não confunda contratos planejados com endpoints já implementados.
+9. Documentação e Git
+Atualize o arquivo prompts.md com o registro desta solicitação.
+Preserve o padrão profissional do repositório e as diretrizes acadêmicas já estabelecidas.
+Não altere o histórico de commits.
+Não faça commit.
+Não execute push.
+10. Relatório final
+Ao concluir, apresente:
+
+1. Arquivos revisados e modificados.
+2. Correções realizadas.
+3. Tabela completa das divergências D1 a D10.
+4. Política final dos códigos HTTP.
+5. Regras finais para dados simulados e última passagem.
+6. Resultado real das validações.
+7. Estado atual do Git.
+8. Pendências, caso existam.
+9. Checklist para autorizar o B2.
+
+Não inicie B2.
+Pare e aguarde minha revisão.
+````
+
+**Resumo da resposta (não é transcrição):** a IA revisou os arquivos de `contracts/`. Mudou o
+endpoint de previsões para devolver 503 quando o provedor está indisponível, mantendo 200 com
+status explícito no resumo e nas alternativas. Renomeou o status para `SemPrevisoes` e definiu
+regras separadas para validar, guardar, consultar e marcar como desatualizada uma passagem.
+Informou que o limite de 7 dias do planejamento tinha sido trocado por 24 horas no B1 sem
+registro e documentou a decisão. Acrescentou ao resumo `situacao` e `partesIndisponiveis`,
+detalhou a identificação da parada pelo código externo e registrou os requisitos R1 a R8 para
+os próximos blocos. Consolidou a matriz de divergências D1 a D15, gerou 15 exemplos e criou um
+verificador em C# (`contracts/verificador/VerificarContrato.cs`), testado também com defeitos
+plantados de propósito. Nenhum código da API foi alterado, e nenhum commit foi feito.
+
+### Prompt 10 — Bloco B1.2: consolidação final dos contratos (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B1.2 — CONSOLIDAÇÃO FINAL DOS CONTRATOS
+A revisão B1.1 foi analisada. A arquitetura contratual foi aprovada, com um único ajuste obrigatório relacionado às passagens simuladas.
+As seguintes decisões estão APROVADAS e não devem ser alteradas:
+
+1. HTTP 503 no endpoint exclusivo de previsões quando o provedor estiver indisponível.
+2. HTTP 200 em alternativas e resumo quando houver informações parciais úteis, acompanhadas de status e avisos explícitos.
+3. Validação de novas observações manuais entre 24 horas no passado e dois minutos no futuro.
+4. Marcação `desatualizada` para registros de passagem com mais de 60 minutos.
+5. Comparação de alternativas pelo tempo total estimado, apenas quando os dados forem suficientes.
+6. Preservação da distinção entre previsão, observação manual, simulação e passagem verificada.
+
+1. Ajuste obrigatório — Dados simulados
+Revise as regras R3 e R4 do contrato.
+Não quero que o seed atualize automaticamente os horários de passagens persistidas toda vez que a aplicação iniciar.
+Adote a seguinte abordagem:
+
+* O seed deverá ser idempotente, criando os dados demonstrativos necessários sem duplicar registros.
+* Registros históricos de passagem não devem ter seus horários modificados automaticamente.
+* As previsões simuladas devem ser calculadas dinamicamente utilizando `TimeProvider`.
+* As observações de passagem devem manter seus horários originais.
+* Registros antigos devem permanecer identificados como desatualizados.
+* Para demonstrar uma passagem recente, podemos utilizar a operação administrativa de registro manual, com fonte e nível de confirmação claramente identificados.
+* Nenhuma observação simulada ou manual pode ser apresentada como passagem oficialmente verificada.
+* Não gerar eventos históricos fictícios automaticamente como consequência de reiniciar a API.
+
+Os exemplos JSON documentais podem continuar usando horários fixos, desde que identificados como exemplos fictícios.
+2. Revisão da documentação
+Atualize somente os trechos afetados em:
+
+* contracts/api-v1.md
+* contracts/README.md
+* contracts/exemplos/, caso necessário
+
+Preserve as demais decisões aprovadas.
+Se a correção gerar uma nova divergência, registre-a no histórico de decisões.
+3. Verificação
+Execute novamente o verificador de contratos.
+Confirme:
+
+* JSON válido.
+* Consistência dos horários.
+* Códigos HTTP.
+* Estados de indisponibilidade.
+* Relação entre os exemplos.
+* Regras de registros de passagem.
+* Ausência de dados sensíveis.
+
+Se o verificador não contemplar uma regra importante, amplie-o de maneira objetiva.
+4. Registro acadêmico
+Atualize prompts.md com esta solicitação.
+Preserve os registros de uso da IA exigidos pela FIAP, sem adicionar referências promocionais de ferramentas ao código ou à documentação técnica.
+5. Git
+Não execute commit nem push nesta etapa.
+Não altere o histórico existente.
+6. Relatório final
+Apresente:
+
+1. Correções realizadas.
+2. Arquivos modificados.
+3. Política definitiva de dados simulados.
+4. Resultados efetivos do verificador.
+5. Estado do Git.
+6. Confirmação de que o código da API permaneceu inalterado.
+7. Pendências restantes para o B2.
+
+Não implemente código de negócio e não inicie o B2.
+Pare após concluir esta revisão.
+````
+
+**Resumo da resposta (não é transcrição):** a IA revisou as regras R3 a R5. Removeu a opção
+que renovava as observações simuladas a cada inicialização e definiu um seed idempotente: as
+observações simuladas são criadas uma única vez, mantêm o horário original e ficam marcadas
+como desatualizadas com o tempo. Reiniciar a API não cria nem altera passagens. A passagem
+recente da demonstração passou a vir do registro manual administrativo. Acrescentou a seção
+4.6.2 ao `api-v1.md`, registrou a mudança como divergência D16 e atualizou o README. Ajustou
+os exemplos de passagem, resumo e operação administrativa. Ampliou o verificador com um grupo
+de regras para dados simulados e o testou com defeitos plantados. Nenhum código da API foi
+alterado, e nenhum commit foi feito.
+
+### Prompt 11 — Bloco B1.3: correções finais e publicação do contrato (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B1.3 — CORREÇÕES FINAIS E PUBLICAÇÃO DO CONTRATO
+Realizei uma auditoria independente dos arquivos reais da Global Solution, incluindo os documentos em contracts/, os 15 exemplos JSON, o verificador e a estrutura do backend.
+O Bloco B1.2 está aprovado em sua arquitetura e no conjunto principal de contratos, condicionado à correção de três detalhes técnicos.
+Execute apenas as correções abaixo. Não amplie o escopo e não implemente funcionalidades de negócio.
+1. Resolver a contradição R3/R4
+O requisito R3 estabelece que o seed cria dados demonstrativos ausentes, incluindo registros fictícios de passagem.
+O requisito R4 afirma que iniciar a API não cria passagens.
+Esclareça a distinção entre:
+
+* Primeiro provisionamento de um banco vazio, quando o seed poderá criar os registros iniciais.
+* Inicialização posterior de um banco já provisionado, quando não se deve criar novos eventos de passagem nem atualizar horários existentes.
+* Registro manual de uma nova observação durante a demonstração.
+
+Preserve a idempotência e a rastreabilidade histórica.
+Atualize R3, R4 e as seções relacionadas, sem modificar o comportamento geral aprovado.
+2. Corrigir a classificação de dados fictícios administrativos
+O exemplo POST /api/v1/admin/paradas utiliza um cadastro fictício, com código TESTE-P003, mas a resposta o identifica com dadosSimulados: false.
+Isso precisa ser corrigido.
+Diferencie:
+
+* Método de cadastro: como a informação entrou no sistema.
+* Natureza do dado: fictício ou não fictício.
+* Verificação: confirmado ou não confirmado por uma fonte confiável.
+
+Não considere automaticamente que um registro administrativo contém dados reais ou verificados.
+Proponha e documente o menor ajuste necessário nos DTOs e exemplos para permitir que cadastros fictícios sejam explicitamente identificados como simulados, mesmo quando criados por uma operação administrativa.
+Garanta que a resposta pública não perca essa informação.
+O contrato também menciona o aviso CadastroNaoVerificado. Defina exatamente como esse aviso será representado nos endpoints públicos, ou ajuste a redação para corresponder ao formato realmente definido.
+Não acrescente novos endpoints.
+3. Corrigir o tratamento temporal de observações futuras
+O contrato aceita observadaEm até dois minutos depois do relógio do servidor como tolerância.
+Defina de forma inequívoca:
+
+* Como calcular minutosDesdeObservacao sem valores negativos.
+* Como lidar com registros aceitos por tolerância de relógio que ainda apresentem horário futuro.
+* Como evitar apresentar uma observação futura como uma passagem já confirmada.
+* Como calcular desatualizada usando o intervalo efetivamente transcorrido.
+* Como testar os limites de 0, 60 e 61 minutos, além dos casos imediatamente acima de 60 minutos e dentro da tolerância futura.
+
+Preserve a janela de 24 horas no passado e dois minutos no futuro.
+Não implemente a lógica no backend agora; documente a regra definitiva para os blocos de domínio e serviços.
+4. Revisar os exemplos e o verificador
+Atualize apenas os arquivos afetados em contracts/.
+Garanta que os exemplos continuem coerentes entre si.
+Amplie o verificador somente na medida necessária para cobrir as decisões corrigidas.
+Execute novamente o comando de verificação.
+Informe a quantidade de exemplos analisados, os grupos de regras, as falhas e o código de saída real.
+Não considere que o verificador comprova a execução da API.
+5. Atualizar a documentação
+Registre as novas decisões e eventuais divergências de forma objetiva.
+Atualize a identificação da etapa B1 nos documentos pertinentes.
+Preserve os requisitos FIAP e o registro acadêmico de prompts em prompts.md.
+Não altere código de negócio, projetos .NET ou arquivos desnecessários.
+6. Git e publicação
+Antes do commit:
+
+* Verifique o estado de main e origin/main.
+* Inspecione o diff completo.
+* Verifique a ausência de segredos, dados pessoais indevidos, arquivos temporários e binários.
+* Não inclua alterações fora dos documentos do B1.
+* Não reescreva os commits anteriores.
+
+Se todas as verificações estiverem satisfatórias, está autorizada a publicação desta etapa usando a mensagem de commit previamente definida:
+docs: consolidate PontoVoz REST API v1 contract
+Não adicione assinaturas automáticas ou mensagens promocionais de ferramentas ao commit.
+Preserve o registro acadêmico de IA em prompts.md.
+Execute o commit e o push normal para origin/main. Nunca utilize force push.
+Se alguma validação falhar ou aparecer uma alteração inesperada, interrompa a publicação e explique o problema.
+7. Relatório obrigatório
+Ao final, apresente:
+
+1. As três correções e decisões técnicas adotadas.
+2. Os arquivos efetivamente alterados.
+3. O resultado do verificador.
+4. A confirmação de que o backend permaneceu inalterado.
+5. O resultado real do commit e do push, caso executados.
+6. O hash final.
+7. O estado de main e origin/main.
+8. As pendências para iniciar o B2.
+
+Não execute B2.
+Pare após concluir esta etapa e aguarde minha revisão.
+````
+
+**Resumo da resposta (não é transcrição):** a IA separou, no contrato, o provisionamento
+inicial de um banco vazio (único momento em que o seed cria observações simuladas), a
+inicialização posterior (que nunca cria nem altera passagens) e o registro manual durante a
+demonstração. Acrescentou `dadosSimulados` obrigatório ao corpo dos cadastros administrativos
+de parada e linha, corrigiu o exemplo `TESTE-P003`, separou método de cadastro, natureza do
+dado e verificação, e definiu em quais listas `avisos` o aviso `CadastroNaoVerificado` aparece.
+Definiu a regra temporal das observações: minutos nunca negativos, desatualização pelo
+intervalo exato, registros com horário futuro fora da consulta até o horário chegar e casos de
+teste nos limites. Registrou as divergências D17 a D19, ampliou o verificador, que foi testado
+também com defeitos plantados, e publicou a etapa com commit e push normais. Nenhum código da
+API foi alterado.

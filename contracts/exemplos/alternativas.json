@@ -1,0 +1,79 @@
+{
+  "paradaId": 1,
+  "codigoExternoParada": "SIM-P001",
+  "nomeParada": "Parada Demonstração Centro",
+  "destino": {
+    "id": 3,
+    "nome": "Terminal Demonstração Norte",
+    "tipo": "Terminal"
+  },
+  "criterio": "MenorTempoTotalEstimado",
+  "situacao": "Comparadas",
+  "comparacaoCompleta": false,
+  "statusPrevisao": "Disponivel",
+  "origemPrevisao": "Simulado",
+  "dadosSimulados": true,
+  "consultadoEm": "2026-11-10T14:32:00-03:00",
+  "alternativas": [
+    {
+      "posicao": 1,
+      "linhaId": 4,
+      "codigoLinha": "SIM-L004",
+      "letreiro": "SIM-104",
+      "situacao": "Comparavel",
+      "previstaPara": "2026-11-10T14:40:00-03:00",
+      "esperaMinutos": 8,
+      "percursoEstimadoMinutos": 20,
+      "tempoTotalEstimadoMinutos": 28,
+      "chegadaEstimadaAoDestino": "2026-11-10T15:00:00-03:00",
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    },
+    {
+      "posicao": 2,
+      "linhaId": 2,
+      "codigoLinha": "SIM-L002",
+      "letreiro": "SIM-102",
+      "situacao": "Comparavel",
+      "previstaPara": "2026-11-10T14:33:00-03:00",
+      "esperaMinutos": 1,
+      "percursoEstimadoMinutos": 40,
+      "tempoTotalEstimadoMinutos": 41,
+      "chegadaEstimadaAoDestino": "2026-11-10T15:13:00-03:00",
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    },
+    {
+      "posicao": null,
+      "linhaId": 1,
+      "codigoLinha": "SIM-L001",
+      "letreiro": "SIM-101",
+      "situacao": "SemPrevisao",
+      "previstaPara": null,
+      "esperaMinutos": null,
+      "percursoEstimadoMinutos": 30,
+      "tempoTotalEstimadoMinutos": null,
+      "chegadaEstimadaAoDestino": null,
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    }
+  ],
+  "avisos": [
+    {
+      "codigo": "DadosSimulados",
+      "mensagem": "Dados simulados para demonstração. Não representam a operação real da SPTrans."
+    },
+    {
+      "codigo": "LimitacaoLinhasDiretas",
+      "mensagem": "Considera apenas linhas diretas desta parada, sem baldeação nem outros meios de transporte."
+    },
+    {
+      "codigo": "PercursoEstimado",
+      "mensagem": "Os tempos de percurso são estimativas simuladas para demonstração e não consideram o trânsito em tempo real."
+    },
+    {
+      "codigo": "ComparacaoIncompleta",
+      "mensagem": "Algumas linhas não têm previsão de chegada e ficaram fora da comparação."
+    }
+  ]
+}

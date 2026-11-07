@@ -1,0 +1,83 @@
+{
+  "paradaId": 1,
+  "codigoExternoParada": "SIM-P001",
+  "nomeParada": "Parada Demonstração Centro",
+  "destino": {
+    "id": 3,
+    "nome": "Terminal Demonstração Norte",
+    "tipo": "Terminal"
+  },
+  "criterio": "MenorTempoTotalEstimado",
+  "situacao": "SemComparacao",
+  "comparacaoCompleta": false,
+  "statusPrevisao": "ProvedorIndisponivel",
+  "origemPrevisao": "Simulado",
+  "dadosSimulados": true,
+  "consultadoEm": "2026-11-10T14:32:00-03:00",
+  "alternativas": [
+    {
+      "posicao": null,
+      "linhaId": 4,
+      "codigoLinha": "SIM-L004",
+      "letreiro": "SIM-104",
+      "situacao": "SemPrevisao",
+      "previstaPara": null,
+      "esperaMinutos": null,
+      "percursoEstimadoMinutos": 20,
+      "tempoTotalEstimadoMinutos": null,
+      "chegadaEstimadaAoDestino": null,
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    },
+    {
+      "posicao": null,
+      "linhaId": 1,
+      "codigoLinha": "SIM-L001",
+      "letreiro": "SIM-101",
+      "situacao": "SemPrevisao",
+      "previstaPara": null,
+      "esperaMinutos": null,
+      "percursoEstimadoMinutos": 30,
+      "tempoTotalEstimadoMinutos": null,
+      "chegadaEstimadaAoDestino": null,
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    },
+    {
+      "posicao": null,
+      "linhaId": 2,
+      "codigoLinha": "SIM-L002",
+      "letreiro": "SIM-102",
+      "situacao": "SemPrevisao",
+      "previstaPara": null,
+      "esperaMinutos": null,
+      "percursoEstimadoMinutos": 40,
+      "tempoTotalEstimadoMinutos": null,
+      "chegadaEstimadaAoDestino": null,
+      "baldeacoes": 0,
+      "origemPercurso": "Simulado"
+    }
+  ],
+  "avisos": [
+    {
+      "codigo": "ProvedorIndisponivel",
+      "mensagem": "O serviço de previsões não está disponível no momento. Tente novamente em instantes."
+    },
+    {
+      "codigo": "SemComparacao",
+      "mensagem": "Nenhuma linha direta tem previsão de chegada no momento. Não é possível indicar a alternativa mais rápida."
+    },
+    {
+      "codigo": "DadosSimulados",
+      "mensagem": "Dados simulados para demonstração. Não representam a operação real da SPTrans."
+    },
+    {
+      "codigo": "LimitacaoLinhasDiretas",
+      "mensagem": "Considera apenas linhas diretas desta parada, sem baldeação nem outros meios de transporte."
+    },
+    {
+      "codigo": "PercursoEstimado",
+      "mensagem": "Os tempos de percurso são estimativas simuladas para demonstração e não consideram o trânsito em tempo real."
+    }
+  ]
+}

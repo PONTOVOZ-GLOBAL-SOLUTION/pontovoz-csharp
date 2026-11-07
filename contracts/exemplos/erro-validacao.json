@@ -1,0 +1,16 @@
+{
+  "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+  "title": "A requisição contém parâmetros inválidos.",
+  "status": 400,
+  "instance": "/api/v1/paradas",
+  "codigo": "RequisicaoInvalida",
+  "errors": {
+    "termo": [
+      "O termo deve ter entre 2 e 60 caracteres."
+    ],
+    "tamanhoPagina": [
+      "O tamanho da página deve estar entre 1 e 50."
+    ]
+  },
+  "traceId": "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-00"
+}

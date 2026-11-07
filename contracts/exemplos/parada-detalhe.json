@@ -1,0 +1,41 @@
+{
+  "id": 1,
+  "codigoExterno": "SIM-P001",
+  "nome": "Parada Demonstração Centro",
+  "endereco": null,
+  "coordenada": null,
+  "origem": "Simulado",
+  "dadosSimulados": true,
+  "linhas": [
+    {
+      "id": 1,
+      "codigo": "SIM-L001",
+      "letreiro": "SIM-101",
+      "terminalPrincipal": "Terminal Demonstração Centro",
+      "terminalSecundario": "Terminal Demonstração Norte",
+      "sentido": "PrincipalParaSecundario",
+      "origem": "Simulado",
+      "dadosSimulados": true
+    },
+    {
+      "id": 2,
+      "codigo": "SIM-L002",
+      "letreiro": "SIM-102",
+      "terminalPrincipal": "Terminal Demonstração Centro",
+      "terminalSecundario": "Terminal Demonstração Norte",
+      "sentido": "PrincipalParaSecundario",
+      "origem": "Simulado",
+      "dadosSimulados": true
+    },
+    {
+      "id": 4,
+      "codigo": "SIM-L004",
+      "letreiro": "SIM-104",
+      "terminalPrincipal": "Terminal Demonstração Centro",
+      "terminalSecundario": "Terminal Demonstração Norte",
+      "sentido": "PrincipalParaSecundario",
+      "origem": "Simulado",
+      "dadosSimulados": true
+    }
+  ]
+}

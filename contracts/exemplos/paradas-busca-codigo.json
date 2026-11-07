@@ -1,0 +1,17 @@
+{
+  "itens": [
+    {
+      "id": 1,
+      "codigoExterno": "SIM-P001",
+      "nome": "Parada Demonstração Centro",
+      "endereco": null,
+      "coordenada": null,
+      "origem": "Simulado",
+      "dadosSimulados": true
+    }
+  ],
+  "pagina": 1,
+  "tamanhoPagina": 20,
+  "totalItens": 1,
+  "totalPaginas": 1
+}

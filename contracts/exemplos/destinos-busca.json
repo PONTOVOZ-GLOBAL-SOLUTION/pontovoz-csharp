@@ -1,0 +1,15 @@
+{
+  "itens": [
+    {
+      "id": 3,
+      "nome": "Terminal Demonstração Norte",
+      "tipo": "Terminal",
+      "origem": "Simulado",
+      "dadosSimulados": true
+    }
+  ],
+  "pagina": 1,
+  "tamanhoPagina": 20,
+  "totalItens": 1,
+  "totalPaginas": 1
+}
