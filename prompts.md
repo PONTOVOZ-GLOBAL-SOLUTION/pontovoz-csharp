@@ -2768,3 +2768,552 @@ Execute B3.1, valide, publique somente se estiver correto e pare. Não inicie B4
   desenvolvimento ficou idêntico.
 - **Publicação:** a etapa foi publicada com o commit
   `feat: add EF Core persistence and SQLite integration tests`, sem trailer, e push normal.
+
+### Prompt 17 — Bloco B4: repositórios, interfaces e consultas LINQ (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 06 — BLOCO B4: REPOSITÓRIOS, INTERFACES E CONSULTAS LINQ
+Atue como engenheiro de software sênior especializado em C#, ASP.NET Core 10, Entity Framework Core e LINQ.
+Estamos desenvolvendo o backend do PontoVoz, projeto CitizenTech da FIAP.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Os blocos B0, B1, B2 e B3 estão concluídos e publicados.
+Commit esperado:
+`988a5fce736cc01fe1d0be4ab72f8b624c2f80e8`
+Sua responsabilidade é executar integralmente a parte técnica deste bloco, incluindo implementação, correção, testes, validação e documentação.
+Execute exclusivamente o B4. Não avance para B5 e não faça commit ou push antes da auditoria.
+1. PRIORIDADE ABSOLUTA — ENUNCIADO DA FIAP
+O professor exige:
+
+* Programação Orientada a Objetos: 3,0 pontos.
+* Web API: 2,5 pontos.
+* Entity Framework Core e LINQ: 1,5 ponto.
+* Async/Await: 1,0 ponto.
+* Qualidade de código: 2,0 pontos.
+
+Também exige interfaces, injeção de dependência, APIs REST, testes unitários, código organizado, README, documentação e evidências.
+Neste bloco, nosso objetivo é demonstrar consultas LINQ reais ao banco SQLite, utilizando EF Core, interfaces e injeção de dependência.
+Não acrescente ferramentas ou funcionalidades desnecessárias.
+Não retire nem simplifique requisitos obrigatórios.
+O contrato REST aprovado deve ser respeitado.
+2. INSPEÇÃO INICIAL
+Antes de modificar qualquer arquivo:
+
+1. Confirme a pasta de trabalho.
+2. Confirme o estado de main e origin/main.
+3. Verifique o commit esperado.
+4. Confirme que não há alterações locais inesperadas.
+5. Leia os arquivos reais do Domain.
+6. Leia o PontoVozDbContext, os mapeamentos e migrations.
+7. Leia `contracts/api-v1.md`.
+8. Leia `contracts/README.md`.
+9. Leia os exemplos JSON e as regras R1 a R8.
+10. Examine os 320 testes existentes.
+
+Não suponha nomes de propriedades ou métodos sem conferir o código.
+O contrato já publicado é nossa referência funcional.
+Não crie novos endpoints nem modifique a proposta CitizenTech.
+3. ARQUITETURA DOS REPOSITÓRIOS
+Implemente os componentes necessários para consultar as entidades persistidas.
+A estrutura sugerida é:
+`Application/Interfaces/`
+`Infrastructure/Repositories/`
+Crie interfaces específicas para as operações reais de consulta, evitando um repositório genérico sem utilidade.
+Contemple, conforme as necessidades do contrato:
+
+* Consultas de paradas.
+* Consultas de linhas.
+* Consultas de destinos.
+* Consultas de associações entre paradas e linhas.
+* Consultas de percursos estimados.
+* Consultas de registros de passagem.
+
+Não é obrigatório criar uma classe para cada item se uma organização mais simples atender integralmente às responsabilidades.
+As interfaces devem abstrair as operações de acesso aos dados.
+As implementações devem utilizar EF Core e LINQ.
+Não coloque SQL ou dependências do EF Core nas entidades de domínio.
+4. CONSULTAS DE PARADAS
+Implemente consultas necessárias para os futuros endpoints:
+
+* GET /api/v1/paradas
+* GET /api/v1/paradas/{id}
+
+Considere as regras do contrato:
+
+* Listagem de paradas ativas.
+* Paginação.
+* Busca por nome.
+* Busca por código externo.
+* Consulta por identificador interno.
+* Ordenação determinística.
+* Identificação de dados fictícios.
+* Exclusão de cadastros inativos das consultas públicas.
+* Retorno vazio quando não houver resultados.
+
+Respeite exatamente os filtros, nomes e limites definidos no contrato.
+Não altere a semântica da API.
+5. BUSCA SEM ACENTOS — R7
+O contrato exige buscas capazes de localizar nomes independentemente de acentos e diferenças entre maiúsculas e minúsculas.
+O B3 demonstrou que o LIKE padrão do SQLite não atende completamente a esse requisito.
+Implemente uma solução simples, correta e testável.
+O planejamento B3 prevê:
+
+* Normalização textual consistente.
+* Campos de busca normalizados no banco.
+* Nova migration `AddSearchColumns`, caso necessária.
+* Atualização dos campos em novos cadastros e em alterações futuras.
+* Preenchimento dos campos para registros já existentes.
+
+Antes de implementar, examine a estrutura atual e confirme a solução de menor complexidade que preserva o contrato.
+Atenção:
+
+1. Normalizar texto Unicode, inclusive letras acentuadas e formas de composição equivalentes.
+2. Evitar diferenças de comportamento entre gravação e consulta.
+3. Não carregar a tabela inteira na memória para filtrar os resultados.
+4. Não utilizar funções C# em consultas LINQ que o SQLite não consiga traduzir.
+5. Não perder dados existentes durante a migration.
+6. Testar a atualização de registros anteriores à migration.
+7. Verificar se a busca funciona depois de alterar o nome de uma entidade.
+8. Verificar que a normalização não modifica o nome original exibido ao usuário.
+9. Não afirmar que um índice acelera todos os padrões de busca sem verificar a consulta real.
+
+Os testes devem incluir:
+
+* demonstracao
+* Demonstração
+* DEMONSTRAÇÃO
+* Texto com espaços adicionais
+* Texto com acentos combinados
+* Busca inexistente
+
+Se o preenchimento dos registros antigos exigir uma etapa de migração de dados separada, implemente-a de forma reproduzível, segura e documentada.
+Não altere a migration InitialCreate.
+6. CONSULTAS DE LINHAS
+Prepare as operações de consulta necessárias para:
+
+* Listagem de linhas.
+* Busca por código.
+* Consulta das linhas associadas a uma parada.
+* Identificação do sentido da linha.
+* Filtro de linhas ativas.
+* Ordenação determinística.
+* Dados simulados corretamente identificados.
+
+As consultas devem respeitar o relacionamento N existente em ParadaLinha.
+Não considere que uma linha atende determinada parada apenas porque elas existem separadamente.
+A associação deve estar persistida e válida.
+7. CONSULTAS DE DESTINOS E PERCURSOS
+Prepare as consultas necessárias para:
+
+* GET /api/v1/destinos
+* Identificação de um destino existente.
+* Listagem e busca paginada de destinos ativos.
+* Busca dos percursos diretos cadastrados para uma parada e destino.
+* Consulta dos minutos estimados.
+* Confirmação de que a linha atende à parada.
+* Exclusão de associações e cadastros inativos.
+
+Não implemente o algoritmo completo de comparação de alternativas agora. Ele pertence ao B9.
+O B4 deve apenas obter os dados corretos para esse cálculo futuro.
+8. ÚLTIMAS PASSAGENS REGISTRADAS
+Esta é uma consulta importante do PontoVoz.
+Implemente acesso aos registros de passagem necessários ao futuro endpoint:
+GET /api/v1/paradas/{id}/ultimas-passagens
+Requisitos:
+
+* Buscar os registros de uma parada.
+* Identificar a última passagem por linha.
+* Não considerar registros com ObservadaEmUtc posterior ao instante de consulta.
+* Permitir filtro por uma linha específica, conforme o contrato.
+* Preservar a distinção entre PassagemSimulada e PassagemRegistroManual.
+* Interpretar corretamente DadosSimulados na hierarquia TPH.
+* Respeitar o estado ativo dos cadastros.
+* Não transformar uma previsão de chegada em passagem observada.
+* Não declarar uma observação manual ou simulada como passagem oficialmente verificada.
+* Deixar os cálculos de desatualização e a apresentação dos avisos para os serviços apropriados, quando não forem responsabilidades da consulta.
+
+A seleção da última passagem de cada linha deve ocorrer por meio de LINQ traduzido para SQL, sem carregar todos os registros para agrupá-los em memória.
+Utilize uma ordenação determinística para desempates por horário, caso existam.
+Confirme o SQL gerado e teste a execução com SQLite real.
+9. LINQ E EF CORE — DEMONSTRAÇÃO ACADÊMICA
+O professor deve conseguir identificar claramente o uso de Entity Framework Core e LINQ.
+Empregue, quando fizer sentido:
+
+* Where.
+* Select.
+* OrderBy / ThenBy.
+* Skip / Take.
+* AnyAsync.
+* FirstOrDefaultAsync.
+* GroupBy, quando a tradução e o resultado forem adequados.
+* AsNoTracking para consultas somente leitura.
+* Include ou projeções, quando necessário para relacionamentos.
+* Consultas por múltiplos filtros.
+* Cancelamento com CancellationToken.
+
+Não utilize todos esses operadores artificialmente apenas para demonstrar quantidade.
+Priorize consultas corretas, claras e eficientes.
+Garanta que:
+
+* Paginação seja executada no banco.
+* Filtros sejam aplicados antes de materializar os resultados.
+* Não ocorram consultas N+1 desnecessárias.
+* Não haja consultas ilimitadas sem justificativa.
+* Não existam ordenações não determinísticas em resultados paginados.
+* O acesso aos dados permaneça isolado na infraestrutura.
+
+Não use `ToList()` antes dos filtros quando o objetivo for executar a consulta no SQL.
+Não exponha IQueryable diretamente aos futuros Controllers.
+10. ASYNC/AWAIT E INJEÇÃO DE DEPENDÊNCIA
+Implemente operações assíncronas de consulta por meio dos métodos de EF Core.
+Utilize:
+
+* Task ou Task<T>.
+* async/await.
+* CancellationToken.
+* Interfaces específicas.
+* Registro das implementações no contêiner de DI do ASP.NET Core.
+
+Os serviços futuros devem conseguir receber essas interfaces por injeção de dependência.
+Não crie tarefas artificiais apenas para satisfazer a rubrica.
+Não utilize Task.Run para disfarçar operações síncronas de banco.
+Considere que o provedor SQLite tem particularidades de execução assíncrona; documente o uso real de async/await sem alegar paralelismo ou desempenho que não tenha sido demonstrado.
+11. TESTES UNITÁRIOS E DE INTEGRAÇÃO
+Preserve todos os 320 testes existentes.
+Adicione testes reais para as consultas implementadas.
+Utilize SQLite, como no B3.
+Teste pelo menos:
+
+1. Listagem de paradas ativas.
+2. Exclusão de paradas inativas.
+3. Busca por código externo.
+4. Busca por nome.
+5. Busca com e sem acentos.
+6. Paginação e ordenação.
+7. Parada inexistente.
+8. Linhas associadas a uma parada.
+9. Linha inativa.
+10. Destinos cadastrados.
+11. Destino inexistente.
+12. Percursos diretos.
+13. Ausência de percurso.
+14. Última passagem por linha.
+15. Várias passagens da mesma linha.
+16. Passagens com mesmo horário e desempate.
+17. Passagem com horário futuro.
+18. Passagem simulada.
+19. Passagem manual com DadosSimulados true.
+20. Passagem manual com DadosSimulados false.
+21. Consulta com CancellationToken cancelado.
+22. Filtros e paginação executados no banco.
+23. Migration dos campos de busca.
+24. Preservação de registros anteriores à migration.
+25. Atualização de nome e atualização da normalização.
+26. Consultas em banco com dados reais de teste e relacionamento N.
+
+Não utilize mocks para afirmar que uma consulta LINQ foi executada no SQLite.
+Não crie testes artificiais.
+Inclua testes que comprovem que uma regressão relevante seria detectada.
+Não precisa inflar a quantidade de testes. A prioridade é cobrir as regras.
+12. MIGRATION E PRESERVAÇÃO DE DADOS
+Se criar a migration dos campos normalizados:
+
+* Não altere a InitialCreate já publicada.
+* Gere uma nova migration real.
+* Revise o conteúdo gerado.
+* Aplique-a a uma cópia isolada de banco existente.
+* Confirme a preservação de dados.
+* Verifique a atualização dos valores normalizados anteriores.
+* Execute novamente a aplicação da migration para confirmar ausência de alterações inesperadas.
+* Verifique índices e integridade referencial.
+* Confirme que o seed continua idempotente.
+* Confirme que registros manuais e simulados não são renovados nem apagados.
+
+Não apague o banco de desenvolvimento.
+Não versionar arquivos SQLite.
+13. COMPATIBILIDADE COM O CONTRATO
+Leia as seções relevantes do contrato antes de decidir nomes, parâmetros e comportamentos.
+Os futuros endpoints deverão continuar exatamente como planejado.
+Não implemente Controllers neste bloco.
+Não implemente ainda:
+
+* Cálculo completo de previsões.
+* Integração SPTrans.
+* Comparador de alternativas.
+* Resumo agregado.
+* IA conversacional.
+* Interface do totem.
+
+Se encontrar contradição real entre o contrato e a estrutura persistida, explique-a e faça somente a correção indispensável.
+Não crie um novo escopo sem necessidade.
+14. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize backend/README.md explicando:
+
+* Repositórios e interfaces implementados.
+* Exemplos reais de LINQ utilizados.
+* Paginação.
+* Busca sem acentos.
+* Consulta da última passagem.
+* Como executar os testes.
+* Como aplicar a nova migration, se houver.
+* O que foi implementado e o que ainda está pendente.
+
+Registre evidências efetivas do B4 em:
+`backend/docs/evidencias/B4-consultas-linq.md`
+Inclua:
+
+* Exemplos de consultas reais.
+* SQL traduzido pelo EF Core.
+* Resultados de testes.
+* Comandos de migrations, caso aplicáveis.
+* Evidência de que os filtros e a paginação foram executados no banco.
+
+Atualize prompts.md conforme a orientação acadêmica da FIAP.
+Não insira assinaturas automáticas de ferramentas ou mensagens promocionais no código.
+15. VALIDAÇÃO FINAL
+Execute:
+
+* dotnet restore.
+* dotnet build.
+* dotnet test.
+* dotnet ef migrations list.
+* dotnet ef database update.
+* dotnet ef migrations has-pending-model-changes.
+
+Confirme:
+
+* Número real de testes.
+* Falhas e testes ignorados.
+* Código de saída.
+* Ausência de erros e avisos de compilação.
+* Banco atualizado.
+* Seed preservado.
+* `/health` funcionando.
+* OpenAPI e Scalar funcionando.
+* Nenhum endpoint de negócio implementado antecipadamente.
+
+Teste também a execução em ambiente limpo ou banco de teste novo, sem depender de arquivos exclusivos do computador atual.
+Se uma verificação falhar, investigue e corrija antes de considerar o bloco concluído.
+16. GIT E CONTROLE
+Confirme branch main e sincronização com origin/main.
+Não faça commit.
+Não execute git push.
+Não utilize force push.
+Não altere o histórico.
+Não apague ou sobrescreva trabalhos existentes.
+Deixe as alterações locais para auditoria antes da publicação.
+17. RELATÓRIO FINAL
+Apresente:
+A. Resumo simples: o que foi construído.
+B. Interfaces e repositórios criados.
+C. Consultas LINQ implementadas.
+D. Estratégia da busca sem acentos.
+E. Migration, se criada.
+F. Consulta da última passagem por linha.
+G. Integração com EF Core e DI.
+H. Testes e resultados reais.
+I. Evidências registradas.
+J. Compatibilidade com o contrato.
+K. Matriz dos critérios do professor: o que está implementado e o que falta.
+L. Estado do Git.
+M. Riscos e pendências para B5.
+Não faça commit e não avance para B5.
+Pare ao concluir o B4 e aguarde minha auditoria.
+Nosso objetivo é demonstrar com clareza e rigor o uso real de EF Core, LINQ, interfaces, injeção de dependência e operações assíncronas, cumprindo exatamente o que o professor exige para a Global Solution.
+````
+
+**Resumo da resposta (não é transcrição):** a IA criou:
+- quatro interfaces de repositório em `Application/Interfaces` (paradas; linhas e associações;
+  destinos e percursos; passagens), os tipos `Paginacao` e `Pagina<T>` e as implementações com EF
+  Core e LINQ em `Infrastructure/Repositories`, registradas na injeção de dependência;
+- a busca sem acentos (R7), com uma coluna `TextoBusca` normalizada por tabela, mantida pelo
+  `DbContext` ao salvar, e a migration `AddSearchColumns`. Uma etapa idempotente preenche os
+  registros antigos depois das migrations;
+- a consulta da última passagem por linha, traduzida para SQL num único comando.
+
+Durante os testes foram encontrados e corrigidos três problemas:
+- a `Paginacao` era uma `record struct`, e `new Paginacao()` zerava os campos;
+- o EF Core não aceita `Include` depois de `GroupBy`;
+- o seed gerava ids de linhas diferentes dos exemplos do contrato.
+
+Foram criados 67 testes, num total de 387 aprovados, e mutações temporárias confirmaram que eles
+detectam regressões. A migration foi aplicada a uma cópia do banco e ao banco de
+desenvolvimento, sem perda de dados, e o fluxo foi repetido em ambiente limpo. O SQL gerado e os
+planos de execução foram registrados em `backend/docs/evidencias/B4-consultas-linq.md`. Não houve
+commit.
+
+### Prompt 18 — Bloco B4.1: auditoria final e publicação das consultas LINQ (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B4.1 — AUDITORIA FINAL E PUBLICAÇÃO DAS CONSULTAS LINQ
+O relatório do Bloco B4 foi analisado.
+A implementação de repositórios, interfaces, injeção de dependência, consultas LINQ, normalização textual e migration de busca está aprovada em princípio.
+Sua responsabilidade agora é realizar a auditoria técnica final e publicar o B4 no GitHub, desde que todas as verificações sejam satisfatórias.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`988a5fce736cc01fe1d0be4ab72f8b624c2f80e8`
+Não inicie B5. Não acrescente novas funcionalidades.
+1. PRINCÍPIO DE EXECUÇÃO
+Você é responsável pela execução técnica integral do projeto C#.
+O objetivo é atender rigorosamente ao enunciado oficial de C# Software Development da FIAP.
+Critérios de avaliação:
+
+* POO: 3,0 pontos.
+* Web API: 2,5 pontos.
+* EF Core + LINQ: 1,5 ponto.
+* Async/Await: 1,0 ponto.
+* Qualidade do código: 2,0 pontos.
+
+Requisitos adicionais: interfaces, injeção de dependência, testes unitários, documentação, README, evidências e integração com a proposta CitizenTech.
+Não adicione nem remova requisitos por iniciativa própria.
+Neste bloco, concentre-se apenas na finalização e publicação do B4.
+2. INSPEÇÃO DO CÓDIGO
+Examine os arquivos reais e confirme:
+
+* Branch main sincronizada com origin/main.
+* Ausência de alterações inesperadas.
+* Interfaces em Application.
+* Implementações em Infrastructure.
+* Consultas LINQ assíncronas.
+* Registro dos repositórios na injeção de dependência.
+* Migration AddSearchColumns.
+* Atualização dos campos normalizados.
+* Consultas de última passagem.
+* Testes do B4.
+* README e evidências.
+
+Verifique que os contratos REST permanecem respeitados e que não foram implementados Controllers de negócio antecipadamente.
+3. ATENÇÃO ESPECIAL — IDENTIFICADORES DO SEED
+O relatório B4 informou que a ordem de inserção das linhas foi modificada para aproximar os IDs internos dos exemplos JSON.
+Isso exige uma revisão.
+Os IDs numéricos são identificadores internos gerados pelo banco. Não devem ser considerados valores estáveis entre bancos diferentes.
+Confirme que:
+
+1. A API e os futuros services não dependerão de IDs fixos do seed.
+2. Os testes funcionais não exigem que SIM-L001, SIM-L002, SIM-L003 ou SIM-L004 tenham IDs numéricos específicos.
+3. Os exemplos JSON são explicitamente ilustrativos.
+4. A identificação externa das paradas e linhas permanece estável por meio dos códigos.
+5. Bancos já provisionados continuam funcionando mesmo com IDs diferentes.
+6. A ordem de inserção não é utilizada como substituto de uma regra de negócio.
+
+Se houver testes ou documentação que tratem o ID numérico como uma garantia, corrija-os.
+Não reorganize novamente o seed apenas para produzir IDs específicos.
+Preserve os relacionamentos e a idempotência.
+4. VALIDAÇÃO DA BUSCA SEM ACENTOS
+Confirme novamente que:
+
+* A busca normaliza Unicode de modo consistente.
+* A pesquisa funciona com e sem acentos.
+* Maiúsculas e minúsculas são tratadas corretamente.
+* A normalização não modifica os nomes exibidos.
+* Uma alteração de nome atualiza o campo normalizado.
+* Registros anteriores à migration recebem os valores normalizados.
+* Os filtros são executados no SQLite, não sobre tabelas carregadas inteiramente na memória.
+* A migration não apaga dados.
+* O seed continua sem duplicar ou renovar passagens.
+
+A decisão de não criar índice para `LIKE '%termo%'` está aceita, desde que continue documentada e tecnicamente justificada.
+Não acrescente índices sem necessidade.
+5. VERIFICAÇÃO DOS REPOSITÓRIOS
+Revise os resultados reais das consultas:
+
+* Paradas ativas e paginadas.
+* Busca por código externo.
+* Linhas associadas a paradas.
+* Destinos ativos.
+* Percursos diretos.
+* Última passagem por linha.
+* Desempate determinístico por horário.
+* Exclusão de observações futuras.
+* Distinção entre passagens simuladas e manuais.
+* Filtros e paginação executados no SQL.
+* Operações assíncronas com CancellationToken.
+
+Verifique especialmente que a paginação nunca retorna tamanho zero indevidamente.
+Confirme que não existem métodos com `ToList()` antes dos filtros que deveriam ser executados no banco.
+Não modifique o escopo funcional.
+6. EXECUÇÃO EM AMBIENTE LIMPO
+Repita as verificações obrigatórias:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+O último relatório apontou 387 testes aprovados, com zero falhas e zero avisos.
+Informe os números reais encontrados agora.
+Confirme que o projeto funciona em uma instalação limpa, com banco novo, e que o banco existente mantém seus dados.
+Verifique também:
+
+* GET /health.
+* OpenAPI.
+* Scalar.
+
+Não declare aprovação se algum comando tiver falhado.
+7. SEGURANÇA E DOCUMENTAÇÃO
+Inspecione os arquivos que serão publicados.
+Não inclua:
+
+* Arquivos SQLite.
+* Segredos.
+* Tokens.
+* Credenciais.
+* Binários desnecessários.
+* Arquivos temporários de diagnóstico.
+* Logs sensíveis.
+* Código de teste artificial.
+
+Atualize as evidências somente com resultados efetivamente observados.
+Registre este prompt em prompts.md conforme a exigência acadêmica.
+Preserve o padrão profissional dos arquivos.
+Não adicione marcas promocionais ou assinaturas automáticas de ferramentas.
+8. PUBLICAÇÃO AUTORIZADA
+Se todas as verificações passarem, faça o commit com a seguinte mensagem:
+`feat: implement EF Core LINQ repositories and search`
+Confirme a mensagem efetivamente gravada antes do push.
+Mantenha a autoria legítima e o e-mail noreply já configurado.
+Não acrescente trailer automático Co-Authored-By.
+Não altere commits anteriores.
+Publique com push normal para origin/main.
+Não utilize force push.
+Caso encontre um problema que não consiga resolver com segurança, interrompa a publicação e apresente o impedimento.
+9. RELATÓRIO FINAL
+Apresente:
+A. Resumo das verificações e correções.
+B. Resultado da conferência dos IDs internos.
+C. Interfaces e repositórios efetivamente publicados.
+D. Resultado da busca sem acentos e da migration.
+E. Quantidade real de testes aprovados, falhos e ignorados.
+F. Resultado de build e dos comandos EF Core.
+G. Confirmação da execução em ambiente limpo.
+H. Resultado dos endpoints existentes.
+I. Hash e mensagem do commit.
+J. Resultado do push e sincronização main/origin/main.
+K. Pendências específicas para B5.
+L. Matriz atualizada da rubrica FIAP, sem confundir implementação com nota garantida.
+Não inicie B5. Pare após concluir esta auditoria e a publicação autorizada.
+````
+
+**Resumo da resposta (não é transcrição):**
+- **Ids internos:** a IA confirmou que repositórios e regras não dependem deles. Removeu o teste
+  do B4 que exigia ids específicos, trocou a busca do destino por id pela busca pelo nome e
+  ajustou os comentários do seed, sem reorganizá-lo.
+- **Testes novos:** um teste que prova o funcionamento com ids diferentes dos exemplos e 15
+  testes unitários de paginação. Uma mutação confirmou que esses testes detectariam a volta do
+  problema da `record struct`.
+- **Documentação:** README e evidências foram corrigidos para não tratar ids como garantia.
+- **Validação:** restore, build sem avisos, 402 testes aprovados e os comandos `dotnet ef`, no
+  banco de desenvolvimento (dados preservados) e em ambiente limpo.
+- **Publicação:** commit `feat: implement EF Core LINQ repositories and search`, sem trailer, e
+  push normal.

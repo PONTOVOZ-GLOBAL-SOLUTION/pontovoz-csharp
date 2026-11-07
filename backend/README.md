@@ -5,19 +5,22 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B3 — persistência com EF Core e SQLite.** Hoje o backend:
+**Bloco B4 — repositórios, interfaces e consultas LINQ.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
 - publica o documento OpenAPI e a interface Scalar em Development;
 - tem o **modelo de domínio** em `src/PontoVoz.Api/Domain/` (veja [Domínio](#domínio-b2));
-- **persiste** o domínio em SQLite com EF Core 10, com migration inicial e seed idempotente de
-  dados fictícios (veja [Persistência](#persistência-b3));
-- tem **320 testes**: 278 de domínio, 39 de integração com SQLite real e 3 do `/health`
-  pela API em execução.
+- **persiste** o domínio em SQLite com EF Core 10, com migrations e seed idempotente de dados
+  fictícios (veja [Persistência](#persistência-b3));
+- tem **repositórios com interfaces** e consultas LINQ assíncronas, executadas no SQLite, para os
+  futuros endpoints de paradas, linhas, destinos, percursos e últimas passagens, incluindo a busca
+  sem acentos (veja [Consultas](#consultas-linq-b4));
+- tem **402 testes**: 278 de domínio, 15 de paginação, 106 de integração com SQLite real e 3 do
+  `/health` pela API em execução.
 
-Ainda **não** existem repositórios, services nem endpoints de transporte público. Os endpoints
-de `/api/v1` descritos em [`../contracts/api-v1.md`](../contracts/api-v1.md) são **planejados**.
+Ainda **não** existem services nem endpoints de transporte público. Os endpoints de `/api/v1`
+descritos em [`../contracts/api-v1.md`](../contracts/api-v1.md) são **planejados**.
 
 ## Requisitos de ambiente
 
@@ -233,9 +236,12 @@ backend/
 │  │  ├─ Enums/                  enums do contrato v1
 │  │  ├─ Exceptions/             exceções de domínio com o código de erro do contrato
 │  │  └─ Rules/                  regras compartilhadas (temporal e de cadastro)
-│  ├─ Application/               services, interfaces e DTOs (B5)
+│  ├─ Application/               interfaces de acesso a dados e tipos de consulta (B4); services e DTOs (B5)
+│  │  ├─ Consultas/              Paginacao e Pagina<T>
+│  │  └─ Interfaces/             interfaces dos repositórios
 │  ├─ Infrastructure/            EF Core, repositórios e provedores (B3, B4, B8)
-│  │  └─ Persistence/            DbContext, mapeamentos, conversor UTC, migrations e seed (B3)
+│  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
+│  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4)
 │  ├─ Security/                  proteção das rotas administrativas (B7)
 │  └─ Middleware/                tratamento global de erros (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
@@ -474,10 +480,14 @@ padrão do `AddDbContext`.
 dotnet ef database update --project src/PontoVoz.Api
 ```
 
-O comando aplica a migration e, em seguida, roda o seed pelo gancho `UseSeeding` do EF Core. O
-`Database.MigrateAsync` usa o mesmo seed pelo gancho `UseAsyncSeeding`, que os testes exercitam.
-A API **não** aplica migrations ao iniciar, e o seed nunca roda por requisição HTTP. Repetir o
-comando não muda um banco já atualizado.
+O comando aplica as migrations pendentes e, em seguida, roda duas etapas pelo gancho
+`UseSeeding` do EF Core: o preenchimento da coluna de busca dos registros antigos (B4) e o seed
+de demonstração. O `Database.MigrateAsync` usa as mesmas etapas pelo gancho `UseAsyncSeeding`,
+que os testes exercitam. A API **não** aplica migrations ao iniciar, e nenhuma etapa roda por
+requisição HTTP. Repetir o comando não muda um banco já atualizado.
+
+Num banco criado no B3, o mesmo comando aplica a migration `AddSearchColumns` do B4 sem apagar
+nem alterar os dados existentes.
 
 ### Tabelas e relações
 
@@ -526,19 +536,27 @@ simuladas.
   renova horários, não cria passagens e não toca nos registros manuais.
 - **Passagem recente na demonstração:** vem do registro manual administrativo (B7), conforme a
   seção 4.6.2 do contrato.
+- **Ids internos:** são gerados pelo banco e **não são estáveis** entre bancos diferentes, como
+  diz a seção 1.2 do contrato. Os dados de demonstração são identificados pelos códigos (`SIM-P001`,
+  `SIM-L004`...) e, nos destinos, pelo nome. Os ids dos exemplos JSON do contrato são ilustrativos.
+  Nenhuma consulta, teste funcional ou regra depende de um id específico nem da ordem de inserção
+  do seed. O teste `Provisionamento_ComIdsDiferentesDosExemplos_RelacionaTudoPeloCodigo` confirma
+  que tudo continua correto quando os ids são outros.
 
 ### O que funciona e o que está planejado
 
 | Funciona (B3) | Planejado |
 |---|---|
-| Esquema SQLite criado pela migration | Repositórios e consultas LINQ (B4) |
-| Persistência e leitura de todas as entidades | Coluna normalizada para a busca sem acentos, R7 (B4) |
-| Seed idempotente nos fluxos síncrono e assíncrono | Services e DTOs (B5) |
-| Ordenação e filtro por instante no SQL | Endpoints REST (B6 e B7) |
+| Esquema SQLite criado pela migration | Services e DTOs (B5) |
+| Persistência e leitura de todas as entidades | Endpoints REST (B6 e B7) |
+| Seed idempotente nos fluxos síncrono e assíncrono | |
+| Ordenação e filtro por instante no SQL | |
 | Verificação do banco no `/health` (200 ou 503) | |
-| 39 testes de integração e 3 testes do `/health` | |
 
-### Orientações para o B4
+Os repositórios e a busca sem acentos, previstos aqui para o B4, estão em
+[Consultas](#consultas-linq-b4).
+
+### Orientações registradas no B3
 
 - **`DadosSimulados` das passagens:** a coluna `DadosSimulados` de `RegistrosPassagem` existe
   só para o registro manual e fica `NULL` nas passagens simuladas, que são fictícias pelo próprio
@@ -555,19 +573,161 @@ simuladas.
 
 - **Busca sem acentos (R7):** o `LIKE` do SQLite ignora maiúsculas só em ASCII e não ignora
   acentos. O teste `BuscaComLikeDoSqlite_NaoIgnoraAcentos...` confirma: `%demonstracao%` não
-  encontra "Demonstração", e `%DEMONSTRAÇÃO%` também não. Plano para o B4:
-  1. uma função de normalização no código (minúsculas, sem diacríticos, pela decomposição
-     Unicode), usada nos dados e no termo da busca;
-  2. colunas de busca persistidas e indexadas, preenchidas pelo `PontoVozDbContext` ao salvar:
-     `Paradas.NomeBusca` e `Paradas.CodigoExternoBusca`, `Destinos.NomeBusca` e, em `Linhas`, uma
-     coluna com código, letreiro e terminais;
-  3. uma nova migration (`AddSearchColumns`), sem alterar a `InitialCreate`, que também preenche
-     as colunas dos registros já existentes;
-  4. as consultas comparam a coluna normalizada com o termo normalizado (`LIKE`), e os testes
-     de integração cobrem "demonstracao", "DEMONSTRAÇÃO" e "Demonstração".
+  encontra "Demonstração", e `%DEMONSTRAÇÃO%` também não. O plano do B3 previa colunas por campo e
+  indexadas. No B4, a implementação usa uma coluna por tabela e nenhum índice, pelos motivos
+  descritos em [Busca sem acentos](#busca-sem-acentos-r7).
 - **Unicidade de `Destinos.Nome`:** é coerente com o contrato. O destino não tem código próprio
   (seção 3.5), o MVP só tem destinos do seed e um nome repetido deixaria ambígua a escolha que a
   IA pede à pessoa (seção 4.4).
+
+## Consultas LINQ (B4)
+
+As consultas que os futuros services e endpoints vão usar ficam atrás de interfaces em
+`Application/Interfaces/`, implementadas com EF Core e LINQ em `Infrastructure/Repositories/`.
+Elas devolvem entidades do domínio ou `Pagina<T>`, nunca `IQueryable`, e são registradas na
+injeção de dependência como *scoped*, junto com o `PontoVozDbContext`
+(`AddPersistenciaPontoVoz`). Um service do B5 recebe, por exemplo, `IParadaRepository` pelo
+construtor.
+
+| Interface | Métodos | Uso no contrato |
+|---|---|---|
+| `IParadaRepository` | `BuscarAtivasAsync(termo, codigoExterno, paginacao)` · `ObterAtivaAsync(id)` | `GET /paradas`, `GET /paradas/{id}` e o cabeçalho das respostas da parada |
+| `ILinhaRepository` | `BuscarAtivasAsync(termo, paginacao)` · `ObterAtivaAsync(id)` · `ListarAtivasDaParadaAsync(paradaId)` · `AtendeParadaAsync(paradaId, linhaId)` | `GET /linhas`, linhas da parada, 404 de linha e 422 `LinhaNaoAtendeParada` |
+| `IDestinoRepository` | `BuscarAtivosAsync(termo, paginacao)` · `ObterAtivoAsync(id)` · `ListarPercursosDiretosAsync(paradaId, destinoId)` | `GET /destinos`, 404 de destino e os dados de entrada das alternativas (B9) |
+| `IRegistroPassagemRepository` | `ListarUltimasPorLinhaAsync(paradaId, referencia, linhaId)` | `GET /paradas/{id}/ultimas-passagens` e o resumo |
+
+As associações entre paradas e linhas ficam em `ILinhaRepository`, e os percursos, em
+`IDestinoRepository`. Não há repositório genérico.
+
+### Regras aplicadas nas consultas
+
+- **Cadastros ativos:** todas as consultas públicas filtram `Ativa` ou `Ativo` (divergência D10
+  do contrato). Linhas inativas saem da lista da parada, dos percursos e das últimas passagens,
+  sem apagar o histórico.
+- **Associação persistida:** "linha que atende a parada" é sempre uma linha em `ParadasLinhas`.
+  As consultas partem dessa tabela, e não da existência separada da parada e da linha.
+- **Ordenação fixa com desempate:** paradas e destinos por `nome` e `id`; linhas por `codigo` e
+  `id`; percursos por minutos e código da linha; passagens do mais recente para o mais antigo e,
+  depois, pelo código da linha.
+- **Paginação no banco:** `COUNT(*)`, depois `ORDER BY ... LIMIT ... OFFSET`. `Paginacao` aceita
+  página ≥ 1 e tamanho de 1 a 50 (padrão 20). `Pagina<T>` calcula `totalPaginas` como no contrato:
+  0 quando não há itens, e uma página além do total devolve `itens` vazio.
+- **Somente leitura:** todas as consultas usam `AsNoTracking`.
+- **`CancellationToken`:** todos os métodos recebem e repassam o token ao EF Core. Um token
+  cancelado interrompe a consulta, como mostra um dos testes.
+
+Exemplo real, a busca de paradas (`ParadaRepository`):
+
+```csharp
+IQueryable<Parada> consulta = contexto.Paradas
+    .AsNoTracking()
+    .Where(parada => parada.Ativa)
+    .ContendoTexto(termo);                       // LIKE na coluna normalizada
+
+if (!string.IsNullOrWhiteSpace(codigoExterno))
+{
+    string codigo = codigoExterno.Trim().ToUpperInvariant();
+    consulta = consulta.Where(parada => parada.CodigoExterno == codigo);
+}
+
+return await consulta
+    .OrderBy(parada => parada.Nome)
+    .ThenBy(parada => parada.Id)
+    .PaginarAsync(paginacao, cancellationToken);  // CountAsync + Skip/Take + ToListAsync
+```
+
+O SQL que o EF Core gera para cada método está em
+[`docs/evidencias/B4-consultas-linq.md`](docs/evidencias/B4-consultas-linq.md).
+
+### Busca sem acentos (R7)
+
+`termo` encontra "Demonstração" escrito como `demonstracao`, `DEMONSTRAÇÃO`, com espaços a mais
+ou com acentos combinados (letra + sinal Unicode separado). Funcionamento:
+
+1. **Normalização (`TextoBusca.Normalizar`):** decomposição Unicode (FormD), remoção dos sinais
+   diacríticos, minúsculas e espaços reduzidos a um só. A mesma função é usada na gravação e no
+   termo da consulta, então as duas comparam o mesmo formato.
+2. **Coluna `TextoBusca`:** uma por tabela pesquisável. `Paradas` guarda nome e código, `Linhas`
+   guarda código, letreiro e os dois terminais, e `Destinos` guarda o nome. Os campos são separados
+   por quebra de linha. Como o termo normalizado nunca contém quebra de linha, uma busca não
+   atravessa dois campos. É uma propriedade sombra do EF Core: o domínio não muda, e os campos
+   exibidos (`Nome`, `Letreiro`...) continuam com o texto original.
+3. **Atualização:** o `PontoVozDbContext` recalcula a coluna de toda parada, linha ou destino
+   adicionado ou alterado, no `SaveChanges` e no `SaveChangesAsync`. Uma parada renomeada passa a
+   ser encontrada pelo nome novo, e não pelo antigo.
+4. **Consulta:** `LIKE @padrao ESCAPE '\'` sobre a coluna, no SQL. `%`, `_` e `\` do termo são
+   escapados, e por isso `100%` procura o texto "100%" literalmente.
+5. **Registros antigos:** a migration `AddSearchColumns` cria a coluna com valor vazio. Depois das
+   migrations, a etapa `PreenchimentoTextoBusca` preenche as linhas vazias com a mesma
+   normalização. A etapa é idempotente: num banco já preenchido, não grava nada. O SQL da
+   migration não conseguiria reproduzir a normalização Unicode do .NET, por isso ela roda em C#.
+
+**Sem índice para `TextoBusca`:** um `LIKE '%termo%'` começa com curinga e não usa índice.
+`EXPLAIN QUERY PLAN` confirma `SCAN Paradas`. Com o volume do MVP, a varredura é adequada. A
+busca exata por `codigoExterno` usa o índice único (`SEARCH ... USING INDEX
+IX_Paradas_CodigoExterno`).
+
+**Limitação:** quem aplicar as migrations por um script SQL gerado (`dotnet ef migrations
+script`), fora do EF Core, precisa rodar a API ou o `dotnet ef database update` uma vez para que
+a etapa de preenchimento aconteça.
+
+### Última passagem por linha
+
+`ListarUltimasPorLinhaAsync` escolhe, no SQL, uma passagem por linha ativa da parada:
+
+```csharp
+IQueryable<int> idsDasUltimas = candidatas          // parada, ObservadaEmUtc <= referencia, linha ativa
+    .GroupBy(passagem => passagem.LinhaId)
+    .Select(grupo => grupo
+        .OrderByDescending(passagem => passagem.ObservadaEmUtc)
+        .ThenByDescending(passagem => passagem.RegistradaEmUtc)
+        .ThenByDescending(passagem => passagem.Id)
+        .Select(passagem => passagem.Id)
+        .First());
+
+return await contexto.RegistrosPassagem
+    .AsNoTracking()
+    .Include(passagem => passagem.Linha)
+    .Where(passagem => idsDasUltimas.Contains(passagem.Id))
+    .OrderByDescending(passagem => passagem.ObservadaEmUtc)
+    .ThenBy(passagem => passagem.Linha.Codigo)
+    .ToListAsync(cancellationToken);
+```
+
+- **SQL:** o EF Core traduz para um único comando, com `GROUP BY "LinhaId"` e uma subconsulta
+  `ORDER BY ObservadaEmUtc DESC, RegistradaEmUtc DESC, Id DESC LIMIT 1` por grupo. Nenhum registro
+  é agrupado em memória.
+- **Horário futuro:** um registro manual ainda no futuro (tolerância de 2 minutos) fica de fora
+  até o horário chegar.
+- **Desempate:** é o da seção 4.6.1 do contrato.
+- **Tipo concreto:** cada item volta como `PassagemSimulada` ou `PassagemRegistroManual`, com
+  `DadosSimulados`, nível de confirmação e aviso corretos. Nenhum é verificado.
+- **O que fica com o B5:** os minutos desde a observação, a marcação de desatualizada, os avisos e
+  a lista `linhasSemRegistro`, montada a partir de `ListarAtivasDaParadaAsync`.
+
+### Executar os testes das consultas
+
+```bash
+dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
+```
+
+| Classe | Testes | Cobre |
+|---|---|---|
+| `TextoBuscaTests` | 19 | Normalização, acentos combinados, espaços, curingas do `LIKE` |
+| `RepositoriosConsultaTests` | 34 | Paradas, linhas, associações, destinos, percursos, inativos, paginação no SQL e cancelamento |
+| `PaginacaoTests` (namespace `PontoVoz.Tests.Application`, fora do filtro acima) | 15 | Valores padrão (nunca tamanho 0), faixas aceitas e recusadas, `totalPaginas` |
+| `UltimasPassagensTests` | 9 | Última por linha, desempates, horário futuro, filtro por linha, tipos e natureza, SQL em um comando |
+| `MigracaoBuscaTests` | 4 | `AddSearchColumns` em banco com dados do B3, reaplicação, renomeação e curingas |
+
+### Implementado e pendente
+
+| Implementado (B4) | Pendente |
+|---|---|
+| 4 interfaces de repositório e suas implementações com EF Core e LINQ | Services, DTOs e validação de parâmetros com 400 (B5) |
+| Busca sem acentos com coluna normalizada e migration `AddSearchColumns` | Endpoints REST (B6 e B7) |
+| Paginação, ordenação e filtros executados no SQLite | Provedores de previsão (B8) |
+| Última passagem por linha no SQL | Cálculo das alternativas e resumo (B9) |
+| Registro na injeção de dependência | |
 
 ## Próximas etapas
 
@@ -575,8 +735,8 @@ simuladas.
 |---|---|
 | B1 | Contrato v1 em `../contracts/` (concluído) |
 | B2 | Entidades e regras de domínio, com testes (concluído) |
-| B3 | `DbContext`, migration inicial e seed de dados simulados (concluído, aguardando revisão) |
-| B4 | Repositórios com consultas LINQ, com testes |
+| B3 | `DbContext`, migration inicial e seed de dados simulados (concluído) |
+| B4 | Repositórios com consultas LINQ, com testes (concluído, aguardando revisão) |
 | B5 | Services, DTOs e injeção de dependência, com testes |
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI |
 | B7 | Endpoints administrativos com chave de acesso |

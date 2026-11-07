@@ -42,6 +42,11 @@ namespace PontoVoz.Api.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TextoBusca")
+                        .IsRequired()
+                        .HasMaxLength(130)
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Tipo")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -100,6 +105,11 @@ namespace PontoVoz.Api.Infrastructure.Persistence.Migrations
                         .HasMaxLength(120)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("TextoBusca")
+                        .IsRequired()
+                        .HasMaxLength(320)
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Codigo")
@@ -140,6 +150,11 @@ namespace PontoVoz.Api.Infrastructure.Persistence.Migrations
                     b.Property<string>("Origem")
                         .IsRequired()
                         .HasMaxLength(30)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("TextoBusca")
+                        .IsRequired()
+                        .HasMaxLength(160)
                         .HasColumnType("TEXT");
 
                     b.ComplexProperty(typeof(Dictionary<string, object>), "Coordenada", "PontoVoz.Api.Domain.Entities.Parada.Coordenada#Coordenada", b1 =>

@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using PontoVoz.Api.Domain.Entities;
+using PontoVoz.Api.Infrastructure.Persistence.Busca;
 
 namespace PontoVoz.Api.Infrastructure.Persistence.Configuracoes;
 
@@ -22,5 +23,8 @@ internal sealed class LinhaConfiguration : IEntityTypeConfiguration<Linha>
         builder.Property(linha => linha.Origem).IsRequired();
 
         builder.Ignore(linha => linha.Persistida);
+
+        // Texto normalizado para a busca sem acentos (R7). É preenchido pelo PontoVozDbContext ao salvar.
+        builder.Property<string>(TextoBusca.Coluna).HasMaxLength(320).IsRequired();
     }
 }

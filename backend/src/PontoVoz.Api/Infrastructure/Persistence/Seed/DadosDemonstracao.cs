@@ -25,7 +25,6 @@ public sealed class DadosDemonstracao
         Linha l003 = Linha.CriarSimulada("SIM-L003", "SIM-203", TerminalCentro, TerminalSul, SentidoLinha.PrincipalParaSecundario, instante);
         Linha l004 = Linha.CriarSimulada("SIM-L004", "SIM-104", TerminalCentro, TerminalNorte, SentidoLinha.PrincipalParaSecundario, instante);
 
-        // A ordem de criação mantém os IDs dos exemplos do contrato (o destino Norte é o 3).
         Destino destinoCentro = Destino.CriarSimulado(TerminalCentro, TipoDestino.Terminal, instante);
         Destino destinoSul = Destino.CriarSimulado(TerminalSul, TipoDestino.Terminal, instante);
         Destino destinoNorte = Destino.CriarSimulado(TerminalNorte, TipoDestino.Terminal, instante);
@@ -75,12 +74,15 @@ public sealed class DadosDemonstracao
 
     /// <summary>
     /// Adiciona o grafo ao contexto. As associações entram junto com as paradas, pela navegação.
+    /// Os ids são gerados pelo banco e não fazem parte do contrato: os dados de demonstração são
+    /// identificados pelos códigos <c>SIM-</c> e, nos destinos, pelo nome. Nenhuma regra depende
+    /// da ordem de inserção.
     /// </summary>
     public void AdicionarA(PontoVozDbContext contexto)
     {
         ArgumentNullException.ThrowIfNull(contexto);
-        contexto.Paradas.AddRange(Paradas);
         contexto.Linhas.AddRange(Linhas);
+        contexto.Paradas.AddRange(Paradas);
         contexto.Destinos.AddRange(Destinos);
         contexto.PercursosEstimados.AddRange(Percursos);
         contexto.RegistrosPassagem.AddRange(Passagens);

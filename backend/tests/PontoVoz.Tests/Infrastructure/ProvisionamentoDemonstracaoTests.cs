@@ -1,9 +1,13 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Time.Testing;
 
+using PontoVoz.Api.Application.Consultas;
 using PontoVoz.Api.Domain.Entities;
+using PontoVoz.Api.Domain.Enums;
 using PontoVoz.Api.Infrastructure.Persistence;
 using PontoVoz.Api.Infrastructure.Persistence.Seed;
+using PontoVoz.Api.Infrastructure.Repositories;
 using PontoVoz.Tests.Domain;
 
 namespace PontoVoz.Tests.Infrastructure;
@@ -38,8 +42,7 @@ public class ProvisionamentoDemonstracaoTests
             .SingleAsync(p => p.CodigoExterno == "SIM-P001", Ct);
         Assert.Equal(new[] { "SIM-L001", "SIM-L002", "SIM-L004" }, centro.LinhasAssociadas.Select(a => a.Linha.Codigo).Order());
 
-        Destino norte = await contexto.Destinos.SingleAsync(d => d.Id == 3, Ct);
-        Assert.Equal("Terminal Demonstração Norte", norte.Nome);
+        Destino norte = await contexto.Destinos.SingleAsync(d => d.Nome == "Terminal Demonstração Norte", Ct);
 
         List<int> percursosCentroNorte = await contexto.PercursosEstimados
             .Where(p => p.ParadaId == centro.Id && p.DestinoId == norte.Id)
@@ -47,6 +50,49 @@ public class ProvisionamentoDemonstracaoTests
             .Select(p => p.MinutosEstimados)
             .ToListAsync(Ct);
         Assert.Equal(new[] { 20, 30, 40 }, percursosCentroNorte);
+    }
+
+    [Fact]
+    public async Task Provisionamento_ComIdsDiferentesDosExemplos_RelacionaTudoPeloCodigo()
+    {
+        // Os ids internos são gerados pelo banco e podem mudar (contrato, seção 1.2). Aqui, cadastros
+        // feitos antes do seed ocupam os primeiros ids, e o seed recebe outros.
+        await using var conexao = new SqliteConnection("Data Source=:memory:");
+        await conexao.OpenAsync(Ct);
+        PontoVozDbContext NovoContexto(ProvisionamentoDemonstracao? provisionamento)
+        {
+            var options = new DbContextOptionsBuilder<PontoVozDbContext>();
+            options.UsarSqlitePontoVoz(conexao, provisionamento);
+            return new PontoVozDbContext(options.Options);
+        }
+
+        await using (PontoVozDbContext esquema = NovoContexto(null))
+        {
+            await esquema.Database.MigrateAsync(Ct);
+            esquema.Linhas.Add(Linha.CadastrarAdministrativa("LINHA-0001", "8000-10", "Centro", "Sul", SentidoLinha.PrincipalParaSecundario, false, Cenario.Agora));
+            esquema.Paradas.Add(Parada.CadastrarAdministrativa("PARADA-0001", "Parada Real", null, null, false, Cenario.Agora));
+            esquema.Destinos.Add(Destino.CriarSimulado("Estação Demonstração", TipoDestino.Estacao, Cenario.Agora));
+            await esquema.SaveChangesAsync(Ct);
+        }
+
+        await using (PontoVozDbContext provisionamento = NovoContexto(new ProvisionamentoDemonstracao(new FakeTimeProvider(BancoSqliteTeste.InicioRelogio))))
+        {
+            await provisionamento.Database.MigrateAsync(Ct);
+        }
+
+        await using PontoVozDbContext leitura = NovoContexto(null);
+        Parada centro = Assert.Single((await new ParadaRepository(leitura).BuscarAtivasAsync(null, "SIM-P001", new Paginacao(), Ct)).Itens);
+        Destino norte = Assert.Single((await new DestinoRepository(leitura).BuscarAtivosAsync("norte", new Paginacao(), Ct)).Itens);
+        int idL001 = await leitura.Linhas.Where(l => l.Codigo == "SIM-L001").Select(l => l.Id).SingleAsync(Ct);
+
+        Assert.NotEqual(1, idL001);
+        Assert.NotEqual(1, centro.Id);
+        Assert.Equal(new[] { "SIM-L001", "SIM-L002", "SIM-L004" }, (await new LinhaRepository(leitura).ListarAtivasDaParadaAsync(centro.Id, Ct)).Select(l => l.Codigo));
+        Assert.Equal(
+            new[] { ("SIM-L004", 20), ("SIM-L001", 30), ("SIM-L002", 40) },
+            (await new DestinoRepository(leitura).ListarPercursosDiretosAsync(centro.Id, norte.Id, Ct)).Select(p => (p.Linha.Codigo, p.MinutosEstimados)));
+        Assert.Equal("SIM-OBS-001", Assert.IsType<PassagemSimulada>(Assert.Single(
+            await new RegistroPassagemRepository(leitura).ListarUltimasPorLinhaAsync(centro.Id, BancoSqliteTeste.InicioRelogio, null, Ct))).ChaveSeed);
     }
 
     [Fact]
@@ -156,7 +202,7 @@ public class ProvisionamentoDemonstracaoTests
     {
         await using var conexao = new SqliteConnection("Data Source=:memory:");
         await conexao.OpenAsync(Ct);
-        var provisionamento = new ProvisionamentoDemonstracao(new Microsoft.Extensions.Time.Testing.FakeTimeProvider(BancoSqliteTeste.InicioRelogio));
+        var provisionamento = new ProvisionamentoDemonstracao(new FakeTimeProvider(BancoSqliteTeste.InicioRelogio));
         PontoVozDbContext NovoContexto()
         {
             var options = new DbContextOptionsBuilder<PontoVozDbContext>();
@@ -201,7 +247,7 @@ public class ProvisionamentoDemonstracaoTests
             await using PontoVozDbContext leitura = reaberto.NovoContexto();
 
             Assert.Equal(Esperado with { Passagens = 3 }, await ContarAsync(leitura));
-            Assert.Single(await leitura.Database.GetAppliedMigrationsAsync(Ct));
+            Assert.Equal(2, (await leitura.Database.GetAppliedMigrationsAsync(Ct)).Count());
         }
         finally
         {

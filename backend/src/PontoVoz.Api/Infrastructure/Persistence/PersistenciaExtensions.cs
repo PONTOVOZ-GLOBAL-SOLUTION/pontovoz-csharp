@@ -1,7 +1,10 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
+using PontoVoz.Api.Application.Interfaces;
+using PontoVoz.Api.Infrastructure.Persistence.Busca;
 using PontoVoz.Api.Infrastructure.Persistence.Seed;
+using PontoVoz.Api.Infrastructure.Repositories;
 
 namespace PontoVoz.Api.Infrastructure.Persistence;
 
@@ -23,6 +26,12 @@ public static class PersistenciaExtensions
         services.AddDbContext<PontoVozDbContext>((provider, options) =>
             options.UsarSqlitePontoVoz(resolvida, new ProvisionamentoDemonstracao(provider.GetRequiredService<TimeProvider>())));
 
+        // Repositórios de consulta (B4): mesmo tempo de vida do DbContext.
+        services.AddScoped<IParadaRepository, ParadaRepository>();
+        services.AddScoped<ILinhaRepository, LinhaRepository>();
+        services.AddScoped<IDestinoRepository, DestinoRepository>();
+        services.AddScoped<IRegistroPassagemRepository, RegistroPassagemRepository>();
+
         // O /health passa a verificar também o banco (contrato, seções 1.10 e 6).
         services.AddHealthChecks().AddCheck<BancoDadosHealthCheck>(BancoDadosHealthCheck.Nome);
 
@@ -30,28 +39,36 @@ public static class PersistenciaExtensions
     }
 
     /// <summary>
-    /// Configuração única do SQLite, usada pela API e pelos testes de integração. Com
-    /// <paramref name="provisionamento"/>, os dados de demonstração são criados depois das
-    /// migrations, nos fluxos síncrono e assíncrono.
+    /// Configuração única do SQLite, usada pela API e pelos testes de integração. Depois das
+    /// migrations, nos fluxos síncrono e assíncrono, preenche a coluna de busca dos registros
+    /// antigos e, com <paramref name="provisionamento"/>, cria os dados de demonstração.
     /// </summary>
     public static DbContextOptionsBuilder UsarSqlitePontoVoz(this DbContextOptionsBuilder options, string connectionString, ProvisionamentoDemonstracao? provisionamento) =>
-        options.UseSqlite(connectionString).ComProvisionamento(provisionamento);
+        options.UseSqlite(connectionString).ComEtapasPosMigracao(provisionamento);
 
     /// <inheritdoc cref="UsarSqlitePontoVoz(DbContextOptionsBuilder, string, ProvisionamentoDemonstracao?)"/>
     public static DbContextOptionsBuilder UsarSqlitePontoVoz(this DbContextOptionsBuilder options, SqliteConnection connection, ProvisionamentoDemonstracao? provisionamento) =>
-        options.UseSqlite(connection).ComProvisionamento(provisionamento);
+        options.UseSqlite(connection).ComEtapasPosMigracao(provisionamento);
 
-    private static DbContextOptionsBuilder ComProvisionamento(this DbContextOptionsBuilder options, ProvisionamentoDemonstracao? provisionamento)
-    {
-        if (provisionamento is null)
-        {
-            return options;
-        }
+    private static DbContextOptionsBuilder ComEtapasPosMigracao(this DbContextOptionsBuilder options, ProvisionamentoDemonstracao? provisionamento) =>
+        options
+            .UseSeeding((contexto, _) =>
+            {
+                PreenchimentoTextoBusca.Executar(Contexto(contexto));
+                provisionamento?.Executar(contexto);
+            })
+            .UseAsyncSeeding(async (contexto, _, cancellationToken) =>
+            {
+                await PreenchimentoTextoBusca.ExecutarAsync(Contexto(contexto), cancellationToken);
+                if (provisionamento is not null)
+                {
+                    await provisionamento.ExecutarAsync(contexto, cancellationToken);
+                }
+            });
 
-        return options
-            .UseSeeding((contexto, _) => provisionamento.Executar(contexto))
-            .UseAsyncSeeding((contexto, _, cancellationToken) => provisionamento.ExecutarAsync(contexto, cancellationToken));
-    }
+    private static PontoVozDbContext Contexto(DbContext contexto) =>
+        contexto as PontoVozDbContext
+        ?? throw new ArgumentException($"A configuração exige um {nameof(PontoVozDbContext)}.", nameof(contexto));
 
     private static string ResolverCaminho(string connectionString, string contentRoot)
     {

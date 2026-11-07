@@ -1,5 +1,7 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 
 using PontoVoz.Api.Infrastructure.Persistence;
@@ -26,6 +28,9 @@ internal sealed class BancoSqliteTeste : IAsyncDisposable
     }
 
     public FakeTimeProvider Relogio { get; }
+
+    /// <summary>Comandos SQL executados pelos contextos deste banco, para os testes conferirem o que rodou no SQLite.</summary>
+    public List<string> ComandosSql { get; } = [];
 
     public static CancellationToken Ct => TestContext.Current.CancellationToken;
 
@@ -55,9 +60,28 @@ internal sealed class BancoSqliteTeste : IAsyncDisposable
     public PontoVozDbContext NovoContexto()
     {
         var options = new DbContextOptionsBuilder<PontoVozDbContext>();
-        options.UsarSqlitePontoVoz(_conexao, _provisionamento);
+        options.UsarSqlitePontoVoz(_conexao, _provisionamento)
+            .EnableSensitiveDataLogging()
+            .LogTo(RegistrarComando, [RelationalEventId.CommandExecuted], LogLevel.Information);
         return new PontoVozDbContext(options.Options);
     }
 
+    /// <summary>Comandos executados a partir deste ponto, para isolar a consulta que o teste quer conferir.</summary>
+    public void LimparComandosSql()
+    {
+        lock (ComandosSql)
+        {
+            ComandosSql.Clear();
+        }
+    }
+
     public async ValueTask DisposeAsync() => await _conexao.DisposeAsync();
+
+    private void RegistrarComando(string mensagem)
+    {
+        lock (ComandosSql)
+        {
+            ComandosSql.Add(mensagem);
+        }
+    }
 }

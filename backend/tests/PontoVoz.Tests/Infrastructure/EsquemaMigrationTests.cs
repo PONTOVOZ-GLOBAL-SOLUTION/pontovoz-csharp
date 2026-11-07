@@ -19,7 +19,7 @@ public class EsquemaMigrationTests
             $"SELECT name AS Value FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE '__EF%' ORDER BY name");
 
         Assert.Equal(new[] { "Destinos", "Linhas", "Paradas", "ParadasLinhas", "PercursosEstimados", "RegistrosPassagem" }, tabelas);
-        Assert.Equal(new[] { "20261107211456_InitialCreate" }, await contexto.Database.GetAppliedMigrationsAsync(BancoSqliteTeste.Ct));
+        Assert.Equal(new[] { "20261107211456_InitialCreate", "20261107222533_AddSearchColumns" }, await contexto.Database.GetAppliedMigrationsAsync(BancoSqliteTeste.Ct));
         Assert.Empty(await contexto.Database.GetPendingMigrationsAsync(BancoSqliteTeste.Ct));
     }
 

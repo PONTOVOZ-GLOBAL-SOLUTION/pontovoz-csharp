@@ -91,8 +91,9 @@ foreign_keys check: []
 Leitura:
 
 - **Seed:** criou 21 registros: 2 paradas, 4 linhas, 5 associações, 3 destinos, 5 percursos e
-  2 passagens simuladas. O destino "Terminal Demonstração Norte" ficou com o id 3, como nos
-  exemplos do contrato.
+  2 passagens simuladas. Nesta execução, o destino "Terminal Demonstração Norte" ficou com o id 3.
+  Os ids são gerados pelo banco e não são garantidos; os dados são identificados pelos códigos e
+  pelo nome (revisão do B4.1).
 - **Chaves estrangeiras:** o `PRAGMA foreign_key_list` lista cada coluna em uma linha. As FKs
   para `ParadasLinhas` são compostas (`ParadaId`, `LinhaId`) e garantem que percursos e
   passagens só existam para uma linha que atende a parada.
