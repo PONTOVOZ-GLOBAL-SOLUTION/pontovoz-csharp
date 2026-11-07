@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PontoVoz.Api/PontoVoz.Api.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PontoVoz.Tests/PontoVoz.Tests.csproj" />
+  </Folder>
+</Solution>
