@@ -5,7 +5,7 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B4 — repositórios, interfaces e consultas LINQ.** Hoje o backend:
+**Bloco B5 — serviços de aplicação, DTOs e validações.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -16,11 +16,15 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - tem **repositórios com interfaces** e consultas LINQ assíncronas, executadas no SQLite, para os
   futuros endpoints de paradas, linhas, destinos, percursos e últimas passagens, incluindo a busca
   sem acentos (veja [Consultas](#consultas-linq-b4));
-- tem **402 testes**: 278 de domínio, 15 de paginação, 106 de integração com SQLite real e 3 do
-  `/health` pela API em execução.
+- tem **services de aplicação** que validam os parâmetros, aplicam as regras do contrato e montam
+  as respostas (DTOs) de paradas, linhas, destinos e últimas passagens (veja
+  [Services](#services-de-aplicação-b5));
+- tem **463 testes**: 278 de domínio, 70 da camada de aplicação, 106 de integração com SQLite real
+  e 9 pela API em execução (`/health` e injeção de dependência).
 
-Ainda **não** existem services nem endpoints de transporte público. Os endpoints de `/api/v1`
-descritos em [`../contracts/api-v1.md`](../contracts/api-v1.md) são **planejados**.
+Ainda **não** existem endpoints de transporte público: os services estão prontos, mas os
+controllers que os expõem por HTTP entram no B6. Os endpoints de `/api/v1` descritos em
+[`../contracts/api-v1.md`](../contracts/api-v1.md) continuam **planejados**.
 
 ## Requisitos de ambiente
 
@@ -236,9 +240,15 @@ backend/
 │  │  ├─ Enums/                  enums do contrato v1
 │  │  ├─ Exceptions/             exceções de domínio com o código de erro do contrato
 │  │  └─ Rules/                  regras compartilhadas (temporal e de cadastro)
-│  ├─ Application/               interfaces de acesso a dados e tipos de consulta (B4); services e DTOs (B5)
-│  │  ├─ Consultas/              Paginacao e Pagina<T>
-│  │  └─ Interfaces/             interfaces dos repositórios
+│  ├─ Application/               camada de aplicação (B4 e B5)
+│  │  ├─ Avisos/                 catálogo de avisos do contrato
+│  │  ├─ Consultas/              Paginacao, Pagina<T> e parâmetros das consultas
+│  │  ├─ Dtos/                   respostas no formato do contrato e regras de serialização JSON
+│  │  ├─ Erros/                  erros de aplicação com os códigos do contrato
+│  │  ├─ Interfaces/             interfaces dos repositórios e dos services
+│  │  ├─ Mapeamentos/            entidades → DTOs e horário de São Paulo
+│  │  ├─ Services/               services de consulta
+│  │  └─ Validacao/              validação dos parâmetros
 │  ├─ Infrastructure/            EF Core, repositórios e provedores (B3, B4, B8)
 │  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
 │  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4)
@@ -246,7 +256,9 @@ backend/
 │  └─ Middleware/                tratamento global de erros (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
    ├─ Domain/                    testes de domínio (B2)
-   └─ Infrastructure/            testes de integração com SQLite real (B3)
+   ├─ Application/               testes dos services e da paginação (B4 e B5)
+   ├─ Infrastructure/            testes de integração com SQLite real (B3 e B4)
+   └─ Api/                       testes pela API em execução (B3.1 e B5)
 ```
 
 ## Domínio (B2)
@@ -729,6 +741,115 @@ dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
 | Última passagem por linha no SQL | Cálculo das alternativas e resumo (B9) |
 | Registro na injeção de dependência | |
 
+## Services de aplicação (B5)
+
+Os services ficam em `Application/Services/` e são o que os controllers do B6 vão chamar. Cada
+service recebe os repositórios do B4 **pelas interfaces**, por injeção de dependência no
+construtor, e não conhece o `DbContext` nem o SQLite. O fluxo de cada consulta é sempre o mesmo:
+
+1. valida os parâmetros e, se algum estiver errado, lança `ErroAplicacaoException` com todos os
+   erros juntos, **sem consultar o banco**;
+2. busca os dados nos repositórios (`await`, com o `CancellationToken` da requisição);
+3. aplica as regras que não são de consulta (minutos, desatualização, avisos);
+4. devolve um DTO no formato do contrato.
+
+| Interface (`Application/Interfaces`) | Service | Método | Endpoint futuro (B6) |
+|---|---|---|---|
+| `IParadaService` | `ParadaService` | `BuscarAsync(ConsultaParadas)` · `ObterDetalheAsync(id)` | `GET /paradas` · `GET /paradas/{id}` |
+| `ILinhaService` | `LinhaService` | `BuscarAsync(ConsultaPaginada)` | `GET /linhas` |
+| `IDestinoService` | `DestinoService` | `BuscarAsync(ConsultaPaginada)` | `GET /destinos` |
+| `IUltimasPassagensService` | `UltimasPassagensService` | `ObterAsync(paradaId, linhaId)` | `GET /paradas/{id}/ultimas-passagens` |
+
+Os quatro são registrados como *scoped* por `AddAplicacaoPontoVoz()`, chamado no `Program.cs`. O
+`TimeProvider` já registrado é injetado no service de últimas passagens.
+
+### Validações e erros
+
+| Regra (contrato, seções 1.5, 1.6 e 2) | Campo | Erro |
+|---|---|---|
+| `termo` de 2 a 60 caracteres, sem os espaços das pontas; vazio conta como ausente | `termo` | 400 `RequisicaoInvalida` |
+| `codigoExterno` com 3 a 30 letras, dígitos ou hífen | `codigoExterno` | 400 |
+| `pagina` ≥ 1 e `tamanhoPagina` de 1 a 50 (padrões 1 e 20) | `pagina`, `tamanhoPagina` | 400 |
+| `linhaId`, quando informado, ≥ 1 | `linhaId` | 400 |
+| Parada inexistente ou inativa (inclusive `id` < 1, que não corresponde à rota) | — | 404 `ParadaNaoEncontrada` |
+| Linha inexistente ou inativa | — | 404 `LinhaNaoEncontrada` |
+| Linha existe, mas não atende a parada | — | 422 `LinhaNaoAtendeParada` |
+
+`ErroAplicacaoException` informa o `Tipo` (validação, não encontrado ou regra de negócio), o
+`Codigo`, o `Titulo`, a mensagem e, na validação, o dicionário `Erros` (campo → mensagens). O B6
+vai convertê-lo em ProblemDetails. Erros inesperados não usam essa classe. A ordem das
+verificações é a do contrato: parâmetros (400), parada (404), linha (404) e associação (422).
+
+### DTOs
+
+Os DTOs (`Application/Dtos/Dtos.cs`) são *records* com os campos do contrato: `ParadaDto`,
+`ParadaDetalheDto`, `LinhaDto`, `DestinoDto`, `PaginaDto<T>`, `ReferenciaLinhaDto`,
+`PassagemDto`, `UltimasPassagensParadaDto`, `AvisoDto` e `CoordenadaDto`.
+
+- **Serialização:** `JsonContrato` define as regras de serialização: nomes em camelCase, enums como
+  texto e campos nulos sempre presentes.
+- **Datas:** saem no horário de São Paulo (`-03:00`), pela conversão de `HorarioSaoPaulo`.
+- **Avisos:** os textos estão em `CatalogoAvisos`.
+- **Compatibilidade:** os testes de integração montam as respostas a partir do banco real com o
+  seed e as comparam, campo a campo, com `paradas-listagem.json`, `paradas-busca-codigo.json`,
+  `parada-detalhe.json`, `destinos-busca.json`, `ultimas-passagens.json` e o exemplo de
+  `GET /linhas` do `api-v1.md`. Só os ids internos ficam de fora da comparação.
+
+### Últimas passagens
+
+`UltimasPassagensService.ObterAsync`:
+
+1. valida `linhaId` (400), confere a parada ativa (404) e, com `linhaId`, a linha ativa (404) e a
+   associação (422);
+2. lê o instante atual **uma vez** do `TimeProvider`. O mesmo instante vale para o filtro de
+   registros futuros, os minutos, a desatualização e o `consultadoEm`;
+3. busca as linhas ativas da parada e a última passagem de cada uma (o repositório já exclui os
+   registros com horário futuro);
+4. monta as passagens:
+   - os minutos são arredondados para baixo;
+   - `desatualizada` só acima de 60 minutos exatos;
+   - o nível de confirmação, a origem do registro e o aviso vêm do tipo concreto;
+   - `verificada` e `oficialSptrans` saem sempre `false`;
+5. lista em `linhasSemRegistro` as linhas sem passagem;
+6. monta os avisos na ordem dos exemplos: `DadosSimulados`, `CadastroNaoVerificado`,
+   `ParadaSemLinhas`, `PassagemDesatualizada` e `PassagemNaoRegistrada`, cada um só quando se
+   aplica.
+
+### Operações assíncronas
+
+As operações com I/O real são as consultas ao SQLite feitas pelos repositórios (`CountAsync`,
+`ToListAsync`, `FirstOrDefaultAsync`, `AnyAsync`). Os services as aguardam em sequência e repassam
+o `CancellationToken`, e um token cancelado interrompe a consulta, como mostram os testes. A
+validação e a montagem dos DTOs são síncronas, porque não fazem I/O. Nenhuma operação usa
+`Task.Run`.
+
+### Executar os testes dos services
+
+```bash
+dotnet test --filter-namespace "PontoVoz.Tests.Application"
+```
+
+| Classe | Testes | Cobre |
+|---|---|---|
+| `ServicosConsultaTests` | 29 | Validação de termo, código, paginação e ids; erros do contrato; mapeamento; listas vazias |
+| `UltimasPassagensServiceTests` | 17 | 400/404/422 e sua ordem; várias linhas; linha sem passagem; simulada e manual; 60 min e 60 min 1 s; uma leitura do relógio; avisos |
+| `ServicosIntegracaoTests` | 9 | Respostas do banco real iguais aos exemplos do contrato; busca sem acentos; registro futuro excluído; cancelamento |
+| `InjecaoDependenciaTests` (em `PontoVoz.Tests.Api`) | 6 | Services e repositórios resolvidos pelo contêiner da API |
+
+Os testes unitários usam dublês de repositório em memória (`DublesRepositorio`), que guardam as
+chamadas recebidas para confirmar que uma requisição inválida não consulta o banco. As consultas
+reais continuam testadas contra o SQLite.
+
+### Pendente para o B6
+
+- os controllers de `GET /paradas`, `GET /paradas/{id}`, `GET /linhas`, `GET /destinos` e
+  `GET /paradas/{id}/ultimas-passagens`, que chamam estes services;
+- a conversão de `ErroAplicacaoException` e das exceções de domínio em ProblemDetails (400, 404 e
+  422, com `codigo` e `traceId`), e o 500 genérico;
+- a aplicação de `JsonContrato` na serialização dos controllers;
+- a restrição `int:min(1)` nas rotas;
+- a exportação do OpenAPI com os endpoints implementados.
+
 ## Próximas etapas
 
 | Bloco | Conteúdo |
@@ -736,8 +857,8 @@ dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
 | B1 | Contrato v1 em `../contracts/` (concluído) |
 | B2 | Entidades e regras de domínio, com testes (concluído) |
 | B3 | `DbContext`, migration inicial e seed de dados simulados (concluído) |
-| B4 | Repositórios com consultas LINQ, com testes (concluído, aguardando revisão) |
-| B5 | Services, DTOs e injeção de dependência, com testes |
+| B4 | Repositórios com consultas LINQ, com testes (concluído) |
+| B5 | Services, DTOs e injeção de dependência, com testes (concluído, aguardando revisão) |
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI |
 | B7 | Endpoints administrativos com chave de acesso |
 | B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo) |

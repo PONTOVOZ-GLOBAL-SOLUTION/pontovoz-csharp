@@ -8,6 +8,14 @@ de aplicação, DTOs de entrada e saída e mapeamentos entre entidades e DTOs.
 
 | Pasta | Conteúdo | Estado |
 |---|---|---|
-| `Consultas/` | `Paginacao` e `Pagina<T>` | Implementado no B4 |
-| `Interfaces/` | `IParadaRepository`, `ILinhaRepository`, `IDestinoRepository` e `IRegistroPassagemRepository` | Implementado no B4 |
-| `Services/`, `Dtos/` | Services e DTOs | Planejado (B5) |
+| `Consultas/` | `Paginacao`, `Pagina<T>`, `ConsultaParadas` e `ConsultaPaginada` | B4 e B5 |
+| `Interfaces/` | Interfaces dos repositórios (B4) e dos services `IParadaService`, `ILinhaService`, `IDestinoService` e `IUltimasPassagensService` (B5) | B4 e B5 |
+| `Services/` | Implementações dos services de consulta | B5 |
+| `Dtos/` | DTOs do contrato e `JsonContrato` (regras de serialização) | B5 |
+| `Validacao/` | `ValidacaoParametros` | B5 |
+| `Erros/` | `ErroAplicacaoException` e `TipoErroAplicacao` | B5 |
+| `Avisos/` | `CatalogoAvisos` | B5 |
+| `Mapeamentos/` | `MapeamentoDtos` e `HorarioSaoPaulo` | B5 |
+
+`AplicacaoExtensions.AddAplicacaoPontoVoz()` registra os services na injeção de dependência.
+Detalhes em [`../../../README.md`](../../../README.md#services-de-aplicação-b5).

@@ -1,3 +1,4 @@
+using PontoVoz.Api.Application;
 using PontoVoz.Api.Infrastructure.Persistence;
 
 using Scalar.AspNetCore;
@@ -10,6 +11,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddPersistenciaPontoVoz(builder.Configuration, builder.Environment);
+builder.Services.AddAplicacaoPontoVoz();
 
 var app = builder.Build();
 

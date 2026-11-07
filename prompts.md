@@ -1,30 +1,109 @@
-# Registro de uso de inteligência artificial
+# Registro de uso de inteligência artificial — PontoVoz
 
-Este arquivo registra o uso de ferramentas de IA no desenvolvimento do PontoVoz,
-conforme as orientações acadêmicas da FIAP. Cada integrante registra o próprio uso
-em uma seção da sua disciplina.
-
-## Como este registro é feito
-
-- **Prompts:** transcritos de forma fiel, exatamente como foram enviados à ferramenta.
-- **Respostas da IA:** não são transcritas, porque são longas. Cada uma tem um
-  **resumo**, identificado como tal.
-- **Revisão humana:** todo código e documento gerado com apoio de IA é revisado pelo
-  integrante responsável antes de ser aceito, bloco a bloco.
-
----
-
-## C# Software Development — Backend
+Registro dos prompts usados no desenvolvimento do backend C# do PontoVoz, na disciplina
+**C# Software Development** da Global Solution FIAP 2026.2 (CitizenTech), conforme a orientação
+do material oficial da FIAP de registrar os prompts utilizados e compreender o código do projeto.
 
 | Item | Informação |
 |---|---|
-| Ferramenta | Claude Code (aplicativo desktop), modelo Claude Opus 5.5, da Anthropic |
+| Disciplina | C# Software Development — backend (`backend/` e `contracts/`) |
+| Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Integrante responsável | Pendente (nome e RM) |
-| Forma de uso | Diagnóstico do ambiente, planejamento da arquitetura e execução de blocos de implementação autorizados um a um |
+| Período | 06/11/2026 em diante |
+| Prompts registrados | 20 |
 
-### Prompt 01 — Diagnóstico do ambiente local (06/11/2026)
+## Como a IA foi usada
 
-**Texto original:**
+Ferramentas de IA participaram de **todas** as etapas registradas abaixo, do diagnóstico do
+ambiente à publicação de cada bloco no GitHub. Duas ferramentas foram usadas, com papéis
+diferentes.
+
+**ChatGPT:**
+
+- auxiliou no planejamento do projeto e na elaboração dos prompts registrados neste arquivo;
+- ajudou a definir os critérios de revisão de cada etapa;
+- auxiliou na auditoria dos materiais enviados a ele: relatórios e arquivos produzidos pelo
+  Claude Code. As auditorias citadas nos prompts 11 e 13 ("Realizei uma auditoria
+  independente...") foram feitas com esse apoio.
+
+**Claude Code:**
+
+- recebeu os prompts registrados abaixo e executou o trabalho técnico de todas as etapas;
+- diagnosticou o ambiente e propôs a arquitetura (prompts 01 a 04);
+- escreveu o contrato REST, os exemplos JSON e o verificador do contrato (prompts 08 a 11);
+- escreveu todo o código C# do backend: domínio, persistência com EF Core, migrations, seed,
+  repositórios, consultas LINQ e services;
+- escreveu os testes automatizados, executou-os e fez testes de mutação para conferir se eles
+  detectam regressões;
+- preparou a documentação técnica (READMEs e evidências) e este registro;
+- executou os comandos (`dotnet`, `dotnet ef`, `git`), incluindo os commits e os pushes, só quando
+  autorizados no prompt e com a identidade Git do integrante (e-mail *noreply* do GitHub).
+
+**Integrante:**
+
+- encaminhou as instruções ao Claude Code e forneceu arquivos às ferramentas;
+- definiu preferências, como a apresentação do repositório e as regras de commit (prompt 08);
+- tomou decisões pontuais quando a ferramenta apresentou uma escolha, como o uso do e-mail
+  *noreply* nos commits (prompt 07);
+- autorizou cada etapa e cada publicação, com a mensagem de commit definida no prompt.
+
+Não houve edição manual do código pelo integrante nas etapas registradas. A verificação técnica de
+cada etapa foi executada pelo Claude Code, com os comandos registrados nas evidências
+(`backend/docs/evidencias/`).
+
+**Commits:** o primeiro commit (`f7a8ccf`) contém um trailer `Co-Authored-By` do Claude Code, criado
+antes da diretriz do prompt 08. A partir dela, por decisão do integrante, os commits não levam
+assinatura de ferramenta, e o uso da IA fica registrado neste arquivo. O histórico não foi
+reescrito.
+
+## Como ler este registro
+
+- **Instrução original:** o texto integral do prompt, exatamente como foi enviado. A numeração
+  deste arquivo é sequencial; alguns prompts têm numeração própria no texto (por exemplo,
+  "PROMPT 05 — BLOCO B3"), mantida sem alteração.
+- **Resultado:** resumo do que o Claude Code entregou, **escrito pelo próprio Claude Code** ao fim
+  da etapa. Não é uma transcrição da resposta, que era longa. Nos resumos, "a IA" e "a ferramenta"
+  se referem ao Claude Code.
+- **Tipo:** diagnóstico, planejamento, implementação, revisão e correção, ou auditoria e
+  publicação.
+- **Commit:** o commit publicado ao fim da etapa, quando houve.
+
+## Índice
+
+| Nº | Data | Etapa | Tipo | Commit |
+|---|---|---|---|---|
+| [01](#prompt-01) | 06/11/2026 | Diagnóstico do ambiente local | Diagnóstico | — |
+| [02](#prompt-02) | 06/11/2026 | Verificação do .NET 10 SDK | Diagnóstico | — |
+| [03](#prompt-03) | 06/11/2026 | Etapa 01: planejamento e arquitetura | Planejamento | — |
+| [04](#prompt-04) | 06/11/2026 | Etapa 01.1: revisão e consolidação do planejamento | Planejamento (revisão) | — |
+| [05](#prompt-05) | 06/11/2026 | Bloco B0: inicialização do backend | Implementação | — |
+| [06](#prompt-06) | 06/11/2026 | Bloco B0.1: auditoria final e primeiro commit local | Auditoria e commit local | `f7a8ccf` (local) |
+| [07](#prompt-07) | 06/11/2026 | Etapa B0.2: conexão e publicação no GitHub | Publicação | `f7a8ccf` |
+| [08](#prompt-08) | 07/11/2026 | Bloco B1: contratos REST e diretriz permanente | Documentação (contrato REST) e diretriz | — |
+| [09](#prompt-09) | 07/11/2026 | Bloco B1.1: revisão técnica final dos contratos REST | Revisão e correção | — |
+| [10](#prompt-10) | 07/11/2026 | Bloco B1.2: consolidação final dos contratos | Revisão e correção | — |
+| [11](#prompt-11) | 07/11/2026 | Bloco B1.3: correções finais e publicação do contrato | Revisão, correção e publicação | `370fab4` |
+| [12](#prompt-12) | 07/11/2026 | Bloco B2: implementação do domínio e Programação Orientada a Objetos | Implementação e testes | — |
+| [13](#prompt-13) | 07/11/2026 | Bloco B2.1: correções de domínio e testes de regressão | Revisão, correção e testes | — |
+| [14](#prompt-14) | 07/11/2026 | Bloco B2.2: auditoria final e publicação do domínio C# | Auditoria e publicação | `f53fe2d` |
+| [15](#prompt-15) | 07/11/2026 | Bloco B3: Entity Framework Core, SQLite, migrations e persistência | Implementação e testes | — |
+| [16](#prompt-16) | 07/11/2026 | Bloco B3.1: correções finais, validação e publicação do EF Core | Revisão, correção, testes e publicação | `988a5fc` |
+| [17](#prompt-17) | 07/11/2026 | Bloco B4: repositórios, interfaces e consultas LINQ | Implementação e testes | — |
+| [18](#prompt-18) | 07/11/2026 | Bloco B4.1: auditoria final e publicação das consultas LINQ | Auditoria, correção e publicação | `38d2dae` |
+| [19](#prompt-19) | 07/11/2026 | Bloco B5: serviços de negócio, DTOs, validações e testes | Implementação, testes e documentação (inclui diretriz do prompts.md) | — |
+| [20](#prompt-20) | 07/11/2026 | Bloco B5.1: auditoria final, correção documental e publicação | Auditoria, correção documental e publicação | `feat: implement application services and DTO validation` |
+
+---
+
+## Ambiente e planejamento
+
+<a id="prompt-01"></a>
+
+### Prompt 01 — Diagnóstico do ambiente local
+
+**Data:** 06/11/2026 · **Tipo:** Diagnóstico · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 Estou iniciando um novo projeto acadêmico de backend em C#/.NET para a Global Solution da FIAP.
@@ -43,28 +122,36 @@ Se alguma ferramenta estiver faltando, explique o que preciso instalar, usando f
 IMPORTANTE: não crie projetos, não altere arquivos, não instale ferramentas e não execute comandos que modifiquem o sistema. Quero somente o diagnóstico, com os resultados efetivamente verificados, e suas recomendações.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA executou apenas comandos de leitura.
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA executou apenas comandos de leitura.
 Constatou pasta vazia, Git 2.44.0, .NET SDK 8.0.421 como único SDK, templates Web API
 disponíveis, NuGet acessível, certificado HTTPS de desenvolvimento existente mas não
 confiável, VS Code sem extensão C#, `dotnet-ef` e Docker ausentes. Recomendou confiar
 no certificado, instalar o C# Dev Kit e, se exigido, o SDK do .NET 10.
 
-### Prompt 02 — Verificação do .NET 10 SDK (06/11/2026)
+<a id="prompt-02"></a>
 
-**Texto original:**
+### Prompt 02 — Verificação do .NET 10 SDK
+
+**Data:** 06/11/2026 · **Tipo:** Diagnóstico · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 Instalei o .NET 10 SDK no meu computador. Verifique, usando apenas comandos de leitura, se a instalação foi reconhecida corretamente. Execute dotnet --list-sdks e dotnet --version, confira se os templates ASP.NET Core Web API continuam disponíveis e informe se podemos usar net10.0 no projeto PontoVoz da Global Solution. Não crie arquivos, não instale dependências e não inicie a implementação. Quero apenas a confirmação técnica do ambiente.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA confirmou os SDKs 8.0.421 e 10.0.403,
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA confirmou os SDKs 8.0.421 e 10.0.403,
 com `dotnet --version` igual a 10.0.403 na pasta do projeto, runtime ASP.NET Core 10.0.14
 e o template `webapi` presente no pacote de templates do .NET 10. Concluiu que `net10.0`
 pode ser usado.
 
-### Prompt 03 — Etapa 01: planejamento e arquitetura (06/11/2026)
+<a id="prompt-03"></a>
 
-**Texto original:**
+### Prompt 03 — Etapa 01: planejamento e arquitetura
+
+**Data:** 06/11/2026 · **Tipo:** Planejamento · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 # GLOBAL SOLUTION FIAP 2026.2 — PONTOVOZ
@@ -294,16 +381,20 @@ Todas as decisões devem ter justificativa e contribuir para a proposta CitizenT
 A implementação será conduzida posteriormente, em blocos, com revisão técnica a cada etapa.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA apresentou o planejamento nas seções
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA apresentou o planejamento nas seções
 A a M: Web API em .NET 10 com Controllers, EF Core 10 com SQLite, um projeto de API
 organizado em pastas e um projeto de testes xUnit. Propôs entidades de parada, linha,
 associação e observação de passagem, um provedor de previsões trocável (simulado ou
 Olho Vivo), cerca de 17 endpoints, matriz da rubrica, blocos B0 a B9 e riscos, como
 a limitação do SQLite com `DateTimeOffset`.
 
-### Prompt 04 — Etapa 01.1: revisão e consolidação do planejamento (06/11/2026)
+<a id="prompt-04"></a>
 
-**Texto original:**
+### Prompt 04 — Etapa 01.1: revisão e consolidação do planejamento
+
+**Data:** 06/11/2026 · **Tipo:** Planejamento (revisão) · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -426,7 +517,7 @@ Não execute o Bloco B0. Pare após apresentar a revisão e aguarde minha aprova
 O projeto deve continuar rigorosamente alinhado à Global Solution CitizenTech e à disciplina C# Software Development, conforme as exigências do professor da FIAP.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA consolidou o plano. Alternativas de
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA consolidou o plano. Alternativas de
 deslocamento entraram no MVP, por linhas diretas, ordenadas pelo tempo total estimado
 (espera + percurso), com as entidades `Destino` e `PercursoEstimado`. Rotas
 administrativas passaram a ficar em `/api/v1/admin`, protegidas por chave em cabeçalho.
@@ -435,9 +526,17 @@ Foram definidos a estrutura `backend/` + `contracts/`, quatro níveis de confirm
 passagem, 13 endpoints mais `/health`, a matriz da rubrica, os blocos B0 a B10 e o
 checklist para autorizar o B0.
 
-### Prompt 05 — Bloco B0: inicialização do backend (06/11/2026)
+---
 
-**Texto original:**
+## Bloco B0 — inicialização e publicação do repositório
+
+<a id="prompt-05"></a>
+
+### Prompt 05 — Bloco B0: inicialização do backend
+
+**Data:** 06/11/2026 · **Tipo:** Implementação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -676,15 +775,19 @@ Ao concluir o Bloco B0, pare. Não avance para B1 sem minha autorização.
 Nosso objetivo é construir a Global Solution com máxima aderência aos critérios acadêmicos, comprovando cada etapa com resultados reais.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA criou a estrutura do B0: solução .NET 10
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA criou a estrutura do B0: solução .NET 10
 em `backend/`, projetos da API e de testes, pacotes EF Core 10.0.14 e Scalar,
 `dotnet-ef` local, endpoint `/health`, documentação inicial e Git local sem remoto e
 sem commit. O resultado das verificações está em
 `backend/docs/evidencias/B0-inicializacao.md`.
 
-### Prompt 06 — Bloco B0.1: auditoria final e primeiro commit local (06/11/2026)
+<a id="prompt-06"></a>
 
-**Texto original:**
+### Prompt 06 — Bloco B0.1: auditoria final e primeiro commit local
+
+**Data:** 06/11/2026 · **Tipo:** Auditoria e commit local · **Commit:** `f7a8ccf` (local)
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -773,7 +876,7 @@ Caso encontre algum problema relevante que não consiga corrigir com segurança,
 Pare ao concluir esta tarefa e aguarde autorização para iniciar o próximo bloco.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA auditou os arquivos. Trocou o pacote
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA auditou os arquivos. Trocou o pacote
 `xunit` 2.9.3, marcado como obsoleto no NuGet, pelo `xunit.v3` 4.0.2, ainda sem testes
 escritos. Declarou a Microsoft.Testing.Platform no `global.json`, porque o .NET 10 SDK
 recusou o modo antigo, e removeu o `coverlet.collector`, incompatível com ela. Acrescentou ao `.gitignore` os arquivos auxiliares do SQLite com extensão
@@ -782,9 +885,13 @@ e trocou o exemplo de `/health` pela resposta real. Repetiu as validações e cr
 primeiro commit local, sem repositório remoto. Os resultados estão em
 `backend/docs/evidencias/B0-inicializacao.md`.
 
-### Prompt 07 — Etapa B0.2: conexão e publicação no GitHub (06/11/2026)
+<a id="prompt-07"></a>
 
-**Texto original:**
+### Prompt 07 — Etapa B0.2: conexão e publicação no GitHub
+
+**Data:** 06/11/2026 · **Tipo:** Publicação · **Commit:** `f7a8ccf`
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -862,7 +969,7 @@ Esta etapa é exclusivamente para conectar e publicar o backend já desenvolvido
 Ao concluir, pare e aguarde minha revisão.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA conferiu o repositório local e o remoto, que
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA conferiu o repositório local e o remoto, que
 estava vazio e já era público, e auditou os arquivos antes de publicar. Encontrou o e-mail pessoal
 do integrante nos metadados do commit e perguntou como prosseguir. O integrante escolheu o e-mail
 *noreply* do GitHub. A IA configurou esse e-mail só no repositório local e refez o autor do commit,
@@ -870,11 +977,19 @@ que ainda não tinha sido publicado, sem alterar nenhum arquivo. Depois conectou
 executou `git push -u origin main` sem force push e conferiu no GitHub que os 25 arquivos
 publicados eram iguais aos locais. Commit publicado: `f7a8ccf`.
 
-### Prompt 08 — Bloco B1: contratos REST e diretriz permanente (07/11/2026)
+---
+
+## Bloco B1 — contrato REST
+
+<a id="prompt-08"></a>
+
+### Prompt 08 — Bloco B1: contratos REST e diretriz permanente
+
+**Data:** 07/11/2026 · **Tipo:** Documentação (contrato REST) e diretriz · **Commit:** —
 
 O prompt foi enviado em uma única mensagem, com duas partes.
 
-**Texto original — parte 1:**
+**Instrução original (texto integral) — parte 1:**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -1095,7 +1210,7 @@ Pare ao concluir a documentação e aguarde minha aprovação.
 Nosso objetivo é entregar uma Web API altamente coerente com o PontoVoz, tecnicamente consistente e alinhada à rubrica da FIAP.
 ````
 
-**Texto original — parte 2:**
+**Instrução original (texto integral) — parte 2:**
 
 ````text
 DIRETRIZ PERMANENTE — PADRONIZAÇÃO DO CÓDIGO E DOS COMMITS
@@ -1112,16 +1227,20 @@ A partir desta etapa, adote as seguintes diretrizes em todo o desenvolvimento do
 Neste Bloco B1, não realize commit nem push. Aguarde minha aprovação após a auditoria da documentação.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA escreveu o rascunho do contrato v1 em
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA escreveu o rascunho do contrato v1 em
 `contracts/api-v1.md` e o guia da equipe em `contracts/README.md`. Os documentos trazem as
 convenções, a política de respostas, os 13 endpoints planejados e o `/health` implementado, os
 catálogos de erros e avisos, a conferência das rotas e as divergências em relação à Etapa 01.1.
 Gerou 12 exemplos JSON fictícios e coerentes entre si em `contracts/exemplos/` e os validou com
 um script. Nenhum código-fonte da API foi alterado, e nenhum commit foi feito.
 
-### Prompt 09 — Bloco B1.1: revisão técnica final dos contratos REST (07/11/2026)
+<a id="prompt-09"></a>
 
-**Texto original:**
+### Prompt 09 — Bloco B1.1: revisão técnica final dos contratos REST
+
+**Data:** 07/11/2026 · **Tipo:** Revisão e correção · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -1259,7 +1378,7 @@ Não inicie B2.
 Pare e aguarde minha revisão.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA revisou os arquivos de `contracts/`. Mudou o
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA revisou os arquivos de `contracts/`. Mudou o
 endpoint de previsões para devolver 503 quando o provedor está indisponível, mantendo 200 com
 status explícito no resumo e nas alternativas. Renomeou o status para `SemPrevisoes` e definiu
 regras separadas para validar, guardar, consultar e marcar como desatualizada uma passagem.
@@ -1270,9 +1389,13 @@ os próximos blocos. Consolidou a matriz de divergências D1 a D15, gerou 15 exe
 verificador em C# (`contracts/verificador/VerificarContrato.cs`), testado também com defeitos
 plantados de propósito. Nenhum código da API foi alterado, e nenhum commit foi feito.
 
-### Prompt 10 — Bloco B1.2: consolidação final dos contratos (07/11/2026)
+<a id="prompt-10"></a>
 
-**Texto original:**
+### Prompt 10 — Bloco B1.2: consolidação final dos contratos
+
+**Data:** 07/11/2026 · **Tipo:** Revisão e correção · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -1345,7 +1468,7 @@ Não implemente código de negócio e não inicie o B2.
 Pare após concluir esta revisão.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA revisou as regras R3 a R5. Removeu a opção
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA revisou as regras R3 a R5. Removeu a opção
 que renovava as observações simuladas a cada inicialização e definiu um seed idempotente: as
 observações simuladas são criadas uma única vez, mantêm o horário original e ficam marcadas
 como desatualizadas com o tempo. Reiniciar a API não cria nem altera passagens. A passagem
@@ -1355,9 +1478,13 @@ os exemplos de passagem, resumo e operação administrativa. Ampliou o verificad
 de regras para dados simulados e o testou com defeitos plantados. Nenhum código da API foi
 alterado, e nenhum commit foi feito.
 
-### Prompt 11 — Bloco B1.3: correções finais e publicação do contrato (07/11/2026)
+<a id="prompt-11"></a>
 
-**Texto original:**
+### Prompt 11 — Bloco B1.3: correções finais e publicação do contrato
+
+**Data:** 07/11/2026 · **Tipo:** Revisão, correção e publicação · **Commit:** `370fab4`
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -1445,7 +1572,7 @@ Não execute B2.
 Pare após concluir esta etapa e aguarde minha revisão.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA separou, no contrato, o provisionamento
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA separou, no contrato, o provisionamento
 inicial de um banco vazio (único momento em que o seed cria observações simuladas), a
 inicialização posterior (que nunca cria nem altera passagens) e o registro manual durante a
 demonstração. Acrescentou `dadosSimulados` obrigatório ao corpo dos cadastros administrativos
@@ -1457,9 +1584,17 @@ teste nos limites. Registrou as divergências D17 a D19, ampliou o verificador, 
 também com defeitos plantados, e publicou a etapa com commit e push normais. Nenhum código da
 API foi alterado.
 
-### Prompt 12 — Bloco B2: implementação do domínio e Programação Orientada a Objetos (07/11/2026)
+---
 
-**Texto original:**
+## Bloco B2 — domínio e Programação Orientada a Objetos
+
+<a id="prompt-12"></a>
+
+### Prompt 12 — Bloco B2: implementação do domínio e Programação Orientada a Objetos
+
+**Data:** 07/11/2026 · **Tipo:** Implementação e testes · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -1879,7 +2014,7 @@ Execute somente o Bloco B2. Ao finalizar, pare e aguarde minha auditoria antes d
 O objetivo é construir um domínio C# tecnicamente sólido, com POO bem demonstrada, aderência integral ao PontoVoz e testes unitários reais.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA implementou o domínio em
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA implementou o domínio em
 `backend/src/PontoVoz.Api/Domain/`:
 - `EntidadeBase` e as entidades `Parada`, `Linha`, `ParadaLinha`, `Destino` e `PercursoEstimado`;
 - a hierarquia `RegistroPassagem`, com `PassagemSimulada` e `PassagemRegistroManual`;
@@ -1897,9 +2032,13 @@ testes detectam o erro. O `backend/README.md` passou a documentar entidades, inv
 conceitos de POO, as evidências e as decisões para o B3. Não houve commit, banco de dados nem
 endpoints novos.
 
-### Prompt 13 — Bloco B2.1: correções de domínio e testes de regressão (07/11/2026)
+<a id="prompt-13"></a>
 
-**Texto original:**
+### Prompt 13 — Bloco B2.1: correções de domínio e testes de regressão
+
+**Data:** 07/11/2026 · **Tipo:** Revisão, correção e testes · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -2029,7 +2168,7 @@ Não inicie B3.
 Pare após concluir e aguarde minha revisão.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA corrigiu as três falhas.
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA corrigiu as três falhas.
 - **Prefixo de veículo:** passou a seguir a natureza do registro (`RegrasCadastro.PrefixoVeiculo`
   com `dadosSimulados`). Registros fictícios usam `SIM-`, inclusive em cadastros administrativos
   fictícios, e registros reais não podem usá-lo. O prefixo segue opcional.
@@ -2043,9 +2182,13 @@ Também ajustou o teste que usava `V-12` em dados simulados e criou 78 testes de
 todo, 278 testes passaram, com build sem avisos. Mutações temporárias, depois restauradas,
 confirmaram que cada correção é detectada pelos testes. Não houve commit.
 
-### Prompt 14 — Bloco B2.2: auditoria final e publicação do domínio C# (07/11/2026)
+<a id="prompt-14"></a>
 
-**Texto original:**
+### Prompt 14 — Bloco B2.2: auditoria final e publicação do domínio C#
+
+**Data:** 07/11/2026 · **Tipo:** Auditoria e publicação · **Commit:** `f53fe2d`
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -2144,7 +2287,7 @@ Não desenvolva DbContext, migrations, repositórios ou seeds nesta etapa.
 Pare depois da publicação e aguarde minha análise.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA conferiu o estado do Git e o escopo do diff,
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA conferiu o estado do Git e o escopo do diff,
 que continha apenas domínio, testes, documentação do backend e este registro. Confirmou que
 `contracts/` e a configuração da API não tinham mudado e que não restavam alterações
 temporárias dos testes de mutação. Executou `dotnet restore`, `dotnet build` (0 avisos e 0 erros)
@@ -2153,9 +2296,17 @@ de segredos, dados pessoais, binários e marcas de ferramenta e publicou o commi
 `feat: implement PontoVoz domain model with unit tests`, sem trailer, com push normal para
 `origin/main`. O B3 não foi iniciado.
 
-### Prompt 15 — Bloco B3: Entity Framework Core, SQLite, migrations e persistência (07/11/2026)
+---
 
-**Texto original:**
+## Bloco B3 — persistência com EF Core e SQLite
+
+<a id="prompt-15"></a>
+
+### Prompt 15 — Bloco B3: Entity Framework Core, SQLite, migrations e persistência
+
+**Data:** 07/11/2026 · **Tipo:** Implementação e testes · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -2551,7 +2702,7 @@ Execute somente o B3. Ao terminar, pare e aguarde minha auditoria antes do commi
 O objetivo é demonstrar a utilização real de Entity Framework Core no PontoVoz, com banco SQLite, migrations, persistência e testes de integração, de maneira rigorosamente alinhada aos critérios oficiais da disciplina C# Software Development.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA criou a persistência em
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA criou a persistência em
 `Infrastructure/Persistence/`:
 - `PontoVozDbContext` e um mapeamento Fluent API por entidade;
 - a hierarquia TPH de passagens, com a coluna `TipoPassagem` e os campos privados do registro
@@ -2572,9 +2723,13 @@ testes aprovados; mutações temporárias confirmaram que eles detectam regress�
 o OpenAPI e o Scalar continuam funcionando, sem verificação de banco no `/health`. As evidências
 estão em `backend/docs/evidencias/B3-persistencia.md`. Não houve commit.
 
-### Prompt 16 — Bloco B3.1: correções finais, validação e publicação do EF Core (07/11/2026)
+<a id="prompt-16"></a>
 
-**Texto original:**
+### Prompt 16 — Bloco B3.1: correções finais, validação e publicação do EF Core
+
+**Data:** 07/11/2026 · **Tipo:** Revisão, correção, testes e publicação · **Commit:** `988a5fc`
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -2748,8 +2903,7 @@ Não implemente repositórios LINQ, novos endpoints de negócio, integração ex
 Execute B3.1, valide, publique somente se estiver correto e pare. Não inicie B4.
 ````
 
-**Resumo da resposta (não é transcrição):**
-- **Verificação do banco:** a IA criou o `BancoDadosHealthCheck`. Ele confere se o SQLite está
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** - **Verificação do banco:** a IA criou o `BancoDadosHealthCheck`. Ele confere se o SQLite está
   acessível e se as migrations foram aplicadas, sem criar o banco nem aplicar migrations, e foi
   registrado junto com a persistência. O `/health` manteve o formato e passou a responder 200
   com o banco saudável e 503 com o banco indisponível ou sem migrations.
@@ -2769,9 +2923,17 @@ Execute B3.1, valide, publique somente se estiver correto e pare. Não inicie B4
 - **Publicação:** a etapa foi publicada com o commit
   `feat: add EF Core persistence and SQLite integration tests`, sem trailer, e push normal.
 
-### Prompt 17 — Bloco B4: repositórios, interfaces e consultas LINQ (07/11/2026)
+---
 
-**Texto original:**
+## Bloco B4 — repositórios e consultas LINQ
+
+<a id="prompt-17"></a>
+
+### Prompt 17 — Bloco B4: repositórios, interfaces e consultas LINQ
+
+**Data:** 07/11/2026 · **Tipo:** Implementação e testes · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -3127,7 +3289,7 @@ Pare ao concluir o B4 e aguarde minha auditoria.
 Nosso objetivo é demonstrar com clareza e rigor o uso real de EF Core, LINQ, interfaces, injeção de dependência e operações assíncronas, cumprindo exatamente o que o professor exige para a Global Solution.
 ````
 
-**Resumo da resposta (não é transcrição):** a IA criou:
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a IA criou:
 - quatro interfaces de repositório em `Application/Interfaces` (paradas; linhas e associações;
   destinos e percursos; passagens), os tipos `Paginacao` e `Pagina<T>` e as implementações com EF
   Core e LINQ em `Infrastructure/Repositories`, registradas na injeção de dependência;
@@ -3147,9 +3309,13 @@ desenvolvimento, sem perda de dados, e o fluxo foi repetido em ambiente limpo. O
 planos de execução foram registrados em `backend/docs/evidencias/B4-consultas-linq.md`. Não houve
 commit.
 
-### Prompt 18 — Bloco B4.1: auditoria final e publicação das consultas LINQ (07/11/2026)
+<a id="prompt-18"></a>
 
-**Texto original:**
+### Prompt 18 — Bloco B4.1: auditoria final e publicação das consultas LINQ
+
+**Data:** 07/11/2026 · **Tipo:** Auditoria, correção e publicação · **Commit:** `38d2dae`
+
+**Instrução original (texto integral, como foi enviada):**
 
 ````text
 PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
@@ -3305,8 +3471,7 @@ L. Matriz atualizada da rubrica FIAP, sem confundir implementação com nota gar
 Não inicie B5. Pare após concluir esta auditoria e a publicação autorizada.
 ````
 
-**Resumo da resposta (não é transcrição):**
-- **Ids internos:** a IA confirmou que repositórios e regras não dependem deles. Removeu o teste
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** - **Ids internos:** a IA confirmou que repositórios e regras não dependem deles. Removeu o teste
   do B4 que exigia ids específicos, trocou a busca do destino por id pela busca pelo nome e
   ajustou os comentários do seed, sem reorganizá-lo.
 - **Testes novos:** um teste que prova o funcionamento com ids diferentes dos exemplos e 15
@@ -3317,3 +3482,544 @@ Não inicie B5. Pare após concluir esta auditoria e a publicação autorizada.
   banco de desenvolvimento (dados preservados) e em ambiente limpo.
 - **Publicação:** commit `feat: implement EF Core LINQ repositories and search`, sem trailer, e
   push normal.
+
+---
+
+## Bloco B5 — serviços de aplicação
+
+<a id="prompt-19"></a>
+
+### Prompt 19 — Bloco B5: serviços de negócio, DTOs, validações e testes
+
+**Data:** 07/11/2026 · **Tipo:** Implementação, testes e documentação (inclui diretriz do prompts.md) · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 07 — BLOCO B5: SERVIÇOS DE NEGÓCIO, DTOs, VALIDAÇÕES E TESTES
+Atue como engenheiro de software sênior especializado em C#, .NET 10, arquitetura de aplicações, ASP.NET Core e testes automatizados.
+Estamos desenvolvendo o backend C# do PontoVoz, solução CitizenTech da FIAP para consultas de transporte público em um totem inteligente.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit esperado:
+`38d2dae398d595bd26c830732341a709d44ae033`
+Os blocos B0, B1, B2, B3 e B4 foram concluídos e publicados.
+Sua responsabilidade nesta etapa é executar integralmente a implementação técnica, os testes, a correção de problemas, a documentação e as validações do B5.
+Execute exclusivamente o Bloco B5. Não implemente B6 e não faça commit ou push.
+1. PRIORIDADE ABSOLUTA — REQUISITOS OFICIAIS DA FIAP
+O enunciado de C# Software Development exige:
+
+* Programação Orientada a Objetos — 3,0 pontos.
+* Web API — 2,5 pontos.
+* Entity Framework Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade do código — 2,0 pontos.
+
+Também exige interfaces, injeção de dependência, APIs REST, testes unitários, documentação dos endpoints, README, evidências e integração com a proposta CitizenTech.
+O contrato `contracts/api-v1.md` é a referência funcional do projeto.
+Não invente funcionalidades nem retire requisitos obrigatórios.
+O objetivo deste bloco é transformar as consultas existentes em serviços de aplicação capazes de preparar respostas corretas para os futuros Controllers REST.
+2. INSPEÇÃO INICIAL OBRIGATÓRIA
+Antes de modificar arquivos:
+
+1. Confirme o diretório correto.
+2. Confirme a branch main e o último commit.
+3. Confira a sincronização com origin/main.
+4. Verifique que a árvore de trabalho está limpa.
+5. Leia o contrato REST e seus exemplos JSON.
+6. Examine as entidades e regras do Domain.
+7. Examine os repositórios LINQ do B4 e suas interfaces.
+8. Examine o DbContext, a injeção de dependência e a paginação.
+9. Confira a estrutura dos testes existentes.
+10. Identifique possíveis ambiguidades antes de implementar.
+
+Não suponha nomes de propriedades, métodos ou campos sem conferir o código real.
+Preserve os contratos e os arquivos publicados.
+3. ESCOPO DESTE BLOCO
+Implemente os serviços necessários para:
+
+* Listagem e consulta de paradas.
+* Listagem e consulta de linhas.
+* Listagem e consulta de destinos.
+* Consulta das últimas passagens registradas por linha.
+* Validação de parâmetros de entrada.
+* Montagem de DTOs.
+* Padronização de erros de aplicação.
+* Montagem de avisos relacionados à origem e à confiabilidade dos dados.
+
+Não implemente neste bloco:
+
+* Controllers REST de negócio.
+* Operações administrativas de escrita.
+* Provedor de previsões.
+* Integração real com SPTrans.
+* Comparador completo de alternativas.
+* Resumo agregado que depende de previsões.
+* Interface do totem.
+* Assistente conversacional.
+
+4. ARQUITETURA DA CAMADA APPLICATION
+Utilize a estrutura existente em:
+`backend/src/PontoVoz.Api/Application/`
+Organize somente os componentes necessários:
+
+* Interfaces de serviços.
+* Implementações de serviços.
+* DTOs.
+* Validações.
+* Mapeamentos.
+* Erros de aplicação.
+
+As interfaces devem representar responsabilidades concretas.
+A camada Application deverá depender das interfaces dos repositórios, não diretamente do DbContext.
+Não crie abstrações artificiais apenas para demonstrar conceitos acadêmicos.
+Preserve a separação entre Domain, Application e Infrastructure.
+5. SERVIÇOS DE PARADAS
+Implemente a lógica necessária aos futuros endpoints:
+GET /api/v1/paradas
+GET /api/v1/paradas/{id}
+Requisitos:
+
+* Validar os parâmetros.
+* Aplicar os limites de paginação do contrato.
+* Validar termo de pesquisa e código externo.
+* Utilizar os repositórios existentes.
+* Excluir paradas inativas das consultas públicas.
+* Preservar a identificação dos dados simulados.
+* Produzir respostas paginadas.
+* Produzir os DTOs previstos no contrato.
+* Tratar listas vazias.
+* Distinguir entrada inválida de recurso inexistente.
+* Preservar o fluxo de identificação do totem pelo codigoExterno.
+
+Não crie novos endpoints.
+6. SERVIÇOS DE LINHAS
+Implemente a lógica necessária a:
+GET /api/v1/linhas
+Inclua:
+
+* Filtros definidos no contrato.
+* Paginação, quando prevista.
+* Informações de sentido.
+* Informações dos terminais.
+* Identificação de dados simulados.
+* Exclusão de linhas inativas.
+* Ordenação determinística.
+* DTOs compatíveis com os exemplos documentados.
+
+Não implemente operações administrativas.
+7. SERVIÇOS DE DESTINOS
+Implemente a lógica necessária a:
+GET /api/v1/destinos
+Requisitos:
+
+* Pesquisa por nome.
+* Busca sem acentos utilizando os recursos do B4.
+* Paginação conforme o contrato.
+* Exclusão de destinos inativos.
+* Identificação de dados simulados.
+* Listas vazias quando apropriado.
+* Mapeamento para DTOs corretos.
+
+Não implemente agora a comparação de alternativas de deslocamento.
+8. SERVIÇO DE ÚLTIMAS PASSAGENS
+Implemente a lógica para o futuro endpoint:
+GET /api/v1/paradas/{id}/ultimas-passagens
+O serviço deverá:
+
+1. Validar o identificador da parada.
+2. Confirmar a existência de uma parada ativa.
+3. Validar o filtro opcional de linha.
+4. Confirmar que a linha atende à parada.
+5. Consultar as linhas ativas da parada.
+6. Consultar a última passagem registrada de cada linha.
+7. Excluir observações com horário futuro.
+8. Identificar as linhas sem registros.
+9. Calcular minutosDesdeObservacao.
+10. Calcular desatualizada.
+11. Diferenciar registros simulados e manuais.
+12. Preservar origemRegistro e nivelConfirmacao.
+13. Produzir avisos estruturados.
+14. Incluir consultadoEm corretamente.
+
+A desatualização deve respeitar a regra do domínio: intervalo exato superior a 60 minutos.
+Leia o instante atual usando TimeProvider, preferencialmente uma única vez por operação.
+Nenhuma observação fictícia ou manual poderá ser apresentada como oficialmente confirmada.
+Não confunda previsão de chegada com passagem observada.
+9. VALIDAÇÕES E ERROS DE APLICAÇÃO
+Implemente validações consistentes para:
+
+* Identificadores inválidos.
+* Parâmetros ausentes.
+* Termos de busca fora dos limites.
+* Código externo inválido.
+* Paginação inválida.
+* Parada inexistente.
+* Linha inexistente.
+* Linha não associada à parada.
+* Destino inexistente quando necessário.
+* Ausência de registros.
+
+Os serviços devem produzir erros de aplicação com códigos estáveis, permitindo que os futuros Controllers ou middleware convertam esses erros para ProblemDetails.
+Respeite a política de HTTP 400, 404 e 422 do contrato.
+Não misture regras de domínio com detalhes de HTTP.
+Não transforme exceções inesperadas em erros de validação.
+O tratamento HTTP completo será implementado no B6.
+10. DTOs E MAPEAMENTO
+Crie os DTOs necessários para os serviços deste bloco.
+Respeite exatamente as estruturas previstas no contrato.
+Verifique:
+
+* Nomes de campos.
+* Tipos de dados.
+* Valores nulos.
+* Listas vazias.
+* Paginação.
+* Enums.
+* Avisos com codigo e mensagem.
+* Datas e fusos.
+* Origem dos dados.
+* Indicadores de dados simulados.
+* IDs internos e códigos externos.
+
+Não crie respostas estáticas copiando os exemplos JSON.
+Os DTOs devem ser construídos a partir dos dados reais retornados pelos repositórios.
+Prepare a futura serialização JSON em camelCase sem implementar os Controllers antecipadamente.
+11. ASYNC/AWAIT E INJEÇÃO DE DEPENDÊNCIA
+Utilize:
+
+* Task e Task<T>.
+* async/await em operações reais.
+* CancellationToken.
+* Interfaces específicas.
+* Injeção de dependência por construtor.
+* Registro dos serviços no contêiner nativo do ASP.NET Core.
+* TimeProvider injetado.
+
+Não utilize Task.Run artificialmente.
+Não acesse o SQLite diretamente na camada Application.
+Documente as operações que realmente executam I/O assíncrono.
+12. TESTES OBRIGATÓRIOS
+Preserve os 402 testes existentes.
+Crie testes unitários e de integração para os novos serviços.
+Cubra:
+
+* Consulta de parada válida.
+* Parada inexistente ou inativa.
+* Código externo válido e inválido.
+* Termo de busca válido e inválido.
+* Paginação válida e inválida.
+* Resposta paginada.
+* Lista vazia.
+* Linhas e destinos ativos.
+* Busca sem acentos.
+* Última passagem registrada.
+* Várias linhas numa parada.
+* Linha sem passagem.
+* Passagem simulada.
+* Passagem manual.
+* Registro desatualizado.
+* Registro exatamente com 60 minutos.
+* Registro com 60 minutos e um segundo.
+* Passagem futura excluída.
+* Linha que não atende à parada.
+* Avisos e níveis de confirmação.
+* TimeProvider controlado.
+* CancellationToken cancelado.
+* Compatibilidade dos DTOs com o contrato.
+
+Utilize doubles de teste quando apropriado para regras isoladas e SQLite real quando for necessário verificar consultas e integração.
+Não crie testes artificiais.
+Não busque uma quantidade específica de testes. A prioridade é cobrir os comportamentos exigidos.
+13. COMPATIBILIDADE COM OS PRÓXIMOS BLOCOS
+Preserve a divisão:
+
+* B6: Controllers REST públicos e tratamento HTTP.
+* B7: operações administrativas.
+* B8: provedores de previsão.
+* B9: alternativas e resumo.
+* B10: validação final e entrega.
+
+Não antecipe esses blocos.
+14. DIRETRIZ PERMANENTE — ORGANIZAÇÃO DO ARQUIVO prompts.md
+Esta diretriz também deverá ser observada nas próximas etapas.
+O arquivo `prompts.md` é parte da documentação acadêmica da Global Solution.
+O material oficial da FIAP, na página 21, orienta registrar os prompts utilizados e compreender o código do projeto.
+Desejo que esse arquivo tenha uma apresentação profissional, objetiva, organizada e fácil de consultar pelo professor.
+Faça uma revisão estrutural do arquivo atual, respeitando as seguintes regras:
+14.1. Organização
+
+* Crie um título e uma introdução objetiva.
+* Organize os registros por etapa ou finalidade.
+* Utilize um índice de navegação quando for útil.
+* Padronize títulos, datas disponíveis e referências.
+* Diferencie claramente prompts de implementação, revisão, testes e documentação.
+* Evite resumos redundantes e informações repetidas sem necessidade.
+
+14.2. Fidelidade do histórico
+
+* Preserve o conteúdo original dos prompts registrados, podendo reorganizá-los em seções ou em uma área de histórico integral.
+* Não invente contribuições humanas que não ocorreram.
+* Não descreva a utilização da IA como limitada a algumas etapas se ela também participou das demais.
+* Não elimine registros relevantes com o objetivo de ocultar a extensão do uso da ferramenta.
+* Identifique corretamente os resumos e as instruções originais.
+
+14.3. Clareza acadêmica
+Na introdução, explique de maneira objetiva como a IA foi utilizada no processo de desenvolvimento, revisão, implementação e testes.
+O documento deverá distinguir o trabalho efetivamente realizado pela ferramenta das decisões e verificações realizadas pelos integrantes.
+Não atribua aos integrantes atividades técnicas que não tenham executado.
+14.4. Apresentação
+Evite textos promocionais, mensagens automáticas sem valor documental e informações repetitivas que não sejam necessárias para compreender o registro.
+O objetivo é um documento acadêmico legível, não uma transcrição desorganizada de terminal.
+14.5. Preservação
+Não modifique o histórico Git para esconder versões anteriores.
+Não altere retroativamente o significado das solicitações feitas.
+Se reorganizar o arquivo, apresente no relatório exatamente o que mudou.
+14.6. Aplicação permanente
+Nas próximas etapas, mantenha o arquivo organizado no mesmo padrão, incluindo os novos prompts e distinguindo as instruções dos resultados obtidos.
+Não adicione marcas promocionais de ferramentas ao código-fonte ou aos commits.
+Essa organização documental não altera os requisitos técnicos do projeto.
+15. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize backend/README.md com:
+
+* Serviços implementados.
+* Interfaces utilizadas.
+* Validações.
+* DTOs.
+* Integração com os repositórios.
+* Operações assíncronas.
+* Instruções de execução dos testes.
+* Funcionalidades pendentes para B6.
+
+Crie evidências reais em:
+`backend/docs/evidencias/B5-servicos.md`
+Registre somente verificações efetivamente executadas.
+A documentação não poderá afirmar que os Controllers REST de negócio já estão implementados.
+16. VALIDAÇÃO FINAL
+Execute:
+
+* dotnet restore.
+* dotnet build.
+* dotnet test.
+* dotnet ef migrations list.
+* dotnet ef migrations has-pending-model-changes.
+
+Confirme também:
+
+* Os testes anteriores continuam passando.
+* Os novos testes passam.
+* O build não apresenta avisos ou erros.
+* Não houve alteração inesperada no banco.
+* `/health` continua funcional.
+* OpenAPI e Scalar continuam funcionando.
+* Nenhum endpoint de negócio foi criado antecipadamente.
+* Os serviços estão coerentes com os contratos.
+
+Informe os resultados reais, sem inventar execuções.
+17. GIT
+Não faça commit.
+Não execute git push.
+Não altere o histórico publicado.
+Não utilize force push.
+Não sobrescreva arquivos não relacionados ao B5.
+As alterações deverão permanecer locais para nossa auditoria.
+18. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo simples do que foi desenvolvido.
+B. Arquivos criados e modificados.
+C. Serviços e interfaces implementados.
+D. DTOs e compatibilidade com o contrato.
+E. Validações e erros de aplicação.
+F. Regras de últimas passagens.
+G. Uso de async/await e injeção de dependência.
+H. Número real de testes aprovados, falhos e ignorados.
+I. Resultado do build e das verificações EF Core.
+J. Evidências disponíveis.
+K. Matriz dos requisitos oficiais da FIAP: implementados e pendentes.
+L. Estado do Git.
+M. Alterações realizadas em prompts.md, preservando a fidelidade documental.
+N. Pendências específicas para B6.
+Inclua uma explicação didática, de até cinco minutos, abordando o que é um service, como ele utiliza um repository, por que existem interfaces e como as informações serão entregues ao totem quando os Controllers estiverem prontos.
+Execute somente o B5. Não faça commit, não faça push e não inicie B6.
+Pare ao concluir e aguarde revisão.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a ferramenta criou a camada de aplicação em `Application/`:
+- **Services:** quatro services de consulta (paradas, linhas, destinos e últimas passagens), com
+  interfaces, registrados na injeção de dependência.
+- **Contrato:** DTOs no formato do contrato, a validação de parâmetros (que devolve todos os erros
+  juntos), erros de aplicação com os códigos do catálogo (400, 404 e 422) e o catálogo de avisos.
+- **Últimas passagens:** o instante é lido uma vez do `TimeProvider`; o service calcula os minutos
+  e a desatualização pelas regras do domínio e não apresenta nenhuma passagem como verificada.
+- **Testes:** 61 testes novos, unitários com dublês de repositório e de integração com SQLite real.
+  Eles comparam as respostas, campo a campo, com seis exemplos JSON do contrato, e mutações
+  temporárias confirmaram que detectam regressões. No total, 463 testes passaram.
+- **`prompts.md`:** reorganizado por etapa, com introdução sobre o uso da IA, índice e o texto
+  integral de todos os prompts preservado.
+- **Controllers:** nenhum controller de negócio foi criado.
+- **Git:** não houve commit.
+
+<a id="prompt-20"></a>
+
+### Prompt 20 — Bloco B5.1: auditoria final, correção documental e publicação
+
+**Data:** 07/11/2026 · **Tipo:** Auditoria, correção documental e publicação · **Commit:** `feat: implement application services and DTO validation`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B5.1 — AUDITORIA FINAL, CORREÇÃO DOCUMENTAL E PUBLICAÇÃO
+Os arquivos reais do Bloco B5 foram analisados, incluindo services, interfaces, DTOs, validações, testes e documentação.
+A implementação técnica está aprovada em princípio, condicionada à validação final e a uma correção na atribuição das atividades descritas em prompts.md.
+Sua tarefa é concluir o B5 e publicá-lo no GitHub.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`38d2dae398d595bd26c830732341a709d44ae033`
+Não implemente B6 nesta etapa.
+1. Exigências obrigatórias da FIAP
+Preserve integralmente os requisitos oficiais de C# Software Development:
+
+* POO — 3,0.
+* Web API — 2,5.
+* EF Core + LINQ — 1,5.
+* Async/Await — 1,0.
+* Qualidade de código — 2,0.
+
+Também devem estar contemplados interfaces, injeção de dependência, testes unitários, documentação, README, evidências e aderência à CitizenTech.
+Não amplie o escopo além do necessário.
+2. Conferência técnica
+Antes de publicar, confirme:
+
+* Branch main e origin/main sincronizadas.
+* Alterações locais exclusivamente relacionadas ao B5.
+* Quatro serviços de aplicação funcionando.
+* Interfaces e injeção de dependência corretas.
+* Application independente de Infrastructure e EF Core.
+* DTOs compatíveis com contracts/api-v1.md.
+* Validação de parâmetros antes da consulta.
+* Erros de aplicação com códigos estáveis.
+* Últimas passagens com cálculo correto dos minutos e da desatualização.
+* Registros simulados e manuais corretamente diferenciados.
+* CancellationToken propagado.
+* TimeProvider utilizado corretamente.
+* Ausência de novos endpoints de negócio antecipados.
+
+Preserve os contratos e a infraestrutura existente.
+3. Correção obrigatória do prompts.md
+A reorganização do arquivo está adequada, mas a introdução contém atribuições que precisam ser corrigidas.
+O documento afirma que o integrante escreveu todos os prompts e realizou pessoalmente as auditorias técnicas.
+O processo efetivo foi:
+
+* O ChatGPT auxiliou no planejamento, na elaboração dos prompts, na definição de critérios de revisão e na auditoria dos materiais enviados.
+* O Claude Code realizou a implementação técnica, a execução de testes, a preparação dos documentos e as operações Git autorizadas.
+* O integrante encaminhou instruções, forneceu arquivos, definiu preferências, tomou decisões pontuais e autorizou etapas e publicações.
+* Não houve edição manual do código pelo integrante nas etapas registradas.
+
+Atualize somente a introdução e os demais trechos de atribuição que precisem refletir esses fatos.
+Regras obrigatórias:
+
+1. Preserve os prompts originais.
+2. Preserve a cronologia e o índice.
+3. Preserve os resumos identificados como resumos.
+4. Não invente participação ou atividades técnicas humanas.
+5. Não afirme que a IA foi utilizada somente em pontos específicos.
+6. Não altere o histórico Git anterior.
+7. Não remova informações relevantes para ocultar a participação das ferramentas.
+8. Mantenha o documento objetivo, profissional e adequado à orientação acadêmica da FIAP.
+
+Se a identificação do modelo exato da ferramenta não estiver comprovada, use apenas o nome confirmado da ferramenta, sem inventar versões.
+Não reorganize novamente o arquivo inteiro sem necessidade.
+4. Validação obrigatória
+Execute novamente a partir de backend/:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef migrations has-pending-model-changes
+
+O relatório anterior apontou:
+
+* 463 testes aprovados.
+* 0 falhas.
+* 0 testes ignorados.
+* 0 avisos e 0 erros no build.
+
+Verifique os resultados reais.
+Teste também:
+
+* GET /health.
+* GET /openapi/v1.json.
+* /scalar/.
+* Um endpoint de negócio ainda não implementado, confirmando que o B6 não foi antecipado.
+
+Verifique que os testes de integração com SQLite real continuam aprovados e que os arquivos da aplicação respeitam o contrato.
+5. Segurança e qualidade
+Revise os arquivos que serão publicados.
+Não inclua:
+
+* Senhas, tokens ou chaves reais.
+* Banco SQLite.
+* Arquivos temporários.
+* Binários de compilação.
+* Logs sensíveis.
+* Arquivos de diagnóstico.
+* Testes artificiais.
+
+Não adicione assinaturas promocionais ou trailers automáticos de ferramentas às mensagens de commit.
+Preserve os registros acadêmicos de uso de IA.
+6. Atualização das evidências
+Revise backend/docs/evidencias/B5-servicos.md.
+Confirme que o relatório distingue resultados realmente executados de funcionalidades apenas planejadas.
+Não declare que os Controllers públicos já funcionam.
+Atualize a evidência somente se alguma verificação real tiver mudado.
+7. Commit e push
+Se todas as verificações passarem, está autorizado a criar o commit:
+`feat: implement application services and DTO validation`
+Antes do push:
+
+* Confira o diff.
+* Confira os arquivos preparados.
+* Confira a mensagem gravada.
+* Confira a autoria legítima, usando o e-mail noreply já configurado.
+* Não altere commits anteriores.
+
+Publique com push normal em origin/main.
+Não utilize force push.
+Se alguma validação falhar e não puder ser corrigida com segurança, não publique.
+8. Relatório final
+Apresente:
+A. Resumo simples da conclusão do B5.
+B. Resultado da auditoria técnica.
+C. Correção feita na introdução de prompts.md.
+D. Quantidade real de testes aprovados, falhos e ignorados.
+E. Resultado do build e dos comandos EF Core.
+F. Confirmação da compatibilidade com o contrato.
+G. Arquivos publicados.
+H. Hash e mensagem do commit.
+I. Resultado do push e estado de main/origin/main.
+J. Pendências específicas para B6.
+K. Matriz dos requisitos oficiais da FIAP, separando critérios implementados e pendentes.
+Não implemente B6, não crie novos endpoints e não adicione funcionalidades fora do escopo.
+Conclua esta etapa e aguarde minha revisão.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code conferiu o estado do Git e
+a implementação do B5:
+- quatro services, com interfaces e injeção de dependência;
+- a camada Application sem dependência de Infrastructure nem do EF Core;
+- validação antes da consulta, erros com códigos estáveis, `CancellationToken` e `TimeProvider`;
+- nenhum endpoint de negócio.
+
+Corrigiu a introdução deste arquivo para registrar os papéis do ChatGPT (planejamento, elaboração
+dos prompts, critérios de revisão e apoio às auditorias), do Claude Code (implementação, testes,
+documentação e operações Git) e do integrante (instruções, arquivos, preferências, decisões e
+autorizações), sem alterar os prompts nem os resumos. Repetiu `dotnet restore`, `dotnet build`,
+`dotnet test` e os comandos `dotnet ef`, verificou `/health`, OpenAPI, Scalar e um endpoint de
+negócio ainda inexistente, e publicou o B5 com o commit
+`feat: implement application services and DTO validation`, sem trailer, e push normal.
