@@ -1456,3 +1456,699 @@ intervalo exato, registros com horário futuro fora da consulta até o horário 
 teste nos limites. Registrou as divergências D17 a D19, ampliou o verificador, que foi testado
 também com defeitos plantados, e publicou a etapa com commit e push normais. Nenhum código da
 API foi alterado.
+
+### Prompt 12 — Bloco B2: implementação do domínio e Programação Orientada a Objetos (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B2 — IMPLEMENTAÇÃO DO DOMÍNIO E PROGRAMAÇÃO ORIENTADA A OBJETOS
+Você atuará como engenheiro de software sênior especialista em C#/.NET 10, Programação Orientada a Objetos, arquitetura de domínio e testes unitários.
+Os blocos B0 e B1 foram concluídos, revisados e publicados no GitHub.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Você está autorizado a executar exclusivamente o Bloco B2 — Domínio e POO.
+Não avance para B3 ou para qualquer outro bloco.
+1. CONTEXTO DA GLOBAL SOLUTION
+O PontoVoz é uma CitizenTech criada para melhorar o acesso a informações sobre transporte público em São Paulo.
+O produto final é um totem inteligente instalado em pontos de ônibus, com interação por voz e tela.
+O cidadão poderá consultar previsões de chegada, últimas passagens registradas e alternativas de deslocamento.
+O backend em C# fornece os dados e as regras de negócio para os demais componentes do sistema.
+A solução deve continuar integrada à proposta CitizenTech da FIAP.
+2. CRITÉRIOS DO PROFESSOR
+A disciplina C# Software Development exige:
+
+* Programação Orientada a Objetos — 3,0 pontos.
+* Web API — 2,5 pontos.
+* Entity Framework Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade do código — 2,0 pontos.
+
+Além disso, são exigidas interfaces, injeção de dependência, testes unitários e documentação.
+O foco deste bloco é demonstrar POO de maneira tecnicamente correta, com testes automatizados e regras reais do PontoVoz.
+Não implemente funcionalidades irrelevantes apenas para demonstrar herança ou polimorfismo.
+3. VERIFICAÇÃO OBRIGATÓRIA ANTES DE IMPLEMENTAR
+Examine os arquivos reais do projeto:
+
+* backend/PontoVoz.slnx.
+* backend/src/PontoVoz.Api/.
+* backend/tests/PontoVoz.Tests/.
+* contracts/api-v1.md.
+* contracts/README.md.
+* contracts/exemplos/.
+* backend/global.json.
+* prompts.md.
+
+Confirme também o estado do Git.
+O commit esperado do B1.3 é:
+`370fab4342c2f0ff3847b37114405a835e8e35f9`
+Não sobrescreva alterações preexistentes.
+O contrato B1.3 é a referência obrigatória. Não crie um domínio incompatível com ele.
+Se encontrar ambiguidades, proponha a solução mais simples e coerente, explicando a decisão. Se houver risco de quebrar o contrato, interrompa a alteração correspondente e informe o impedimento.
+4. ESTRUTURA DO DOMÍNIO
+Implemente as classes e objetos de valor necessários em:
+`backend/src/PontoVoz.Api/Domain/`
+Organize de maneira clara:
+
+* Entities/.
+* ValueObjects/.
+* Enums/.
+* Exceptions/.
+* Rules/, apenas se houver necessidade de regras compartilhadas.
+
+Evite criar classes sem responsabilidade real.
+4.1 EntidadeBase
+Crie uma classe base abstrata adequada para as entidades persistentes.
+Considere:
+
+* Id.
+* CriadoEmUtc.
+* Encapsulamento.
+* Construtores apropriados.
+* Compatibilidade futura com EF Core.
+
+Não invente identificadores de banco durante a criação das entidades. A persistência e geração de IDs serão configuradas no B3.
+4.2 Parada
+Represente um ponto de ônibus.
+Propriedades principais:
+
+* CodigoExterno.
+* Nome.
+* Endereco.
+* Coordenada.
+* Ativa.
+* Origem.
+* DadosSimulados.
+* Associações com linhas.
+
+Implemente invariantes e métodos de domínio apropriados.
+Exemplos:
+
+* AtualizarDados.
+* Ativar.
+* Desativar.
+* AssociarLinha.
+
+Regras:
+
+* Código obrigatório e válido.
+* Nome com comprimento válido.
+* Origem Simulado implica DadosSimulados verdadeiro.
+* Cadastro administrativo informa explicitamente a natureza do dado.
+* DadosSimulados não muda depois da criação.
+* Não permitir associação duplicada.
+* Não permitir associação de linhas inativas.
+* Não permitir associação quando a parada estiver inativa.
+
+Cuide da diferença entre objetos ainda não persistidos e entidades com IDs gerados pelo banco.
+4.3 Linha
+Represente uma linha de ônibus em determinado sentido.
+Propriedades:
+
+* Codigo.
+* Letreiro.
+* TerminalPrincipal.
+* TerminalSecundario.
+* Sentido.
+* Ativa.
+* Origem.
+* DadosSimulados.
+
+Implemente:
+
+* Validação de código.
+* Validação dos campos obrigatórios.
+* Métodos de atualização, quando justificados.
+* Ativação e desativação.
+* Regras de proteção ao prefixo SIM-.
+
+Cada sentido de linha corresponde a um cadastro próprio, conforme o contrato.
+4.4 ParadaLinha
+Represente a associação entre uma parada e uma linha.
+Considere:
+
+* Parada.
+* Linha.
+* AssociadaEmUtc.
+* Identificadores que serão persistidos posteriormente.
+
+A associação não pode ser duplicada.
+Mantenha compatibilidade com o futuro relacionamento N configurado no Entity Framework Core.
+Não implemente banco nesta etapa.
+4.5 Destino
+Represente os destinos consultáveis pelo totem.
+Propriedades:
+
+* Nome.
+* TipoDestino.
+* Ativo.
+* Origem.
+* DadosSimulados.
+
+No MVP, os destinos serão demonstrativos e cadastrados pelo seed.
+Não crie funcionalidades administrativas de destino que não existam no contrato.
+4.6 PercursoEstimado
+Represente um percurso direto de uma linha que atende uma parada até determinado destino.
+Campos relevantes:
+
+* Parada.
+* Linha.
+* Destino.
+* MinutosEstimados.
+* Origem e natureza do dado, conforme contrato.
+
+Regras:
+
+* O tempo estimado deve ficar entre 1 e 240 minutos.
+* O percurso precisa estar associado à linha, à parada e ao destino.
+* Não permitir um relacionamento logicamente inconsistente.
+* Preparar a futura chave composta e restrição de unicidade para o B3.
+
+A comparação das alternativas será implementada posteriormente nos services. Não desenvolva o algoritmo completo agora.
+4.7 RegistroPassagem
+Implemente a hierarquia de domínio planejada:
+
+* RegistroPassagem, classe abstrata.
+* PassagemSimulada.
+* PassagemRegistroManual.
+
+Use herança e polimorfismo de maneira coerente.
+O registro deverá permitir:
+
+* Parada e linha.
+* ObservadaEmUtc.
+* RegistradaEmUtc.
+* PrefixoVeiculo.
+* NivelConfirmacao.
+* Indicação de verificação.
+* Natureza simulada quando aplicável.
+
+PassagemSimulada:
+
+* Deve possuir uma chave interna estável para o seed.
+* Não pode ser apresentada como oficial.
+* Seu horário não deve ser renovado automaticamente.
+* A chave interna não precisa aparecer nos DTOs públicos.
+
+PassagemRegistroManual:
+
+* Deve possuir OrigemRegistro.
+* Deve validar o formato técnico do rótulo.
+* Não pode ser apresentada como oficialmente verificada.
+* Sua criação respeita a janela temporal definida no contrato.
+
+Não crie ainda o seed. Apenas prepare a modelagem que permitirá implementá-lo no B3.
+5. OBJETOS DE VALOR
+Implemente os objetos de valor que fizerem sentido para a modelagem aprovada.
+Considere:
+Coordenada
+
+* Latitude entre -90 e 90.
+* Longitude entre -180 e 180.
+* Igualdade por valor.
+* Imutabilidade.
+
+PrevisaoChegada
+
+* Representa uma previsão, nunca uma passagem confirmada.
+* Horário previsto.
+* Referência da linha.
+* Identificação opcional do veículo.
+* Regras pertinentes ao cálculo de minutos.
+
+ResultadoProvedor
+
+* Representa o resultado do provedor.
+* Status, origem, horário da consulta e previsões.
+
+AlternativaDeslocamento
+
+* Representa um resultado calculado.
+* Não é entidade persistente.
+* Não implementa ainda a ordenação completa do serviço.
+
+Use records e outros recursos modernos do C# quando adequados.
+Não crie abstrações excessivas.
+6. ENUMS
+Implemente os enums efetivamente exigidos pelo contrato B1.3, incluindo:
+
+* OrigemDado.
+* TipoDestino.
+* SentidoLinha.
+* NivelConfirmacao.
+* StatusPrevisao.
+* SituacaoAlternativas.
+* SituacaoAlternativa.
+* SituacaoResumo.
+
+Use exatamente os valores documentados em `contracts/api-v1.md`.
+Não renomeie valores sem justificativa e não acrescente membros desnecessários.
+7. REGRAS TEMPORAIS — OBRIGATÓRIAS
+Siga rigorosamente a seção 4.6.3 do contrato.
+Para a criação de um registro manual:
+
+* Aceitar observações até 24 horas no passado.
+* Aceitar tolerância de até 2 minutos no futuro.
+* Rejeitar observações fora desses limites.
+
+Para cálculos de passagem:
+
+* minutosDesdeObservacao nunca pode ser negativo.
+* Utilizar minutos inteiros arredondados para baixo.
+* desatualizada é verdadeira quando o intervalo exato ultrapassa 60 minutos.
+* Um registro com horário futuro não pode ser tratado como passagem já ocorrida.
+* A consulta deverá filtrar registros futuros no bloco apropriado.
+
+Use TimeProvider ou um instante explícito fornecido pelo componente de aplicação. Não dependa de DateTime.Now dentro das entidades.
+Mantenha cálculos e comparações em UTC.
+Planeje corretamente a conversão entre o modelo de domínio e a persistência futura em SQLite.
+8. PROGRAMAÇÃO ORIENTADA A OBJETOS
+Garanta demonstração real dos seguintes conceitos:
+Encapsulamento: propriedades protegidas contra alterações arbitrárias e métodos que preservam invariantes.
+Abstração: classes abstratas e interfaces quando houver responsabilidade concreta.
+Herança: EntidadeBase e a hierarquia de registros de passagem.
+Polimorfismo: comportamento específico das subclasses, por exemplo em nível de confirmação e avisos.
+Composição: relacionamentos entre entidades e objetos de valor.
+SOLID: aplicação proporcional ao projeto, priorizando responsabilidade única e dependências claras.
+Não crie interfaces para cada entidade apenas para aumentar a quantidade de arquivos.
+As interfaces de serviços e repositórios serão definidas nos blocos apropriados, quando suas operações forem implementadas.
+9. TESTES UNITÁRIOS REAIS
+Este bloco deverá criar os primeiros testes efetivos do PontoVoz.
+Utilize a infraestrutura já instalada:
+
+* xUnit v3.
+* Microsoft Testing Platform.
+* .NET 10.
+
+Se necessário, adicione Microsoft.Extensions.TimeProvider.Testing em versão compatível para controlar o relógio nos testes.
+Não migre novamente o framework de testes sem necessidade.
+Crie testes positivos e negativos para as regras de domínio.
+Inclua, entre outros:
+
+* Construção válida de parada.
+* Código de parada inválido.
+* Nome obrigatório e comprimento inválido.
+* Coordenadas nos limites aceitos e rejeitados.
+* Criação válida de linha.
+* Associação duplicada.
+* Associação de linha inativa.
+* Desativação e reativação.
+* DadosSimulados consistente com a origem.
+* Imutabilidade de propriedades essenciais.
+* Percurso com 1 e 240 minutos.
+* Percurso com 0 e 241 minutos.
+* RegistroPassagem com polimorfismo.
+* Registro manual com origemRegistro válida e inválida.
+* Registro de passagem sem confirmação oficial.
+* Cálculo temporal de passagens.
+
+Execute todos os casos J1 a J5 e T1 a T7 da seção 4.6.3 do contrato.
+Utilize valores variados de entrada para provar as regras, não somente os números dos exemplos.
+Não crie testes artificiais como Assert.True(true).
+O objetivo é que dotnet test execute testes reais, com resultado verificável.
+10. COMPATIBILIDADE COM ENTITY FRAMEWORK CORE
+O B3 implementará DbContext, migrations e mapeamento do banco.
+Portanto:
+
+* Prepare entidades persistíveis por EF Core.
+* Mantenha construtores e modificadores de acesso compatíveis com materialização.
+* Evite regras que impeçam o EF de reconstruir entidades.
+* Não introduza dependência do Domain em Infrastructure.
+* Não adicione atributos de persistência sem necessidade.
+* Não implemente EF Core neste bloco.
+
+Caso o futuro mapeamento de uma hierarquia ou chave composta exija uma decisão especial, documente essa decisão para o B3.
+11. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize backend/README.md para descrever os conceitos de POO efetivamente implementados.
+Inclua:
+
+* Lista das entidades.
+* Relacionamentos fundamentais.
+* Invariantes.
+* Exemplos de aplicação de herança e polimorfismo.
+* Instruções para executar os testes.
+* Evidências dos testes executados.
+* O que continua pendente para o B3.
+
+Se for útil, crie um diagrama Mermaid simples de classes no README.
+Não afirme que os endpoints REST estão implementados.
+Preserve o README geral e o contrato REST publicado.
+Registre este prompt em prompts.md conforme as exigências acadêmicas.
+12. PADRONIZAÇÃO DO DESENVOLVIMENTO
+Mantenha as diretrizes estabelecidas:
+
+* Código limpo, profissional e legível.
+* Comentários técnicos apenas quando agregarem valor.
+* Sem banners promocionais, marcas automáticas de ferramentas ou comentários de geração.
+* Registro acadêmico de uso de IA preservado em prompts.md.
+* Sem informações sensíveis no repositório.
+* Sem mudanças na autoria ou no histórico Git existente.
+* Não acrescente assinaturas automáticas de ferramentas a futuras mensagens de commit.
+
+Nenhum commit está autorizado neste bloco antes da minha revisão.
+13. VALIDAÇÃO OBRIGATÓRIA
+Ao finalizar a implementação, execute:
+
+1. dotnet restore.
+2. dotnet build.
+3. dotnet test.
+
+Registre:
+
+* Número exato de testes descobertos.
+* Número de testes aprovados.
+* Número de falhas.
+* Número de testes ignorados.
+* Código de saída do comando.
+* Avisos e erros de compilação.
+
+Verifique também que a API ainda compila.
+Não altere o comportamento do `/health`, OpenAPI ou Scalar sem necessidade.
+Se houver falhas, analise, corrija e execute novamente.
+Não afirme sucesso se a execução não comprovar o resultado.
+14. GIT
+Antes de programar, confirme:
+
+* Branch main.
+* Estado local do Git.
+* Último commit.
+* Conexão com origin/main.
+
+Durante a implementação:
+
+* Trabalhe somente nos arquivos necessários.
+* Não execute git reset --hard.
+* Não execute force push.
+* Não sobrescreva arquivos de outros integrantes.
+* Não faça commit.
+* Não faça push.
+
+Deixe todas as alterações locais para nossa auditoria.
+15. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo da implementação: o que foi desenvolvido e o que ficou para depois.
+B. Árvore dos arquivos criados e modificados.
+C. Entidades, propriedades e relacionamentos implementados.
+D. Regras de negócio e invariantes.
+E. Demonstração dos conceitos de POO: classe ou método correspondente a encapsulamento, abstração, herança, polimorfismo e composição.
+F. Resultado dos testes unitários: números reais, incluindo os testes temporais J1 a J5 e T1 a T7.
+G. Resultado do build.
+H. Compatibilidade com o contrato B1.3: diferenças, se existirem.
+I. Preparação para EF Core no B3: decisões e possíveis dificuldades.
+J. Estado do Git.
+K. Pendências, riscos e próximos passos.
+L. Matriz dos critérios FIAP: o que já está implementado de forma verificável e o que ainda está pendente.
+16. RESTRIÇÃO FINAL
+Não implemente:
+
+* DbContext.
+* Migrations.
+* Repositórios EF Core.
+* Controllers de negócio.
+* Integração com SPTrans.
+* Serviços de previsão.
+* Comparador completo de alternativas.
+* Interface do totem.
+* Inteligência artificial conversacional.
+* Funcionalidades da disciplina Testing/QA.
+
+Execute somente o Bloco B2. Ao finalizar, pare e aguarde minha auditoria antes de qualquer commit ou avanço para B3.
+O objetivo é construir um domínio C# tecnicamente sólido, com POO bem demonstrada, aderência integral ao PontoVoz e testes unitários reais.
+````
+
+**Resumo da resposta (não é transcrição):** a IA implementou o domínio em
+`backend/src/PontoVoz.Api/Domain/`:
+- `EntidadeBase` e as entidades `Parada`, `Linha`, `ParadaLinha`, `Destino` e `PercursoEstimado`;
+- a hierarquia `RegistroPassagem`, com `PassagemSimulada` e `PassagemRegistroManual`;
+- os objetos de valor `Coordenada`, `ReferenciaLinha`, `PrevisaoChegada`, `ResultadoProvedor` e
+  `AlternativaDeslocamento`;
+- os nove enums do contrato;
+- exceções de domínio com os códigos de erro do contrato;
+- a regra temporal da seção 4.6.3 em `RegraTemporalPassagem`.
+
+As entidades usam métodos de fábrica, propriedades com `private set` e construtores sem
+parâmetros não públicos, para que o EF Core possa materializá-las. Foram criados 200 testes
+unitários com xUnit v3 e `FakeTimeProvider`, incluindo os casos J1 a J5 e T1 a T7. Todos
+passaram, com build sem avisos, e uma mutação intencional da regra temporal confirmou que os
+testes detectam o erro. O `backend/README.md` passou a documentar entidades, invariantes,
+conceitos de POO, as evidências e as decisões para o B3. Não houve commit, banco de dados nem
+endpoints novos.
+
+### Prompt 13 — Bloco B2.1: correções de domínio e testes de regressão (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B2.1 — CORREÇÕES DE DOMÍNIO E TESTES DE REGRESSÃO
+Realizei uma auditoria independente dos arquivos C# efetivamente produzidos no Bloco B2, incluindo entidades, objetos de valor, regras, contratos e testes unitários.
+O trabalho foi considerado adequado, mas foram identificadas três inconsistências que precisam ser resolvidas antes da aprovação para commit.
+Execute somente as correções deste prompt. Não avance para B3.
+1. Contexto e verificações iniciais
+Confirme o estado do Git, a branch main e o commit publicado `370fab4342c2f0ff3847b37114405a835e8e35f9`.
+Preserve todas as alterações locais ainda não commitadas do B2.
+Examine o código real, especialmente:
+
+* Domain/Rules/RegrasCadastro.cs
+* Domain/Entities/PassagemRegistroManual.cs
+* Domain/Entities/PassagemSimulada.cs
+* Domain/ValueObjects/PrevisaoChegada.cs
+* Domain/ValueObjects/ResultadoProvedor.cs
+* Domain/ValueObjects/AlternativaDeslocamento.cs
+* Os testes dessas classes
+* contracts/api-v1.md
+
+Não reescreva arquivos completos sem necessidade.
+2. Correção 1 — Prefixo de veículo e natureza simulada
+O contrato estabelece que dados de veículos simulados utilizam o prefixo SIM-.
+A classe PassagemSimulada valida o prefixo, mas a classe PassagemRegistroManual permite cadastrar um veículo sem esse prefixo mesmo quando o registro depende de uma parada ou linha fictícia.
+Corrija o comportamento de maneira consistente com o contrato.
+Regras:
+
+* `prefixoVeiculo` continua opcional.
+* Se estiver presente e o registro representar dados simulados, sua identificação deverá respeitar o padrão estabelecido para veículos fictícios.
+* Não confunda `OrigemDado.CadastroAdministrativo` com a natureza fictícia do cadastro.
+* Cadastros administrativos reais não devem ser obrigados a utilizar o prefixo SIM-.
+* Preserve a expressão regular geral de formato e os limites documentados.
+* Não altere a API REST, pois ela ainda não foi implementada.
+
+Revise os testes existentes que usam, por exemplo, `V-12` em uma parada e linha simuladas.
+Adicione testes positivos e negativos para os cenários relevantes.
+Se identificar uma ambiguidade contratual entre o prefixo reservado e os dados fictícios administrativos, resolva-a com a menor mudança coerente e explique a decisão.
+3. Correção 2 — Previsões vencidas
+O contrato estabelece que previsões anteriores ao instante `consultadoEm` não devem ser devolvidas ao consumidor.
+Atualmente, ResultadoProvedor.Respondido permite armazená-las e AlternativaDeslocamento.Calcular pode classificá-las como comparáveis.
+Corrija isso preservando a arquitetura planejada.
+Verifique especialmente:
+
+* Previsão anterior ao instante da consulta.
+* Previsão exatamente no instante da consulta.
+* Previsão futura.
+* Resultado contendo somente previsões vencidas.
+* Resultado misto, com previsões vencidas e futuras.
+* Alternativa construída com uma previsão vencida.
+* Coerência entre `esperaMinutos`, `tempoTotalEstimadoMinutos` e `chegadaEstimadaAoDestinoUtc`.
+
+Uma previsão vencida nunca deve ser apresentada como alternativa comparável.
+Preserve a semântica do contrato: uma previsão exatamente em `consultadoEm` pode representar ônibus chegando, com espera de zero minutos.
+Se a filtragem pertencer ao ResultadoProvedor, implemente-a nesse ponto. Se houver proteção necessária em AlternativaDeslocamento, acrescente-a sem duplicar regras desnecessariamente.
+Crie testes de regressão.
+4. Correção 3 — Expressões regulares
+Verifique as expressões regulares de:
+
+* Código de parada e linha.
+* Prefixo de veículo.
+* OrigemRegistro.
+* ChaveSeed.
+
+As validações atuais utilizam `$`, que no mecanismo Regex do .NET pode aceitar uma posição anterior à quebra de linha final.
+Substitua as âncoras quando necessário para exigir correspondência com a entrada completa, por exemplo utilizando `\A` e `\z` com a sintaxe correta de strings C#.
+Adicione testes rejeitando:
+
+* Quebra de linha no início.
+* Quebra de linha no final.
+* Quebra de linha no meio.
+* Entradas com caracteres fora do formato.
+
+Preserve os formatos e comprimentos estabelecidos pelo contrato B1.3.
+Não acrescente bibliotecas de validação desnecessárias.
+5. Preservação da modelagem
+As seguintes decisões estão aprovadas:
+
+* Associação idempotente de linha e parada.
+* Parada fictícia sem endereço ou coordenada, conforme o contrato atual.
+* Herança de RegistroPassagem.
+* Níveis de confirmação distintos.
+* Regras temporais J1 a J5 e T1 a T7.
+* Uso de TimeProvider.
+* Domínio independente da infraestrutura.
+
+Não altere essas decisões durante esta correção.
+6. Testes e qualidade
+Após as correções:
+
+1. Execute `dotnet restore`.
+2. Execute `dotnet build`.
+3. Execute `dotnet test`.
+
+Confirme que os 200 testes existentes continuam aprovados e que os novos testes também passam.
+Informe a contagem exata, sem assumir que continuará sendo 200.
+Execute também os casos temporais do contrato.
+Verifique que o projeto continua sem avisos e erros.
+Faça testes negativos que comprovem que as novas validações realmente rejeitam entradas incorretas.
+Se executar testes de mutação, restaure integralmente o código original após a verificação.
+7. Documentação
+Atualize backend/README.md e Domain/README.md apenas quando necessário para refletir as correções.
+Não afirme que o EF Core, os services ou os endpoints de negócio já estão implementados.
+Atualize prompts.md com este prompt e o resumo identificado da execução, conforme a exigência acadêmica da FIAP.
+Preserve os padrões profissionais do código e da documentação.
+Não insira assinaturas automáticas ou marcas promocionais de ferramentas.
+8. Git
+Não faça commit.
+Não execute git push.
+Não modifique commits existentes.
+Mantenha todas as alterações locais para a próxima auditoria.
+9. Relatório final
+Apresente:
+
+1. As três falhas identificadas e suas causas.
+2. As correções feitas, com nomes dos arquivos e métodos.
+3. Novos testes criados e quais cenários cobrem.
+4. Total real de testes aprovados, falhos e ignorados.
+5. Resultado de restore, build e test.
+6. Confirmação de que o contrato B1.3 continua sendo respeitado.
+7. Confirmação de que o código da Web API não foi alterado indevidamente.
+8. Estado do Git.
+9. Riscos que restarem para o mapeamento EF Core no B3.
+10. Proposta de mensagem de commit, sem executá-lo.
+
+Não inicie B3.
+Pare após concluir e aguarde minha revisão.
+````
+
+**Resumo da resposta (não é transcrição):** a IA corrigiu as três falhas.
+- **Prefixo de veículo:** passou a seguir a natureza do registro (`RegrasCadastro.PrefixoVeiculo`
+  com `dadosSimulados`). Registros fictícios usam `SIM-`, inclusive em cadastros administrativos
+  fictícios, e registros reais não podem usá-lo. O prefixo segue opcional.
+- **Previsões vencidas:** criou `PrevisaoChegada.VencidaEm`. Com ela, `ResultadoProvedor.Respondido`
+  descarta as previsões vencidas antes de definir o status, e `AlternativaDeslocamento.Calcular`
+  trata uma previsão vencida como ausente. A previsão exatamente no instante da consulta continua
+  válida, com espera zero.
+- **Expressões regulares:** passaram a usar `\A` e `\z`.
+
+Também ajustou o teste que usava `V-12` em dados simulados e criou 78 testes de regressão. Ao
+todo, 278 testes passaram, com build sem avisos. Mutações temporárias, depois restauradas,
+confirmaram que cada correção é detectada pelos testes. Não houve commit.
+
+### Prompt 14 — Bloco B2.2: auditoria final e publicação do domínio C# (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B2.2 — AUDITORIA FINAL E PUBLICAÇÃO DO DOMÍNIO C#
+Os Blocos B2 e B2.1 foram analisados. A implementação do domínio e das correções de regressão está aprovada para publicação, desde que todas as verificações finais sejam satisfatórias.
+Sua tarefa é realizar a conferência final e publicar o domínio C# já desenvolvido no repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Não implemente novas funcionalidades e não avance para B3.
+1. Verificação inicial
+Confirme:
+
+* Diretório correto do PontoVoz.
+* Branch main.
+* Commit atual `370fab4342c2f0ff3847b37114405a835e8e35f9`.
+* Sincronização entre main e origin/main.
+* Arquivos alterados e novos.
+* Ausência de conflitos ou alterações inesperadas.
+
+Não execute reset, rebase ou qualquer reescrita do histórico publicado.
+2. Conferência do escopo
+Revise o diff e confirme que as alterações correspondem somente ao B2/B2.1:
+
+* Entidades e objetos de valor.
+* Enums e exceções de domínio.
+* Regras de cadastro e de passagem.
+* Testes unitários e testes de regressão.
+* Documentação técnica do backend.
+* Registro acadêmico em prompts.md.
+
+Confirme que os contratos REST publicados continuam intactos e que Program.cs, Controllers, appsettings e demais configurações da API não foram modificados indevidamente.
+Não inclua bin/, obj/, bancos SQLite, arquivos de ambiente, segredos ou backups temporários.
+3. Validação obrigatória
+Execute novamente, a partir de backend/:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+
+Confirme a quantidade real de testes.
+O relatório anterior apontou 278 testes aprovados, nenhuma falha e nenhum aviso no build.
+Caso esse resultado mude, explique a diferença.
+Verifique se os testes J1 a J5 e T1 a T7 continuam aprovados.
+Confirme também que não restaram alterações temporárias dos testes de mutação.
+Se alguma validação falhar, interrompa a publicação.
+4. Auditoria de segurança e qualidade
+Inspecione os arquivos a serem versionados.
+Procure:
+
+* Chaves, senhas e tokens.
+* Dados pessoais indevidos.
+* Arquivos temporários.
+* Binários desnecessários.
+* Código incompleto ou comentários enganosos.
+* Testes fictícios.
+* Alterações não relacionadas ao domínio.
+
+Preserve o registro acadêmico de utilização de IA exigido pela FIAP em prompts.md.
+Não insira marcas promocionais ou assinaturas automáticas de ferramentas no código ou na mensagem de commit.
+5. Commit
+Se a auditoria passar, está autorizado a criar um commit com a seguinte mensagem:
+feat: implement PontoVoz domain model with unit tests
+Mantenha a mensagem objetiva.
+Não acrescente corpo promocional, trailer automático de ferramenta ou linha Co-Authored-By.
+Preserve os metadados legítimos de autoria, usando o e-mail noreply já configurado localmente.
+Antes do push, inspecione a mensagem real gravada no commit com git log -1 --format=%B.
+Se algum trailer automático indesejado tiver sido inserido, corrija apenas a mensagem do novo commit local antes de publicá-lo, preservando os arquivos e a autoria. Não altere commits anteriores.
+6. Publicação
+Publique a branch main com push normal para origin/main.
+Não utilize force push.
+Depois do envio, confirme:
+
+* Hash do commit.
+* Mensagem efetivamente publicada.
+* Branch main e origin/main sincronizadas.
+* Árvore local limpa.
+* Arquivos do domínio publicados.
+* Testes e documentação publicados.
+* Ausência de arquivos indevidos.
+
+7. Relatório final obrigatório
+Apresente:
+
+1. Resultado da auditoria.
+2. Arquivos publicados.
+3. Total real de testes aprovados, falhos e ignorados.
+4. Resultado do restore, build e test.
+5. Hash do commit.
+6. Mensagem do commit.
+7. Resultado real do push.
+8. Estado final do Git.
+9. Pendências técnicas para B3.
+10. Confirmação de que B3 não foi iniciado.
+
+Registre este prompt em prompts.md antes do commit.
+Não desenvolva DbContext, migrations, repositórios ou seeds nesta etapa.
+Pare depois da publicação e aguarde minha análise.
+````
+
+**Resumo da resposta (não é transcrição):** a IA conferiu o estado do Git e o escopo do diff,
+que continha apenas domínio, testes, documentação do backend e este registro. Confirmou que
+`contracts/` e a configuração da API não tinham mudado e que não restavam alterações
+temporárias dos testes de mutação. Executou `dotnet restore`, `dotnet build` (0 avisos e 0 erros)
+e `dotnet test` (278 testes aprovados, incluindo os 17 casos J1 a J5 e T1 a T7). Fez a auditoria
+de segredos, dados pessoais, binários e marcas de ferramenta e publicou o commit
+`feat: implement PontoVoz domain model with unit tests`, sem trailer, com push normal para
+`origin/main`. O B3 não foi iniciado.
