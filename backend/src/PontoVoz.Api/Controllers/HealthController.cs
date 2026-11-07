@@ -4,9 +4,9 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 namespace PontoVoz.Api.Controllers;
 
 /// <summary>
-/// Informa se o processo da API está em execução.
-/// Neste estágio não há verificações registradas (o banco de dados ainda não existe),
-/// então o resultado reflete apenas o processo.
+/// Informa se o processo da API está em execução e o resultado de cada verificação registrada.
+/// Desde o B3, a verificação <c>banco-de-dados</c> confere o SQLite; com ela, o escopo é
+/// <c>processo-e-dependencias</c>, e uma falha devolve 503.
 /// </summary>
 [ApiController]
 [Route("health")]

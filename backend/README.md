@@ -5,19 +5,19 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B2 — domínio e testes de domínio.** Hoje o backend:
+**Bloco B3 — persistência com EF Core e SQLite.** Hoje o backend:
 
-- inicia localmente e responde em `GET /health`, que verifica **apenas se o processo está
-  ativo** (ainda não há banco de dados para verificar);
+- inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
+  (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
 - publica o documento OpenAPI e a interface Scalar em Development;
-- tem o **modelo de domínio** do PontoVoz em `src/PontoVoz.Api/Domain/` (entidades, objetos de
-  valor, enums, exceções e a regra temporal das passagens), coberto por **278 testes
-  unitários** (veja [Domínio](#domínio-b2)).
+- tem o **modelo de domínio** em `src/PontoVoz.Api/Domain/` (veja [Domínio](#domínio-b2));
+- **persiste** o domínio em SQLite com EF Core 10, com migration inicial e seed idempotente de
+  dados fictícios (veja [Persistência](#persistência-b3));
+- tem **320 testes**: 278 de domínio, 39 de integração com SQLite real e 3 do `/health`
+  pela API em execução.
 
-Ainda **não** existem `DbContext`, migrations, banco de dados, repositórios, services nem
-endpoints de transporte público. Os endpoints de `/api/v1` descritos em
-[`../contracts/api-v1.md`](../contracts/api-v1.md) são **planejados**. Os pacotes do EF Core já
-estão instalados para o B3.
+Ainda **não** existem repositórios, services nem endpoints de transporte público. Os endpoints
+de `/api/v1` descritos em [`../contracts/api-v1.md`](../contracts/api-v1.md) são **planejados**.
 
 ## Requisitos de ambiente
 
@@ -39,12 +39,58 @@ Não é necessário instalar Docker, banco de dados nem ferramentas globais.
 |---|---|---|
 | `Microsoft.AspNetCore.OpenApi` | 10.0.14 | Documento OpenAPI nativo |
 | `Scalar.AspNetCore` | 2.18.7 | Interface de documentação em `/scalar` |
-| `Microsoft.EntityFrameworkCore.Sqlite` | 10.0.14 | EF Core com SQLite (uso a partir do B3) |
-| `Microsoft.EntityFrameworkCore.Design` | 10.0.14 | Suporte às migrations (uso a partir do B3) |
+| `Microsoft.EntityFrameworkCore.Sqlite` | 10.0.14 | EF Core com SQLite: `PontoVozDbContext`, mapeamentos e seed |
+| `Microsoft.EntityFrameworkCore.Design` | 10.0.14 | Geração e aplicação das migrations pelo `dotnet ef` |
 | `dotnet-ef` (ferramenta **local**) | 10.0.14 | Comandos de migrations, declarado em `.config/dotnet-tools.json` |
 | `xunit.v3` | 4.0.2 | Testes automatizados (o projeto de testes é um executável, como exige o xUnit v3) |
 | `xunit.runner.visualstudio` e `Microsoft.NET.Test.Sdk` | 4.0.1 e 17.14.1 | Compatibilidade com o Test Explorer das IDEs |
 | `Microsoft.Extensions.TimeProvider.Testing` | 10.11.0 | `FakeTimeProvider`, relógio controlado nos testes das regras temporais (só no projeto de testes) |
+| `Microsoft.AspNetCore.Mvc.Testing` | 10.0.14 | `WebApplicationFactory`, para testar endpoints pela API real em memória (só no projeto de testes) |
+
+## Executar a partir do GitHub
+
+O repositório **não** contém o banco SQLite: ele é criado na primeira execução, a partir da
+migration. Os pré-requisitos são o Git e o .NET SDK 10 (veja
+[Requisitos de ambiente](#requisitos-de-ambiente)); Docker e banco de dados instalados não são
+necessários. O passo a passo:
+
+```bash
+git clone https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp.git
+```
+
+```bash
+cd pontovoz-csharp/backend
+```
+
+```bash
+dotnet tool restore
+```
+
+```bash
+dotnet restore
+```
+
+```bash
+dotnet build
+```
+
+```bash
+dotnet ef database update --project src/PontoVoz.Api
+```
+
+```bash
+dotnet run --project src/PontoVoz.Api --launch-profile http
+```
+
+Com a API em execução, abra http://localhost:5080/scalar (documentação interativa) e
+http://localhost:5080/health. Os testes rodam com `dotnet test`, sem precisar do banco local.
+Sem o `dotnet ef database update`, a API inicia, mas o `/health` responde **503**, porque o banco
+não existe.
+
+Os dados são **fictícios**: paradas, linhas, destinos, percursos e passagens de demonstração com
+o prefixo `SIM-`. Eles não representam a operação real da SPTrans (veja
+[Dados de demonstração](#dados-de-demonstração)). No estágio atual, só o `/health` está
+disponível como endpoint.
 
 ## Como executar
 
@@ -66,6 +112,13 @@ dotnet build
 dotnet test
 ```
 
+Na primeira vez, crie o banco SQLite aplicando as migrations. O mesmo comando cria os dados de
+demonstração (veja [Persistência](#persistência-b3)):
+
+```bash
+dotnet ef database update --project src/PontoVoz.Api
+```
+
 ```bash
 dotnet run --project src/PontoVoz.Api --launch-profile http
 ```
@@ -76,18 +129,25 @@ A API fica disponível em `http://localhost:5080` (somente localhost).
 
 | Recurso | Endereço |
 |---|---|
-| Saúde do processo | http://localhost:5080/health |
+| Saúde do processo e do banco | http://localhost:5080/health |
 | Documento OpenAPI | http://localhost:5080/openapi/v1.json |
 | Interface Scalar | http://localhost:5080/scalar |
 
-Resposta real de `GET /health`, registrada nas evidências do B0:
+Respostas reais de `GET /health`, registradas nas evidências do B3:
 
 ```json
-{"status":"Healthy","escopo":"processo","verificadoEm":"2026-11-07T01:39:15.6929158+00:00","verificacoes":[]}
+{"status":"Healthy","escopo":"processo-e-dependencias","verificadoEm":"2026-11-07T21:47:05.9017706+00:00","verificacoes":[{"nome":"banco-de-dados","status":"Healthy"}]}
 ```
 
-`escopo: "processo"` e `verificacoes` vazia indicam que só o processo da API foi
-verificado. A verificação do banco de dados entra quando o banco existir (bloco B3).
+Com o banco indisponível, a resposta é **503**:
+
+```json
+{"status":"Unhealthy","escopo":"processo-e-dependencias","verificadoEm":"2026-11-07T21:48:03.2666865+00:00","verificacoes":[{"nome":"banco-de-dados","status":"Unhealthy"}]}
+```
+
+A verificação `banco-de-dados` (`BancoDadosHealthCheck`) confere se o SQLite está acessível e
+se todas as migrations foram aplicadas. Ela não cria o banco, não aplica migrations e não expõe
+caminhos nem a connection string.
 
 ### Testes
 
@@ -95,8 +155,10 @@ O projeto usa xUnit v3 sobre a Microsoft.Testing.Platform, declarada em
 `global.json` (`"test": { "runner": "Microsoft.Testing.Platform" }`), como o
 .NET 10 SDK exige para essa plataforma.
 
-Desde o B2, `dotnet test` executa os testes de domínio e termina com código de saída **0**
-quando todos passam. Para ver cada teste:
+`dotnet test` executa os testes de domínio (B2), os de integração com SQLite (B3) e os do
+`/health` pela API em execução, e termina com código de saída **0** quando todos passam. Os testes de integração usam um banco SQLite
+**real** e isolado por teste, em memória ou em arquivo temporário, com o esquema criado pela
+migration. Eles não usam o provedor InMemory e não tocam no `pontovoz.db`. Para ver cada teste:
 
 ```bash
 dotnet test --output detailed
@@ -108,7 +170,14 @@ Para rodar só os casos J1 a J5 e T1 a T7 da regra temporal do contrato (seção
 dotnet test --filter-method "*CasosDoContrato"
 ```
 
-A evidência da execução está em [Domínio](#evidências-dos-testes).
+Para rodar só os testes de integração:
+
+```bash
+dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
+```
+
+As evidências estão em [Domínio](#evidências-dos-testes) e em
+[`docs/evidencias/B3-persistencia.md`](docs/evidencias/B3-persistencia.md).
 
 ### HTTPS (opcional)
 
@@ -136,7 +205,15 @@ redirecionamento fica ativo.
 dotnet ef --version
 ```
 
-Deve mostrar `10.0.14`. Ainda não há migrations para aplicar.
+Deve mostrar `10.0.14`. Comandos úteis:
+
+```bash
+dotnet ef migrations list --project src/PontoVoz.Api
+```
+
+```bash
+dotnet ef migrations has-pending-model-changes --project src/PontoVoz.Api
+```
 
 ## Estrutura
 
@@ -158,10 +235,12 @@ backend/
 │  │  └─ Rules/                  regras compartilhadas (temporal e de cadastro)
 │  ├─ Application/               services, interfaces e DTOs (B5)
 │  ├─ Infrastructure/            EF Core, repositórios e provedores (B3, B4, B8)
+│  │  └─ Persistence/            DbContext, mapeamentos, conversor UTC, migrations e seed (B3)
 │  ├─ Security/                  proteção das rotas administrativas (B7)
 │  └─ Middleware/                tratamento global de erros (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
-   └─ Domain/                    testes de domínio (B2)
+   ├─ Domain/                    testes de domínio (B2)
+   └─ Infrastructure/            testes de integração com SQLite real (B3)
 ```
 
 ## Domínio (B2)
@@ -360,35 +439,143 @@ restaurado:
 | Sem a proteção de `AlternativaDeslocamento.Calcular` | 4 |
 | Prefixo de veículo do registro manual só por formato | 11 |
 
-### Decisões para o B3 (EF Core e SQLite)
+## Persistência (B3)
 
-- **Instantes:** o domínio usa `DateTimeOffset` sempre em UTC (`...EmUtc`). O provedor SQLite
-  não ordena nem compara `DateTimeOffset` em consultas, então o B3 precisa de um conversor,
-  para `DateTime` UTC ou para ticks, garantindo `ORDER BY` e o filtro
-  `observadaEm <= consultadoEm`.
-- **Hierarquia de passagens:** TPH (uma tabela, com discriminador). `ChaveSeed` e
-  `OrigemRegistro` ficam como colunas anuláveis. `NivelConfirmacao`, `CodigoAviso` e
-  `Verificada` são calculados e não são mapeados. `DadosSimulados` do registro manual é
-  guardado pelo campo `_dadosSimulados`, e `OrigemRegistro` pelo campo `_origemRegistro`;
-  os dois exigem configuração explícita do campo de apoio.
-- **Chaves compostas:** `ParadaLinha` usa (`ParadaId`, `LinhaId`), e `PercursoEstimado` usa
-  (`ParadaId`, `LinhaId`, `DestinoId`), com chave estrangeira composta para `ParadaLinha`.
-- **Índices únicos:** `Parada.CodigoExterno`, `Linha.Codigo` e `PassagemSimulada.ChaveSeed`.
-- **Coleção:** `Parada.LinhasAssociadas` usa o campo `_linhasAssociadas`.
-- **Coordenada:** objeto de valor mapeado como tipo complexo ou *owned*, com as colunas
-  anuláveis.
-- **Enums:** guardados como texto, para coincidir com o contrato.
-- **Busca:** a coluna normalizada (requisito R7 do contrato) entra junto com o mapeamento.
-- **Seed:** usa as fábricas `CriarSimulada` e `CriarNoProvisionamento`, só no provisionamento
-  de um banco vazio (contrato, seção 4.6.2).
+A persistência fica em `src/PontoVoz.Api/Infrastructure/Persistence/`. O domínio não depende
+dela.
+
+| Arquivo | Papel |
+|---|---|
+| `PontoVozDbContext.cs` | `DbSet` de cada entidade e convenções comuns (instantes e enums) |
+| `Configuracoes/` | Um mapeamento Fluent API por entidade (`IEntityTypeConfiguration`) |
+| `Conversores/InstanteUtcParaTicksConverter.cs` | Conversão de `DateTimeOffset` para ticks UTC |
+| `Seed/DadosDemonstracao.cs` | Monta os dados fictícios com as fábricas do domínio |
+| `Seed/ProvisionamentoDemonstracao.cs` | Decide se o seed roda e o grava, nos fluxos síncrono e assíncrono |
+| `PersistenciaExtensions.cs` | Registro do contexto na injeção de dependência e configuração do SQLite |
+| `Migrations/` | Migration `InitialCreate` e o snapshot do modelo |
+
+### Configuração do SQLite
+
+A connection string fica em `appsettings.json` (`ConnectionStrings:PontoVoz`), sem credenciais:
+
+```json
+"ConnectionStrings": { "PontoVoz": "Data Source=pontovoz.db" }
+```
+
+Um caminho relativo é resolvido a partir da pasta do projeto, então a API e o `dotnet ef` usam
+o mesmo arquivo, `src/PontoVoz.Api/pontovoz.db`. Esse arquivo é **local** e é ignorado pelo Git
+(`*.db` no `.gitignore`). O `PontoVozDbContext` é registrado com
+`builder.Services.AddPersistenciaPontoVoz(...)` no `Program.cs`, com tempo de vida *scoped*, o
+padrão do `AddDbContext`.
+
+### Criar o banco, aplicar a migration e o seed
+
+```bash
+dotnet ef database update --project src/PontoVoz.Api
+```
+
+O comando aplica a migration e, em seguida, roda o seed pelo gancho `UseSeeding` do EF Core. O
+`Database.MigrateAsync` usa o mesmo seed pelo gancho `UseAsyncSeeding`, que os testes exercitam.
+A API **não** aplica migrations ao iniciar, e o seed nunca roda por requisição HTTP. Repetir o
+comando não muda um banco já atualizado.
+
+### Tabelas e relações
+
+| Tabela | Chave | Relações e restrições |
+|---|---|---|
+| `Paradas` | `Id` | `CodigoExterno` único; `Latitude` e `Longitude` anuláveis (objeto de valor `Coordenada`) |
+| `Linhas` | `Id` | `Codigo` único |
+| `ParadasLinhas` | (`ParadaId`, `LinhaId`) | FK para `Paradas` e `Linhas` |
+| `Destinos` | `Id` | `Nome` único (chave natural usada pelo seed; o contrato não tem código de destino) |
+| `PercursosEstimados` | (`ParadaId`, `LinhaId`, `DestinoId`) | FK composta para `ParadasLinhas` (a linha precisa atender a parada) e FK para `Destinos`; `CHECK` de 1 a 240 minutos |
+| `RegistrosPassagem` | `Id` | Hierarquia TPH com `TipoPassagem` (`Simulada` ou `RegistroManual`); FK composta para `ParadasLinhas`; `ChaveSeed` única quando não nula; índice (`ParadaId`, `LinhaId`, `ObservadaEmUtc`) para a consulta da última passagem |
+
+- **Exclusões:** todas as chaves estrangeiras usam `RESTRICT`. Nenhuma exclusão apaga passagens
+  históricas em cascata, porque os cadastros são desativados, não excluídos.
+- **TPH:** a subclasse correta é reconstruída ao ler do banco. `NivelConfirmacao`,
+  `CodigoAviso`, `Verificada` e `OficialSptrans` são calculados pelo tipo e não viram colunas.
+- **Registro manual:** `OrigemRegistro` e `DadosSimulados` são gravados a partir dos campos
+  privados da classe. Nas passagens simuladas essas colunas ficam nulas, e `DadosSimulados` é
+  sempre `true` pelo próprio tipo.
+
+### Instantes em UTC
+
+Todo `DateTimeOffset` é gravado como **ticks UTC** (`INTEGER`), por
+`InstanteUtcParaTicksConverter`. Motivos:
+
+- o provedor SQLite do EF Core não traduz `ORDER BY` nem comparações sobre `DateTimeOffset`.
+  Com inteiros, a ordenação e o filtro `ObservadaEmUtc <= @referencia` rodam no banco;
+- a precisão de 100 ns é preservada, o que importa para a regra temporal do domínio, que
+  compara o intervalo exato;
+- a leitura devolve sempre deslocamento zero.
+
+A API pública do domínio não mudou: as entidades continuam com `DateTimeOffset`.
+
+### Dados de demonstração
+
+No **primeiro provisionamento** de um banco vazio, o seed cria 21 registros coerentes com
+`contracts/exemplos/`: 2 paradas, 4 linhas, 5 associações, 3 destinos, 5 percursos e 2 passagens
+simuladas.
+
+- **Identificação:** todos os registros têm origem `Simulado`, `DadosSimulados = true` e códigos
+  com `SIM-`. As passagens simuladas têm `ChaveSeed` (`SIM-OBS-001` e `SIM-OBS-002`) e nunca são
+  verificadas nem oficiais.
+- **Horários:** são calculados uma única vez, 15 e 25 minutos antes do instante do
+  provisionamento, lido do `TimeProvider`.
+- **Banco já provisionado** (existe uma parada do seed): o seed não faz nada. Não duplica, não
+  renova horários, não cria passagens e não toca nos registros manuais.
+- **Passagem recente na demonstração:** vem do registro manual administrativo (B7), conforme a
+  seção 4.6.2 do contrato.
+
+### O que funciona e o que está planejado
+
+| Funciona (B3) | Planejado |
+|---|---|
+| Esquema SQLite criado pela migration | Repositórios e consultas LINQ (B4) |
+| Persistência e leitura de todas as entidades | Coluna normalizada para a busca sem acentos, R7 (B4) |
+| Seed idempotente nos fluxos síncrono e assíncrono | Services e DTOs (B5) |
+| Ordenação e filtro por instante no SQL | Endpoints REST (B6 e B7) |
+| Verificação do banco no `/health` (200 ou 503) | |
+| 39 testes de integração e 3 testes do `/health` | |
+
+### Orientações para o B4
+
+- **`DadosSimulados` das passagens:** a coluna `DadosSimulados` de `RegistrosPassagem` existe
+  só para o registro manual e fica `NULL` nas passagens simuladas, que são fictícias pelo próprio
+  tipo (`TipoPassagem = 'Simulada'`). Essa é uma decisão de armazenamento válida: o objeto lido
+  do banco sempre informa `DadosSimulados` corretamente, e um filtro pela propriedade calculada
+  (`Where(p => p.DadosSimulados)`) **não é traduzido**: o EF Core lança exceção, em vez de filtrar
+  errado. Se o B4 precisar filtrar no SQL, deve usar a forma testada em
+  `AuditoriaPersistenciaTests`:
+
+  ```csharp
+  passagens.Where(p => p is PassagemSimulada
+      || (p is PassagemRegistroManual && EF.Property<bool>((PassagemRegistroManual)p, "_dadosSimulados")))
+  ```
+
+- **Busca sem acentos (R7):** o `LIKE` do SQLite ignora maiúsculas só em ASCII e não ignora
+  acentos. O teste `BuscaComLikeDoSqlite_NaoIgnoraAcentos...` confirma: `%demonstracao%` não
+  encontra "Demonstração", e `%DEMONSTRAÇÃO%` também não. Plano para o B4:
+  1. uma função de normalização no código (minúsculas, sem diacríticos, pela decomposição
+     Unicode), usada nos dados e no termo da busca;
+  2. colunas de busca persistidas e indexadas, preenchidas pelo `PontoVozDbContext` ao salvar:
+     `Paradas.NomeBusca` e `Paradas.CodigoExternoBusca`, `Destinos.NomeBusca` e, em `Linhas`, uma
+     coluna com código, letreiro e terminais;
+  3. uma nova migration (`AddSearchColumns`), sem alterar a `InitialCreate`, que também preenche
+     as colunas dos registros já existentes;
+  4. as consultas comparam a coluna normalizada com o termo normalizado (`LIKE`), e os testes
+     de integração cobrem "demonstracao", "DEMONSTRAÇÃO" e "Demonstração".
+- **Unicidade de `Destinos.Nome`:** é coerente com o contrato. O destino não tem código próprio
+  (seção 3.5), o MVP só tem destinos do seed e um nome repetido deixaria ambígua a escolha que a
+  IA pede à pessoa (seção 4.4).
 
 ## Próximas etapas
 
 | Bloco | Conteúdo |
 |---|---|
 | B1 | Contrato v1 em `../contracts/` (concluído) |
-| B2 | Entidades e regras de domínio, com testes (concluído, aguardando revisão) |
-| B3 | `DbContext`, migration inicial e seed de dados simulados |
+| B2 | Entidades e regras de domínio, com testes (concluído) |
+| B3 | `DbContext`, migration inicial e seed de dados simulados (concluído, aguardando revisão) |
 | B4 | Repositórios com consultas LINQ, com testes |
 | B5 | Services, DTOs e injeção de dependência, com testes |
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI |

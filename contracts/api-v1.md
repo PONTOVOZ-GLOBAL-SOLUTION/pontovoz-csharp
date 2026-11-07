@@ -169,8 +169,8 @@ oficialmente confirmada.**
   - `GET /alternativas` e `GET /resumo` devolvem **200** com status explícito e avisos, porque
     continuam tendo informação útil.
 - Erros inesperados da própria API, como falha de banco, devolvem **500** em ProblemDetails,
-  sem detalhes internos. O `/health` passa a indicar o problema quando a verificação do banco
-  existir (B3).
+  sem detalhes internos. Desde o B3, o `/health` também indica quando o banco está
+  indisponível (seção 6).
 
 ### 1.11 Acesso
 
@@ -888,15 +888,28 @@ por um horário das últimas 24 horas.
 | Erros | **503** com `status: "Unhealthy"` (no mesmo formato de corpo) |
 | Acesso | Público |
 
-Resposta real, registrada nas evidências do B0:
+Resposta real com o banco disponível, registrada nas evidências do B3:
 
 ```json
-{"status":"Healthy","escopo":"processo","verificadoEm":"2026-11-07T01:39:15.6929158+00:00","verificacoes":[]}
+{"status":"Healthy","escopo":"processo-e-dependencias","verificadoEm":"2026-11-07T21:47:05.9017706+00:00","verificacoes":[{"nome":"banco-de-dados","status":"Healthy"}]}
 ```
 
-Hoje só o processo é verificado (`escopo: "processo"`, `verificacoes: []`). A verificação do
-banco entra no B3 e passará a aparecer em `verificacoes`. O estado do provedor de previsões
-**não** entra no `/health`: ele é informado pelos próprios endpoints de negócio.
+Resposta real com o banco indisponível (**503**):
+
+```json
+{"status":"Unhealthy","escopo":"processo-e-dependencias","verificadoEm":"2026-11-07T21:48:03.2666865+00:00","verificacoes":[{"nome":"banco-de-dados","status":"Unhealthy"}]}
+```
+
+- **`escopo`:** é `processo` quando não há verificação registrada e `processo-e-dependencias`
+  quando há. Desde o B3, a API sempre registra a verificação `banco-de-dados`.
+- **`banco-de-dados`:** confere se o SQLite está acessível e se todas as migrations foram
+  aplicadas. Ela só lê: não cria o arquivo do banco, não aplica migrations e não roda o seed. A
+  resposta não traz caminhos, connection string nem mensagens internas.
+- **Provedor de previsões:** o estado dele **não** entra no `/health`; é informado pelos
+  próprios endpoints de negócio.
+
+O formato do corpo não mudou desde o B0. Mudam apenas o valor de `escopo` e o conteúdo de
+`verificacoes`.
 
 ---
 
@@ -983,7 +996,7 @@ mostrar a `mensagem` como está.
 | 11 | POST | `/api/v1/admin/linhas` | Chave | Planejado (B7) |
 | 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Chave | Planejado (B7) |
 | 13 | POST | `/api/v1/admin/observacoes-passagem` | Chave | Planejado (B7) |
-| — | GET | `/health` | Público | **Implementado (B0)** |
+| — | GET | `/health` | Público | **Implementado (B0; verificação do banco no B3)** |
 
 Por que as rotas não entram em conflito:
 - `{id}` e `{linhaId}` terão a restrição `int:min(1)`. Um texto nunca é confundido com um `id`.

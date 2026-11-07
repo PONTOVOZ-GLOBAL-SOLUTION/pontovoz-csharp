@@ -1,10 +1,12 @@
 # Infrastructure
 
-Implementações técnicas das interfaces definidas em `Application`:
+Implementações técnicas do backend. O domínio (`Domain/`) não depende desta pasta.
 
-- `Data/`: `DbContext` do EF Core, configurações das tabelas e seed de dados simulados.
-- `Repositories/`: consultas LINQ sobre o SQLite.
-- `Providers/`: provedores de previsão de chegada (simulado e adaptador HTTP do Olho Vivo).
+| Pasta | Conteúdo | Estado |
+|---|---|---|
+| `Persistence/` | `PontoVozDbContext`, mapeamentos Fluent API, conversor de instantes UTC, migrations e seed de dados fictícios | Implementado no B3 |
+| `Repositories/` | Consultas LINQ sobre o SQLite | Planejado (B4) |
+| `Providers/` | Provedores de previsão de chegada (simulado e adaptador HTTP do Olho Vivo) | Planejado (B8) |
 
-Estado: **vazio**. Os pacotes do EF Core 10 (SQLite e Design) já estão instalados,
-mas ainda não existem `DbContext`, migrations nem banco de dados (blocos B3 em diante).
+Detalhes da persistência, das tabelas e do seed estão em
+[`../../../README.md`](../../../README.md#persistência-b3).

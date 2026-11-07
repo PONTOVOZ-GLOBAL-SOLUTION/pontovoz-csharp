@@ -2152,3 +2152,619 @@ e `dotnet test` (278 testes aprovados, incluindo os 17 casos J1 a J5 e T1 a T7).
 de segredos, dados pessoais, binários e marcas de ferramenta e publicou o commit
 `feat: implement PontoVoz domain model with unit tests`, sem trailer, com push normal para
 `origin/main`. O B3 não foi iniciado.
+
+### Prompt 15 — Bloco B3: Entity Framework Core, SQLite, migrations e persistência (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 05 — BLOCO B3: ENTITY FRAMEWORK CORE, SQLITE, MIGRATIONS E PERSISTÊNCIA
+Atue como engenheiro de software sênior especializado em C#, .NET 10 e Entity Framework Core.
+Estamos desenvolvendo o backend C# do PontoVoz, projeto CitizenTech da FIAP.
+Repositório: https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local: `C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Os blocos B0, B1 e B2 foram concluídos, auditados e publicados.
+O último commit esperado é:
+`f53fe2d743554d0ef1ef1d7266d63bae5643cc47`
+Sua tarefa é executar somente o Bloco B3 — Persistência com EF Core e SQLite.
+Não avance para B4 e não execute commit ou push.
+1. PRIORIDADE ABSOLUTA: EXIGÊNCIAS DO PROFESSOR
+O enunciado oficial da disciplina C# Software Development exige:
+
+* Programação Orientada a Objetos — 3,0 pontos.
+* Web API — 2,5 pontos.
+* Entity Framework Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade de código — 2,0 pontos.
+
+Também exige interfaces, injeção de dependência, APIs REST, testes unitários, README, documentação dos endpoints, evidências da aplicação e repositório GitHub.
+O escopo deste bloco é exclusivamente a persistência das entidades com Entity Framework Core.
+LINQ será explorado no B4, serviços e DI nos blocos seguintes, e os endpoints REST nos blocos posteriores.
+Não tente implementar todos os critérios neste bloco.
+Todo código desenvolvido deve ter relação real com a proposta PontoVoz.
+Não adicione funcionalidades, ferramentas, integrações ou abstrações que não sejam necessárias para atender ao planejamento e à rubrica.
+2. INSPEÇÃO OBRIGATÓRIA
+Antes de modificar arquivos:
+
+1. Confirme o diretório local correto.
+2. Confirme a branch main.
+3. Verifique o commit atual e a sincronização com origin/main.
+4. Confirme que a árvore de trabalho está limpa.
+5. Examine a solução e os projetos .NET existentes.
+6. Leia os arquivos atuais de `Domain/`.
+7. Leia `contracts/api-v1.md` e `contracts/README.md`.
+8. Examine os 278 testes existentes e as configurações de teste.
+9. Confira as dependências já instaladas do Entity Framework Core.
+
+O estado real do código e o contrato B1.3 prevalecem sobre qualquer suposição.
+Se encontrar inconsistências entre a modelagem e o contrato, explique o problema e faça apenas o ajuste mínimo seguro.
+Não reestruture o projeto inteiro.
+3. IMPLEMENTAÇÃO DO DBCONTEXT
+Crie um `PontoVozDbContext` em:
+`backend/src/PontoVoz.Api/Infrastructure/Persistence/`
+Configure o contexto para representar as entidades persistentes do domínio:
+
+* Parada.
+* Linha.
+* ParadaLinha.
+* Destino.
+* PercursoEstimado.
+* RegistroPassagem.
+* PassagemSimulada.
+* PassagemRegistroManual.
+
+Utilize os recursos nativos do Entity Framework Core 10.
+Preserve a arquitetura já aprovada.
+O domínio não deve depender de Infrastructure.
+Configure os DbSets necessários e os mapeamentos por Fluent API.
+Não exponha propriedades mutáveis públicas nas entidades apenas para facilitar o EF Core.
+4. MAPEAMENTO DAS ENTIDADES
+Configure os relacionamentos conforme o domínio real.
+Parada
+
+* Identificador interno.
+* Código externo.
+* Nome.
+* Endereço opcional.
+* Coordenada opcional.
+* Ativa.
+* Origem.
+* DadosSimulados.
+* Data de criação.
+* Relacionamento com linhas.
+
+Linha
+
+* Identificador interno.
+* Código.
+* Letreiro.
+* Terminais.
+* Sentido.
+* Ativa.
+* Origem.
+* DadosSimulados.
+* Data de criação.
+
+ParadaLinha
+
+* Relação entre parada e linha.
+* Chave composta por ParadaId e LinhaId.
+* Data da associação.
+* Integridade referencial.
+
+Destino
+
+* Identificador.
+* Nome.
+* Tipo.
+* Ativo.
+* Origem.
+* DadosSimulados.
+
+PercursoEstimado
+
+* Chave composta por ParadaId, LinhaId e DestinoId.
+* Tempo estimado de percurso.
+* Origem e natureza do dado.
+* Relação válida com uma associação ParadaLinha e com Destino.
+
+RegistroPassagem
+
+* Identificador.
+* ParadaId e LinhaId.
+* ObservadaEmUtc.
+* RegistradaEmUtc.
+* PrefixoVeiculo.
+* Dados específicos de suas subclasses.
+
+Respeite todos os campos existentes no código real.
+Não invente propriedades sem verificar sua necessidade.
+5. HERANÇA E POLIMORFISMO NO EF CORE
+A hierarquia de passagens foi implementada no B2:
+
+* RegistroPassagem, abstrata.
+* PassagemSimulada.
+* PassagemRegistroManual.
+
+Configure o mapeamento TPH (Table Per Hierarchy).
+Utilize um discriminador apropriado para identificar o tipo de passagem.
+Mapeie corretamente:
+
+* ChaveSeed, exclusiva das passagens simuladas.
+* OrigemRegistro, exclusiva das passagens manuais.
+* DadosSimulados conforme a implementação atual.
+* Campos de apoio privados que precisem ser persistidos.
+
+Não mapeie propriedades derivadas ou calculadas que não sejam efetivamente persistentes, como:
+
+* CodigoAviso.
+* Verificada.
+* OficialSptrans.
+* NivelConfirmacao, se for calculado pelo tipo concreto.
+
+Confirme que, após salvar e carregar registros do banco, a subclasse correta é reconstruída e seu comportamento polimórfico permanece funcional.
+6. DATAS UTC E SQLITE
+Este é um ponto crítico.
+O domínio utiliza DateTimeOffset em UTC.
+O SQLite possui limitações para ordenação e comparação direta de DateTimeOffset por meio do EF Core.
+Implemente uma estratégia consistente de persistência que:
+
+* Preserve a representação UTC.
+* Permita salvar e recuperar instantes corretamente.
+* Permita ordenar passagens no banco de dados.
+* Permita filtrar passagens anteriores a um instante de referência.
+* Evite depender de comparação em memória quando a consulta deva ocorrer no SQL.
+* Preserve a precisão necessária às regras temporais do domínio.
+
+Avalie um ValueConverter para representação UTC como inteiro de ticks ou outra estratégia comprovadamente compatível com o SQLite.
+Justifique brevemente a escolha.
+Não altere toda a API pública do domínio para resolver um detalhe de armazenamento.
+Crie testes com instantes anteriores, posteriores e iguais ao limite, incluindo fronteiras temporais.
+7. COORDENADAS E ENUMS
+Mapeie Coordenada de maneira compatível com a sua definição de objeto de valor e com EF Core 10.
+Como Endereco e Coordenada podem ser nulos, teste explicitamente esses casos.
+Configure os enums persistidos como texto quando previsto pela arquitetura.
+Verifique se os valores são recuperados corretamente.
+Não altere os nomes de enums definidos no contrato.
+8. ÍNDICES, CHAVES E INTEGRIDADE
+Crie os índices e restrições necessários.
+Inclua, quando aplicável:
+
+* Índice único para Parada.CodigoExterno.
+* Índice único para Linha.Codigo.
+* Índice único para PassagemSimulada.ChaveSeed, tratando corretamente as outras subclasses.
+* Chave composta em ParadaLinha.
+* Chave composta em PercursoEstimado.
+* Relacionamentos com chaves estrangeiras reais.
+* Índices úteis para consultas por parada, linha e horário.
+
+Teste a integridade referencial com SQLite real.
+Evite exclusões em cascata que apaguem passagens históricas indevidamente.
+A aplicação utiliza ativação/desativação de cadastros em vez de excluir seu histórico.
+Não crie dezenas de índices sem justificativa.
+9. CONFIGURAÇÃO E INJEÇÃO DE DEPENDÊNCIA
+Configure o DbContext na infraestrutura e registre-o no contêiner nativo de injeção de dependência do ASP.NET Core.
+Utilize:
+
+* EF Core SQLite.
+* Connection string de desenvolvimento em configuração adequada.
+* Arquivo de banco local ignorado pelo Git.
+* TimeProvider já registrado, quando necessário.
+
+Preserve o funcionamento de:
+
+* GET /health.
+* OpenAPI.
+* Scalar.
+
+Não crie endpoints de negócio nesta etapa.
+Não afirme que o health check verifica o banco de dados se ele continua verificando apenas o processo.
+Não introduza credenciais ou segredos no repositório.
+10. MIGRATION INICIAL
+Crie uma migration inicial real usando a ferramenta dotnet-ef já instalada no projeto.
+Por exemplo:
+`dotnet ef migrations add InitialCreate`
+Use os parâmetros corretos para a estrutura real do projeto.
+Examine a migration gerada antes de aplicá-la.
+Depois execute:
+`dotnet ef database update`
+Confirme que:
+
+* O banco SQLite foi criado.
+* As tabelas esperadas existem.
+* As chaves e índices estão presentes.
+* As relações estão corretas.
+* A migration foi registrada.
+* Reexecutar o update não destrói os dados.
+
+Não utilize EnsureCreated como substituto de migrations.
+Não inclua o arquivo .db no Git.
+Não apague bancos já existentes sem confirmar sua origem e sem necessidade.
+Se precisar testar um banco vazio, utilize um arquivo temporário de teste.
+11. SEED DE DADOS SIMULADOS
+Implemente o seed mínimo necessário para o MVP, conforme o contrato aprovado.
+O objetivo é permitir uma demonstração real do backend com dados fictícios identificados.
+Utilize os dados e relacionamentos coerentes com os exemplos documentados em contracts/exemplos/.
+Crie somente o necessário:
+
+* Paradas simuladas.
+* Linhas simuladas.
+* Associações entre paradas e linhas.
+* Destinos simulados.
+* Percursos estimados.
+* Registros simulados de passagem no primeiro provisionamento.
+
+Preserve os códigos SIM- e a consistência entre entidades.
+Regras obrigatórias do seed:
+
+1. No primeiro provisionamento de um banco vazio, criar os dados demonstrativos.
+2. Não duplicar registros em execuções posteriores.
+3. Não renovar automaticamente os horários de passagens.
+4. Não criar novas passagens ao reiniciar a API com banco já provisionado.
+5. Não apagar ou sobrescrever registros manuais.
+6. Não simular passagens oficialmente verificadas.
+7. Armazenar a chave estável de PassagemSimulada.
+8. Calcular os horários iniciais em relação ao instante do provisionamento, apenas uma vez.
+9. Manter toda observação identificada como fictícia e não oficial.
+
+Utilize um mecanismo de seed compatível com EF Core 10 e com migrations, incluindo os fluxos síncronos e assíncronos exigidos pela abordagem escolhida.
+Evite duplicar lógica entre esses fluxos.
+Não associe a execução do seed a cada requisição HTTP.
+Não modifique o histórico apenas para que uma passagem pareça recente durante a apresentação.
+12. TESTES DE INTEGRAÇÃO DO BANCO
+Não utilize EF Core InMemory para fingir que SQLite foi testado.
+Crie testes de integração usando o provedor relacional SQLite real, em memória com conexão mantida aberta ou em bancos temporários isolados.
+Preserve os 278 testes do B2.
+Adicione testes de integração pertinentes, incluindo:
+
+* Criação de esquema a partir da migration.
+* Persistência de parada.
+* Persistência de linha.
+* Associação parada-linha.
+* Persistência de destino.
+* Persistência de percurso.
+* Persistência de registro manual.
+* Persistência de registro simulado.
+* Materialização da hierarquia TPH.
+* ChaveSeed única.
+* Código de parada duplicado rejeitado pelo banco.
+* Código de linha duplicado rejeitado pelo banco.
+* Associação duplicada rejeitada.
+* Relacionamento inválido rejeitado.
+* Recuperação correta de enums.
+* Recuperação de coordenada nula.
+* Recuperação de dados fictícios.
+* Datas UTC preservadas.
+* Ordenação por ObservadaEmUtc.
+* Filtro por instante de referência executado no SQLite.
+* Seed executado duas vezes sem duplicação.
+* Reinicialização sem criar ou renovar passagens.
+* Preservação de registros manuais.
+* Reaplicação da migration sem perda de dados.
+
+Os testes devem verificar resultados concretos, e não somente que métodos foram chamados.
+Evite testes repetitivos sem valor.
+Mantenha o banco de testes isolado do banco de desenvolvimento.
+13. QUALIDADE DO CÓDIGO
+Siga os critérios acadêmicos e a arquitetura existente.
+Exijo:
+
+* Código organizado e legível.
+* Responsabilidades bem separadas.
+* Configurações Fluent API específicas quando isso melhorar a clareza.
+* Tratamento correto de nulidade.
+* Uso adequado de async/await para operações de persistência.
+* CancellationToken quando aplicável.
+* Sem acesso ao banco dentro das entidades de domínio.
+* Sem SQL manual desnecessário.
+* Sem novas dependências sem justificativa.
+
+Não implemente um repositório genérico artificial.
+Os repositórios específicos e consultas LINQ serão trabalhados no B4.
+14. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize backend/README.md para explicar:
+
+* Como configurar o SQLite.
+* Como executar a migration.
+* Como criar o banco.
+* Como aplicar o seed.
+* Como executar os testes.
+* Quais tabelas e relações foram criadas.
+* Como os dados simulados são identificados.
+* Qual é a estratégia de armazenamento UTC.
+* O que já funciona e o que ainda está planejado.
+
+Registre evidências reais, identificadas como B3, em backend/docs/evidencias/.
+As evidências devem mostrar resultados efetivamente verificados, como:
+
+* Migração criada e aplicada.
+* Esquema do banco.
+* Testes executados.
+* Confirmação da idempotência do seed.
+
+Não fabrique capturas, saídas de terminal ou resultados.
+Registre integralmente este prompt em prompts.md, mantendo o histórico acadêmico exigido pela FIAP.
+Preserve a apresentação profissional do código e as diretrizes de commits já estabelecidas.
+15. VALIDAÇÕES OBRIGATÓRIAS
+Ao concluir, execute a partir de backend/:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+
+Execute também os testes de integração criados e confirme os resultados reais.
+Informe:
+
+* Quantidade total de testes.
+* Testes aprovados.
+* Testes falhos.
+* Testes ignorados.
+* Código de saída.
+* Avisos e erros de compilação.
+* Migration aplicada.
+* Quantidade de registros criados pelo seed.
+* Resultado do segundo provisionamento.
+* Se o banco de dados foi efetivamente consultado.
+
+Verifique que a API ainda inicia e que `/health`, OpenAPI e Scalar continuam funcionando.
+Se houver falhas, tente corrigi-las sem alterar o escopo. Registre os problemas e as soluções.
+16. GIT E CONTROLE DE ALTERAÇÕES
+Não execute commit.
+Não execute git push.
+Não altere o histórico.
+Não utilize force push ou reset --hard.
+Confirme que somente arquivos relacionados ao B3, seus testes e sua documentação foram alterados.
+Atenção à presença de bancos .db, arquivos temporários, binários e logs.
+Deixe o trabalho local aguardando minha revisão.
+17. RELATÓRIO FINAL OBRIGATÓRIO
+Ao concluir, apresente:
+A. Resumo: o que foi desenvolvido, em linguagem clara.
+B. Arquivos: árvore das pastas criadas e modificadas.
+C. Entidades persistidas: tabelas, relacionamentos, índices e chaves.
+D. Configuração EF Core: DbContext, Fluent API e DI.
+E. Migrations: comando utilizado e resultado real.
+F. SQLite: estratégia de UTC, conversões e limitações resolvidas.
+G. Seed: dados criados e comprovação de idempotência.
+H. Testes: total de testes, resultados, testes de integração e casos críticos.
+I. Evidências: arquivos e verificações disponíveis.
+J. Compatibilidade: confirmação de aderência ao contrato B1.3 e à CitizenTech.
+K. Rubrica FIAP: critérios atendidos e ainda pendentes, sem declarar concluído o que não foi implementado.
+L. Git: branch, alterações locais e confirmação de que não houve commit ou push.
+M. Riscos e pendências: possíveis problemas para o B4.
+18. RESTRIÇÃO FINAL
+NÃO implemente nesta etapa:
+
+* Repositórios e consultas completas de LINQ (B4).
+* Serviços de negócio do totem (B5).
+* Controllers REST de negócio (B6/B7).
+* Integração real com SPTrans (B8).
+* Algoritmo completo de alternativas (B9).
+* Assistente de IA.
+* Interface do totem.
+* Funcionalidades de outras disciplinas.
+* Sistemas de autenticação novos ou recursos não previstos no contrato.
+
+Execute somente o B3. Ao terminar, pare e aguarde minha auditoria antes do commit e do B4.
+O objetivo é demonstrar a utilização real de Entity Framework Core no PontoVoz, com banco SQLite, migrations, persistência e testes de integração, de maneira rigorosamente alinhada aos critérios oficiais da disciplina C# Software Development.
+````
+
+**Resumo da resposta (não é transcrição):** a IA criou a persistência em
+`Infrastructure/Persistence/`:
+- `PontoVozDbContext` e um mapeamento Fluent API por entidade;
+- a hierarquia TPH de passagens, com a coluna `TipoPassagem` e os campos privados do registro
+  manual mapeados;
+- `Coordenada` como tipo complexo opcional e enums gravados como texto;
+- chaves compostas, chaves estrangeiras compostas para `ParadasLinhas`, índices únicos (inclusive
+  o de `ChaveSeed`, filtrado) e todas as exclusões como `RESTRICT`;
+- todo `DateTimeOffset` gravado como ticks UTC, para que ordenação e filtros rodem no SQLite.
+
+O seed idempotente usa os ganchos `UseSeeding` e `UseAsyncSeeding` do EF Core e reaproveita a
+mesma montagem de dados nos dois fluxos. No primeiro provisionamento cria 21 registros
+fictícios coerentes com os exemplos do contrato; num banco já provisionado não faz nada. O
+contexto foi registrado na injeção de dependência. A migration `InitialCreate` foi gerada,
+revisada e aplicada com `dotnet ef`, e o esquema real foi inspecionado. Repetir o `update` deixou
+o banco idêntico. O snapshot do modelo, gravado pelo `dotnet-ef` numa pasta errada, foi movido
+para junto da migration. Foram criados 35 testes de integração com SQLite real, num total de 313
+testes aprovados; mutações temporárias confirmaram que eles detectam regressões. O `/health`,
+o OpenAPI e o Scalar continuam funcionando, sem verificação de banco no `/health`. As evidências
+estão em `backend/docs/evidencias/B3-persistencia.md`. Não houve commit.
+
+### Prompt 16 — Bloco B3.1: correções finais, validação e publicação do EF Core (07/11/2026)
+
+**Texto original:**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B3.1 — CORREÇÕES FINAIS, VALIDAÇÃO E PUBLICAÇÃO DO EF CORE
+O relatório do Bloco B3 foi analisado.
+A implementação de Entity Framework Core, SQLite, migration inicial, seed e testes de integração está aprovada em princípio, mas precisamos concluir uma auditoria final antes de publicá-la no GitHub.
+Você é o responsável pela execução técnica completa do backend C# do PontoVoz. O usuário não realizará alterações manuais no código.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`f53fe2d743554d0ef1ef1d7266d63bae5643cc47`
+Execute somente B3.1. Não avance para B4.
+1. PRINCÍPIO OBRIGATÓRIO — SEGUIR O PROFESSOR
+A fonte principal de requisitos é o enunciado oficial de C# Software Development da FIAP.
+A implementação final deverá demonstrar:
+
+* POO: 3,0 pontos.
+* Web API: 2,5 pontos.
+* EF Core + LINQ: 1,5 ponto.
+* Async/Await: 1,0 ponto.
+* Qualidade de código: 2,0 pontos.
+
+Também são exigidos interfaces, injeção de dependência, testes unitários, documentação de endpoints, README, evidências da aplicação e integração com a CitizenTech.
+Não invente funcionalidades acadêmicas nem elimine requisitos do professor.
+Neste bloco, concentre-se exclusivamente em completar e publicar a persistência B3.
+2. INSPEÇÃO INICIAL
+Examine o estado real do repositório.
+Confirme:
+
+* Branch main.
+* Sincronização com origin/main.
+* Alterações não commitadas do B3.
+* Estrutura do DbContext.
+* Mappings Fluent API.
+* Migration inicial e snapshot.
+* Seed.
+* Testes de integração.
+* Registro no Program.cs.
+* Connection string.
+* Compatibilidade com contracts/api-v1.md.
+
+Preserve os arquivos existentes e evite refatorações desnecessárias.
+3. PENDÊNCIA 1 — VERIFICAÇÃO DO BANCO NO HEALTH CHECK
+O contrato REST, seção 1.10, estabelece que o endpoint `/health` deverá sinalizar falha no banco quando a verificação de persistência for incorporada no B3.
+Atualmente `/health` verifica somente o processo.
+Implemente a menor alteração necessária para incluir uma verificação real de conectividade com SQLite.
+Requisitos:
+
+* Quando o processo e o banco estiverem saudáveis, devolver HTTP 200.
+* Quando o banco estiver inacessível, sinalizar falha real por HTTP 503.
+* Preservar o formato do endpoint na medida compatível com o contrato.
+* Identificar claramente quais verificações foram executadas.
+* Não expor detalhes internos, connection strings ou informações sensíveis.
+* Manter CancellationToken e programação assíncrona adequada.
+* Não aplicar migration nem recriar o banco automaticamente dentro do health check.
+* Não criar um novo endpoint sem necessidade.
+
+Crie testes que comprovem o funcionamento tanto com banco disponível quanto indisponível, utilizando ambiente de teste isolado.
+Atualize a documentação pertinente.
+4. PENDÊNCIA 2 — DADOS SIMULADOS DAS PASSAGENS
+O relatório B3 informa que a coluna DadosSimulados pode ficar NULL para PassagemSimulada.
+Investigue o mapeamento real e confirme se isso é intencional e seguro.
+O contrato exige que passagens simuladas sejam identificadas como fictícias.
+Verifique:
+
+* Persistência da subclasse PassagemSimulada.
+* Materialização correta após leitura do SQLite.
+* Valor de DadosSimulados observado no objeto reconstruído.
+* Comportamento de futuras consultas LINQ.
+* Uso do discriminador TPH.
+* Possibilidade de filtros incorretos por causa de NULL.
+
+Se existir inconsistência funcional, corrija-a com a menor mudança possível.
+Se o valor NULL for uma decisão válida de armazenamento, documente a razão e teste a interpretação correta, especialmente para o B4.
+Não introduza uma propriedade ou coluna redundante sem justificativa técnica.
+5. PREPARAÇÃO PARA A BUSCA SEM ACENTOS
+O contrato exige que a busca encontre termos independentemente de acentos.
+O R7 prevê suporte de normalização nos blocos B3/B4.
+Verifique se o banco atual permite implementar essa regra corretamente no B4.
+Se a solução exigir uma coluna normalizada e uma nova migration, documente o plano preciso para o B4.
+Não implemente agora os repositórios completos nem as consultas de negócio.
+Evite alterar desnecessariamente a migration inicial já validada.
+6. VALIDAÇÃO DO BANCO
+Confirme novamente:
+
+* As seis tabelas.
+* As chaves e índices.
+* Relacionamentos N.
+* Hierarquia TPH.
+* Conversão de datas para ticks UTC.
+* Consultas de comparação e ordenação executadas no SQLite.
+* Restrições de integridade referencial.
+* Persistência de enums.
+* Idempotência do seed.
+* Preservação das observações antigas.
+* Ausência de duplicações ou reinserção de passagens ao reiniciar.
+* Ausência de alterações inesperadas nas classes do domínio.
+
+Revise também a restrição única de Destinos.Nome, verificando sua coerência com o contrato.
+Não crie recursos adicionais desnecessários.
+7. TESTES E EVIDÊNCIAS
+Execute novamente, a partir de backend/:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Teste também:
+
+* GET /health com banco disponível.
+* Comportamento de saúde quando o banco está indisponível, sem danificar o banco de desenvolvimento.
+* GET /openapi/v1.json.
+* Interface Scalar.
+
+O relatório anterior apresentou 313 testes aprovados. Todos devem continuar passando, além dos novos testes efetivamente necessários.
+Atualize backend/docs/evidencias/B3-persistencia.md com resultados reais.
+Não invente resultados nem declare que testes foram executados se não tiverem sido.
+8. README PARA EXECUÇÃO EM OUTRO COMPUTADOR
+O professor precisa conseguir executar o projeto a partir do GitHub.
+Verifique se o README descreve, com comandos corretos:
+
+1. Pré-requisitos.
+2. Restauração das ferramentas e dependências.
+3. Criação do banco através das migrations.
+4. Execução da API.
+5. Acesso ao Swagger/Scalar.
+6. Execução dos testes.
+7. Origem e limitações dos dados simulados.
+
+Considere que o professor clonará um repositório que NÃO contém o banco SQLite local.
+Não dependa de configurações exclusivas do computador atual.
+9. REGISTRO ACADÊMICO E PADRÃO PROFISSIONAL
+Registre esta solicitação em prompts.md, conforme o padrão existente.
+Preserve a documentação acadêmica do uso de IA exigida pela FIAP.
+Não adicione comentários promocionais, banners ou assinaturas automáticas de ferramentas.
+Não altere commits antigos.
+Utilize os dados legítimos de autoria já configurados no Git local.
+10. AUTORIZAÇÃO CONDICIONAL PARA COMMIT E PUSH
+Se todas as verificações passarem, está autorizado a publicar o B3.
+Mensagem de commit:
+`feat: add EF Core persistence and SQLite integration tests`
+Antes de publicar:
+
+* Inspecione o diff completo.
+* Confirme que somente alterações pertinentes ao B3 serão versionadas.
+* Confirme ausência de senhas, tokens, arquivos .db, arquivos temporários e binários.
+* Verifique a mensagem real do commit.
+* Não acrescente trailer Co-Authored-By ou assinatura automática de ferramenta.
+* Não utilize force push.
+
+Execute commit e push normal para origin/main.
+Se encontrar falha relevante que não consiga corrigir com segurança, NÃO publique; explique o bloqueio.
+11. RELATÓRIO FINAL
+Apresente objetivamente:
+A. O que foi corrigido.
+B. Estado final da verificação de saúde.
+C. Resultado da auditoria de DadosSimulados.
+D. Confirmação das migrations e integridade do banco.
+E. Quantidade real de testes aprovados, falhos e ignorados.
+F. Resultado do build e dos comandos EF Core.
+G. Evidências registradas.
+H. Comandos para o professor executar o backend a partir do GitHub.
+I. Hash e mensagem do commit, se publicado.
+J. Resultado do push e sincronização de main com origin/main.
+K. Pendências específicas para B4.
+L. Critérios oficiais da FIAP já implementados e ainda pendentes.
+Não implemente repositórios LINQ, novos endpoints de negócio, integração externa ou serviços do totem.
+Execute B3.1, valide, publique somente se estiver correto e pare. Não inicie B4.
+````
+
+**Resumo da resposta (não é transcrição):**
+- **Verificação do banco:** a IA criou o `BancoDadosHealthCheck`. Ele confere se o SQLite está
+  acessível e se as migrations foram aplicadas, sem criar o banco nem aplicar migrations, e foi
+  registrado junto com a persistência. O `/health` manteve o formato e passou a responder 200
+  com o banco saudável e 503 com o banco indisponível ou sem migrations.
+- **Testes do `/health`:** três testes pela API real (`WebApplicationFactory`), com bancos
+  temporários isolados, comprovam esses cenários.
+- **`DadosSimulados` das passagens:** a auditoria concluiu que o `NULL` nas passagens simuladas é
+  uma decisão de armazenamento válida, porque o tipo, pelo discriminador, as identifica como
+  fictícias. Testes mostram a materialização correta e que o filtro pela propriedade calculada
+  não é traduzido, o que evita resultados errados. Também foi testado o filtro traduzível que o
+  B4 deve usar.
+- **Busca sem acentos:** um teste comprovou que o `LIKE` do SQLite não ignora acentos, e o plano
+  de colunas de busca normalizadas para o B4 foi documentado.
+- **Documentação:** foram atualizados o contrato (seção 6 e histórico), o `backend/README.md`
+  (com um passo a passo para executar a partir do GitHub) e as evidências do B3.
+- **Validação:** 320 testes aprovados; todos os comandos `dotnet ef` passaram; o banco de
+  desenvolvimento ficou idêntico.
+- **Publicação:** a etapa foi publicada com o commit
+  `feat: add EF Core persistence and SQLite integration tests`, sem trailer, e push normal.
