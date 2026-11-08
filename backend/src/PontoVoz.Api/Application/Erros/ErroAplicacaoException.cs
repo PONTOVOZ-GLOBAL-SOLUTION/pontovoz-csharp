@@ -1,6 +1,6 @@
 namespace PontoVoz.Api.Application.Erros;
 
-/// <summary>Categoria do erro, que o tratamento HTTP do B6 converte em status.</summary>
+/// <summary>Categoria do erro, que o tratamento HTTP converte em status.</summary>
 public enum TipoErroAplicacao
 {
     /// <summary>Parâmetro com formato ou faixa inválidos (400).</summary>
@@ -18,7 +18,7 @@ public enum TipoErroAplicacao
 
 /// <summary>
 /// Erro esperado de um service, com o <see cref="Codigo"/> estável do catálogo de erros do
-/// contrato (contracts/api-v1.md, seção 7). Não carrega detalhes de HTTP: o B6 monta o
+/// contrato (contracts/api-v1.md, seção 7). Não carrega detalhes de HTTP: o tratamento global monta o
 /// ProblemDetails a partir de <see cref="Tipo"/>, <see cref="Titulo"/>, <see cref="Exception.Message"/> e
 /// <see cref="Erros"/>. Erros inesperados não usam esta classe.
 /// </summary>

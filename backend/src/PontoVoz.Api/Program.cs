@@ -21,6 +21,9 @@ builder.Services.AddSegurancaAdministrativa();
 
 var app = builder.Build();
 
+// Em Development (Banco:AplicarMigracoesAoIniciar), cria ou atualiza o SQLite antes de atender.
+await app.AplicarMigracoesEmDesenvolvimentoAsync();
+
 // Erros: exceções viram ProblemDetails (TratadorExcecoes) e status sem corpo, como o 404 de
 // uma rota inexistente, também recebem um ProblemDetails.
 app.UseExceptionHandler();
@@ -31,6 +34,11 @@ if (app.Environment.IsDevelopment())
     // Documento OpenAPI em /openapi/v1.json e interface Scalar em /scalar.
     app.MapOpenApi();
     app.MapScalarApiReference();
+
+    // Atalhos para a documentação: a raiz e o endereço habitual do Swagger levam ao Scalar.
+    // Não são operações da API e ficam fora do documento OpenAPI.
+    app.MapGet("/", () => Results.Redirect("/scalar")).ExcludeFromDescription();
+    app.MapGet("/swagger/{**resto}", () => Results.Redirect("/scalar")).ExcludeFromDescription();
 }
 else
 {

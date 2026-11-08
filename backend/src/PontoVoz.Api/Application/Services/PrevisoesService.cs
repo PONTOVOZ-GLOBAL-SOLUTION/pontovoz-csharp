@@ -66,7 +66,7 @@ public sealed class PrevisoesService(
     /// <summary>
     /// Monta <c>PrevisoesParada</c> a partir do resultado do provedor (ou <c>null</c> quando a parada
     /// não tem linhas e o provedor não foi consultado) e do instante <paramref name="agora"/>. Também é
-    /// usado pelo resumo (B9): lá um provedor indisponível aparece como
+    /// usado pelo resumo: lá um provedor indisponível aparece como
     /// <c>status: "ProvedorIndisponivel"</c>, com <c>previsoes: []</c> e todas as linhas em
     /// <c>linhasSemPrevisao</c>, em vez do 503 (seções 4.5 e 4.8).
     /// </summary>

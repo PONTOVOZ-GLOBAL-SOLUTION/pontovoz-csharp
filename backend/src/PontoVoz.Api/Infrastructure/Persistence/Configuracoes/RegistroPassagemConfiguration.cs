@@ -47,7 +47,7 @@ internal sealed class RegistroPassagemConfiguration : IEntityTypeConfiguration<R
         builder.HasOne(passagem => passagem.Parada).WithMany().HasForeignKey(passagem => passagem.ParadaId).OnDelete(DeleteBehavior.Restrict);
         builder.HasOne(passagem => passagem.Linha).WithMany().HasForeignKey(passagem => passagem.LinhaId).OnDelete(DeleteBehavior.Restrict);
 
-        // Consulta da última passagem por linha de uma parada (B4).
+        // Consulta da última passagem por linha de uma parada.
         builder.HasIndex(passagem => new { passagem.ParadaId, passagem.LinhaId, passagem.ObservadaEmUtc });
     }
 }

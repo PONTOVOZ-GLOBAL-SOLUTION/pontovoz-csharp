@@ -5,12 +5,14 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estado atual
 
-**Bloco B10 — revisão final da entrega.** Todas as rotas do contrato estão implementadas
-(B0 a B9). O B10 não acrescentou funcionalidades: reproduziu a execução num clone novo, revisou a
-documentação e passou por auditoria independente do pacote do projeto. Hoje o backend:
+Todas as rotas do contrato estão implementadas (B0 a B9). O B10 reproduziu a execução num clone
+novo e revisou a documentação. O B11 corrigiu a execução: solução na raiz do repositório, banco
+criado automaticamente em Development e atalhos para a documentação; foi concluído e auditado.
+Nenhuma rota foi acrescentada. Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
-  (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
+  (200 quando os dois estão saudáveis, 503 quando o banco está indisponível); em Development, cria
+  ou atualiza o banco na inicialização (veja [Banco em Development](#banco-em-development));
 - publica o documento OpenAPI e a interface Scalar em Development;
 - tem o **modelo de domínio** em `src/PontoVoz.Api/Domain/` (veja [Domínio](#domínio-b2));
 - **persiste** o domínio em SQLite com EF Core 10, com migrations e seed idempotente de dados
@@ -33,8 +35,8 @@ documentação e passou por auditoria independente do pacote do projeto. Hoje o 
 - compara as **alternativas de deslocamento** (linhas diretas até um destino, pelo menor tempo
   total) e monta o **resumo do totem** (parada, previsões e últimas passagens numa só resposta),
   completando as 13 rotas de negócio do contrato (veja [Alternativas e resumo](#alternativas-e-resumo-b9));
-- tem **805 testes**: 278 de domínio, 144 da camada de aplicação, 172 de integração e de
-  provedores e 211 pela API em execução (51 acrescentados no B9).
+- tem **816 testes**: 278 de domínio, 144 da camada de aplicação, 172 de integração e de
+  provedores e 222 pela API em execução.
 
 Todas as rotas do contrato estão implementadas. O estado de cada uma está em
 [`../contracts/api-v1.md`](../contracts/api-v1.md), seção 9.
@@ -48,7 +50,7 @@ desta seção.
 | Executar do zero | [Executar a partir do GitHub](#executar-a-partir-do-github) |
 | Demonstrar a API | [Roteiro de demonstração](#roteiro-de-demonstração) |
 | Evidências por critério da disciplina | [`docs/evidencias/INDICE-ENTREGA.md`](docs/evidencias/INDICE-ENTREGA.md) |
-| Validação final (B10) | [`docs/evidencias/B10-validacao-final.md`](docs/evidencias/B10-validacao-final.md) |
+| Validação final (B10 e B11) | [`docs/evidencias/B10-validacao-final.md`](docs/evidencias/B10-validacao-final.md) e [`docs/evidencias/B11-validacao.md`](docs/evidencias/B11-validacao.md) |
 | Explicar o código | [`docs/GUIA-APRESENTACAO-CSHARP.md`](docs/GUIA-APRESENTACAO-CSHARP.md) |
 
 ## Requisitos de ambiente
@@ -58,10 +60,13 @@ desta seção.
 | .NET SDK | 10.0.100 ou superior na linha 10.0 (testado com **10.0.403**) |
 | Runtime ASP.NET Core | 10.0.x |
 | Sistema | Testado no Windows 11 |
-| Editor | Qualquer um (VS Code com C# Dev Kit, Visual Studio 2022+ ou Rider) |
+| IDE (opcional) | **Visual Studio 2026** (18.0 ou superior), VS Code com a extensão C# Dev Kit, ou JetBrains Rider. Versões anteriores do Visual Studio não têm suporte ao .NET 10. |
 
-O arquivo [global.json](global.json) exige SDK `10.0.100` com `rollForward: latestFeature`.
-Qualquer SDK 10.0.x com feature band igual ou superior é aceito, sem exigir o mesmo patch de todos.
+O arquivo [`global.json`](../global.json), na raiz do repositório, exige SDK `10.0.100` com
+`rollForward: latestFeature`: qualquer SDK 10.0.x com feature band igual ou superior é aceito. Com
+um SDK anterior ao 10 (por exemplo, só o .NET 8), o build não funciona. Como fica na raiz, o mesmo
+arquivo vale para os comandos executados na raiz e dentro de `backend/`, inclusive a configuração
+dos testes.
 
 Não é necessário instalar Docker, banco de dados nem ferramentas globais.
 
@@ -73,7 +78,7 @@ Não é necessário instalar Docker, banco de dados nem ferramentas globais.
 | `Scalar.AspNetCore` | 2.18.7 | Interface de documentação em `/scalar` |
 | `Microsoft.EntityFrameworkCore.Sqlite` | 10.0.14 | EF Core com SQLite: `PontoVozDbContext`, mapeamentos e seed |
 | `Microsoft.EntityFrameworkCore.Design` | 10.0.14 | Geração e aplicação das migrations pelo `dotnet ef` |
-| `dotnet-ef` (ferramenta **local**) | 10.0.14 | Comandos de migrations, declarado em `.config/dotnet-tools.json` |
+| `dotnet-ef` (ferramenta **local**) | 10.0.14 | Comandos de migrations, declarado em `.config/dotnet-tools.json`, na raiz do repositório |
 | `xunit.v3` | 4.0.2 | Testes automatizados (o projeto de testes é um executável, como exige o xUnit v3) |
 | `xunit.runner.visualstudio` e `Microsoft.NET.Test.Sdk` | 4.0.1 e 17.14.1 | Compatibilidade com o Test Explorer das IDEs |
 | `Microsoft.Extensions.TimeProvider.Testing` | 10.11.0 | `FakeTimeProvider`, relógio controlado nos testes das regras temporais (só no projeto de testes) |
@@ -81,10 +86,29 @@ Não é necessário instalar Docker, banco de dados nem ferramentas globais.
 
 ## Executar a partir do GitHub
 
-O repositório **não** contém o banco SQLite: ele é criado na primeira execução, a partir da
-migration. Os pré-requisitos são o Git e o .NET SDK 10 (veja
+O repositório **não** contém o banco SQLite: em Development, a API o cria na primeira execução, a
+partir das migrations. Os pré-requisitos são o Git e o .NET SDK 10 (veja
 [Requisitos de ambiente](#requisitos-de-ambiente)); Docker e banco de dados instalados não são
-necessários. O passo a passo:
+necessários.
+
+O caminho mais curto, a partir da raiz do repositório clonado:
+
+```bash
+dotnet build
+```
+
+```bash
+dotnet test
+```
+
+```bash
+dotnet run --project backend/src/PontoVoz.Api --launch-profile http
+```
+
+No Visual Studio 2026, abra `PontoVoz.sln`, na raiz, escolha `PontoVoz.Api` como projeto de
+inicialização e execute com o perfil `http`.
+
+O passo a passo completo, dentro de `backend/`, com o banco criado antes de iniciar a API:
 
 ```bash
 git clone https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp.git
@@ -121,11 +145,25 @@ http://localhost:5080/health. Os testes rodam com `dotnet test`, sem precisar do
 dotnet test
 ```
 
-Esse passo a passo foi repetido no B10 num clone novo do GitHub, sem banco nem binários
-anteriores: todos os comandos terminaram com código 0 e os 805 testes passaram (veja
-[`docs/evidencias/B10-validacao-final.md`](docs/evidencias/B10-validacao-final.md)).
-Sem o `dotnet ef database update`, a API inicia, mas o `/health` responde **503**, porque o banco
-não existe.
+Os dois caminhos foram testados numa cópia limpa do repositório, sem banco nem binários
+anteriores (veja [`docs/evidencias/B11-validacao.md`](docs/evidencias/B11-validacao.md)). O
+`dotnet ef database update` continua disponível para criar o banco sem iniciar a API e para os
+ambientes fora de Development.
+
+### Banco em Development
+
+Com `Banco:AplicarMigracoesAoIniciar` verdadeira, que é o valor do `appsettings.Development.json`,
+a API aplica as migrations pendentes e o seed de demonstração antes de atender a primeira
+requisição (`PersistenciaExtensions.AplicarMigracoesEmDesenvolvimentoAsync`).
+
+- Usa as mesmas migrations do `dotnet ef database update`, e não `EnsureCreated`.
+- É idempotente: num banco já atualizado e provisionado, nada é gravado; reiniciar a API não
+  duplica dados.
+- Fora de Development, a opção é ignorada mesmo se ligada (com aviso no log), e o
+  `appsettings.json` a mantém desligada: o banco precisa ser preparado com
+  `dotnet ef database update`.
+- Testes: `MigracaoAutomaticaTests` (banco criado, migrations aplicadas, seed sem duplicação,
+  banco existente sem alteração, Production sem criar o banco).
 
 Os dados são **fictícios**: paradas, linhas, destinos, percursos e passagens de demonstração com
 o prefixo `SIM-`. Eles não representam a operação real da SPTrans (veja
@@ -226,7 +264,7 @@ A API fica disponível em `http://localhost:5080` (somente localhost).
 |---|---|
 | Saúde do processo e do banco | http://localhost:5080/health |
 | Documento OpenAPI | http://localhost:5080/openapi/v1.json |
-| Interface Scalar | http://localhost:5080/scalar (redireciona para `/scalar/`) |
+| Interface Scalar | http://localhost:5080/scalar (redireciona para `/scalar/`); `/` e `/swagger` também levam a ela, só em Development |
 | Consultas públicas (B6) | http://localhost:5080/api/v1/... (veja [Web API](#web-api-b6)) |
 
 Respostas reais de `GET /health`, registradas nas evidências do B3:
@@ -251,8 +289,8 @@ O projeto usa xUnit v3 sobre a Microsoft.Testing.Platform, declarada em
 `global.json` (`"test": { "runner": "Microsoft.Testing.Platform" }`), como o
 .NET 10 SDK exige para essa plataforma.
 
-`dotnet test` executa os 805 testes (domínio, aplicação, integração com SQLite e provedores, e
-HTTP pela API em execução) e termina com código de saída **0** quando todos passam. Os testes de integração usam um banco SQLite
+`dotnet test` executa os 816 testes (domínio, aplicação, integração com SQLite e provedores, e
+HTTP pela API em execução), na raiz do repositório ou em `backend/`, e termina com código de saída **0** quando todos passam. Os testes de integração usam um banco SQLite
 **real** e isolado por teste, em memória ou em arquivo temporário, com o esquema criado pela
 migration. Eles não usam o provedor InMemory e não tocam no `pontovoz.db`. Para ver cada teste:
 
@@ -319,11 +357,13 @@ dotnet ef migrations has-pending-model-changes --project src/PontoVoz.Api
 
 ## Estrutura
 
+Na raiz do repositório ficam `PontoVoz.sln` (formato clássico, usado pelo Visual Studio 2026 e
+pelos comandos na raiz), `global.json` (versão do SDK e plataforma de testes) e
+`.config/dotnet-tools.json` (ferramenta local `dotnet-ef`).
+
 ```
 backend/
-├─ PontoVoz.slnx                 solução (formato .slnx do .NET 10)
-├─ global.json                   versão mínima do SDK e plataforma de testes
-├─ .config/dotnet-tools.json     ferramenta local dotnet-ef
+├─ PontoVoz.slnx                 solução no formato .slnx (a mesma de ../PontoVoz.sln)
 ├─ .editorconfig                 padrão de estilo do código
 ├─ docs/GUIA-APRESENTACAO-CSHARP.md  guia para explicar o código (B10)
 ├─ docs/evidencias/              evidências por bloco e índice da entrega (B10)
@@ -595,8 +635,10 @@ dotnet ef database update --project src/PontoVoz.Api
 O comando aplica as migrations pendentes e, em seguida, roda duas etapas pelo gancho
 `UseSeeding` do EF Core: o preenchimento da coluna de busca dos registros antigos (B4) e o seed
 de demonstração. O `Database.MigrateAsync` usa as mesmas etapas pelo gancho `UseAsyncSeeding`,
-que os testes exercitam. A API **não** aplica migrations ao iniciar, e nenhuma etapa roda por
-requisição HTTP. Repetir o comando não muda um banco já atualizado.
+que os testes exercitam. Em Development, a API usa esse mesmo caminho ao iniciar (veja
+[Banco em Development](#banco-em-development)); nos outros ambientes, não aplica migrations ao
+iniciar. Nenhuma etapa roda por requisição HTTP. Repetir o comando não muda um banco já
+atualizado.
 
 Num banco criado no B3, o mesmo comando aplica a migration `AddSearchColumns` do B4 sem apagar
 nem alterar os dados existentes.
@@ -1453,4 +1495,5 @@ dotnet test --filter-class "*Resumo*"
 | B7 | Endpoints administrativos com chave de acesso (concluído) |
 | B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo desligado) (concluído) |
 | B9 | Alternativas de deslocamento e resumo da parada (concluído) |
-| B10 | Revisão final: reprodução num clone novo, documentação, evidências e guia de apresentação (auditoria do pacote concluída; ajustes finais da documentação) |
+| B10 | Revisão final: reprodução num clone novo, documentação, evidências e guia de apresentação (concluído) |
+| B11 | Correções de execução (solução na raiz, banco automático em Development, atalhos da documentação), ficha CitizenTech e ODS (concluído e auditado) |

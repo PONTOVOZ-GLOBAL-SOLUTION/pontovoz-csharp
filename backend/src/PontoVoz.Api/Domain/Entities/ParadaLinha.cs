@@ -2,8 +2,8 @@ namespace PontoVoz.Api.Domain.Entities;
 
 /// <summary>
 /// Indica que uma linha atende uma parada. Só é criada por <see cref="Parada.AssociarLinha"/>,
-/// que impede associações duplicadas. A chave será composta por (<see cref="ParadaId"/>,
-/// <see cref="LinhaId"/>) no B3.
+/// que impede associações duplicadas. No banco, a chave é composta por (<see cref="ParadaId"/>,
+/// <see cref="LinhaId"/>).
 /// </summary>
 public sealed class ParadaLinha
 {

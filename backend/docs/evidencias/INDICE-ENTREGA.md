@@ -26,9 +26,10 @@ registros produzidos em cada bloco e na validação final do B10.
 | **EF Core + LINQ** | [`B3-persistencia.md`](B3-persistencia.md) | Migration, esquema, seed idempotente, `/health` com verificação do banco | EF Core + LINQ |
 | **EF Core + LINQ** | [`B4-consultas-linq.md`](B4-consultas-linq.md) | SQL gerado pelo EF Core para cada consulta LINQ, migration `AddSearchColumns`, busca sem acentos, plano de execução e mutações | EF Core + LINQ |
 | **EF Core + LINQ** | [`B10-validacao-final.md`](B10-validacao-final.md#reprodução-num-clone-novo) | Banco novo criado pelas migrations e pelo seed num clone do GitHub | EF Core + LINQ |
+| **EF Core + LINQ** | [`B11-validacao.md`](B11-validacao.md#banco-criado-na-inicialização) | Banco criado pela API ao iniciar em Development, sem duplicar dados ao reiniciar | EF Core + LINQ |
 | **Async/Await** | [`B5-servicos.md`](B5-servicos.md) | Services assíncronos com `CancellationToken` repassado ao EF Core | Async/Await |
 | **Async/Await** | [`B9-alternativas-resumo.md`](B9-alternativas-resumo.md#instante-único-e-paralelismo) | `Task.WhenAll` no resumo sem duas operações simultâneas no mesmo `DbContext` | Async/Await |
-| **Testes unitários** | [`B10-validacao-final.md`](B10-validacao-final.md#testes) | 805 testes aprovados com binários recompilados, por grupo | Qualidade |
+| **Testes unitários** | [`B11-validacao.md`](B11-validacao.md#testes) | 816 testes aprovados com binários recompilados, por grupo (805 no B10) | Qualidade |
 | **Testes unitários** | Blocos [`B3`](B3-persistencia.md#testes), [`B4`](B4-consultas-linq.md#testes), [`B5`](B5-servicos.md), [`B6`](B6-web-api.md#testes-automatizados), [`B7`](B7-admin.md), [`B8`](B8-previsoes.md), [`B9`](B9-alternativas-resumo.md#testes-automatizados) | Testes de cada bloco e o que cobrem | Qualidade |
 | **Scalar/OpenAPI** | [`B0-scalar.jpg`](B0-scalar.jpg), [`B6-scalar-documentacao.jpg`](B6-scalar-documentacao.jpg), [`B6-scalar-requisicao.jpg`](B6-scalar-requisicao.jpg), [`B7-scalar-admin.jpg`](B7-scalar-admin.jpg), [`B8-scalar-previsoes.jpg`](B8-scalar-previsoes.jpg), [`B9-scalar-alternativas.jpg`](B9-scalar-alternativas.jpg) | Capturas reais da interface Scalar ao longo dos blocos | Web API |
 | **Scalar/OpenAPI** | [`../../../contracts/openapi/pontovoz-v1.json`](../../../contracts/openapi/pontovoz-v1.json) | Documento exportado, igual ao gerado pela API (teste `OpenApiExportado_EstaIgualAoDocumentoGeradoPelaApi`) | Web API |
@@ -38,6 +39,7 @@ registros produzidos em cada bloco e na validação final do B10.
 | **Tratamento de falhas** | [`B8-previsoes.md`](B8-previsoes.md), [`B9-alternativas-resumo.md`](B9-alternativas-resumo.md#provedor-indisponível-nas-três-rotas), [`B10-validacao-final.md`](B10-validacao-final.md#falha-controlada) | 503 nas previsões, 200 `SemComparacao` nas alternativas e 200 `Parcial` no resumo | Web API / Qualidade |
 | **Segurança** | [`B7-admin.md`](B7-admin.md), [`B10-validacao-final.md`](B10-validacao-final.md#segurança-e-higiene-do-repositório) | Chave comparada em tempo constante, 401/403, chave fora de logs e respostas, ausência de segredos no Git | Qualidade |
 | **Inicialização** | [`B0-inicializacao.md`](B0-inicializacao.md) | SDK, ferramenta local do EF Core, primeiro build, `/health` e Scalar | Qualidade |
+| **Execução pelo professor** | [`B11-validacao.md`](B11-validacao.md) | Build e testes na raiz e em `backend/`, API sem comando extra, atalhos `/` e `/swagger` | Qualidade |
 
 ## Documentos de apoio
 

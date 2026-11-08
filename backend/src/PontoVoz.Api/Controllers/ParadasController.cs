@@ -8,8 +8,8 @@ namespace PontoVoz.Api.Controllers;
 
 /// <summary>
 /// Paradas e últimas passagens (contracts/api-v1.md, seções 4.1, 4.2 e 4.6). O controller só
-/// recebe os parâmetros e chama os services; validação, regras e erros ficam no B5 e no
-/// tratamento global de erros.
+/// recebe os parâmetros e chama os services; validação, regras e erros ficam nos services e
+/// no tratamento global de erros.
 /// </summary>
 [ApiController]
 [Route("api/v1/paradas")]

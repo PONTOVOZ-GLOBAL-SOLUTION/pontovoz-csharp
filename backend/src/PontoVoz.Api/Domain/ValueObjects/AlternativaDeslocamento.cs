@@ -6,7 +6,7 @@ namespace PontoVoz.Api.Domain.ValueObjects;
 
 /// <summary>
 /// Resultado calculado para uma linha direta até um destino (<c>Alternativa</c> no contrato).
-/// Não é persistido. A ordenação e a posição de cada item ficam com o serviço de alternativas (B9).
+/// Não é persistido. A ordenação e a posição de cada item ficam com o serviço de alternativas.
 /// </summary>
 public sealed record AlternativaDeslocamento
 {

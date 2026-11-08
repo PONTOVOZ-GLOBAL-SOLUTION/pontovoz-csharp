@@ -9,7 +9,7 @@ namespace PontoVoz.Api.Application.Interfaces;
 /// Fonte de previsões de chegada (contrato, seção 4.5). Trocar a implementação (simulada ou Olho
 /// Vivo) não muda o service nem os controllers. Uma falha do provedor não é exceção: volta como
 /// <see cref="ResultadoProvedor.Indisponivel"/>, para que cada consumidor decida o que fazer
-/// (503 no endpoint de previsões, status no resumo e nas alternativas do B9). Só o cancelamento
+/// (503 no endpoint de previsões, status no resumo e nas alternativas). Só o cancelamento
 /// da requisição é propagado como <see cref="OperationCanceledException"/>.
 /// </summary>
 public interface IProvedorPrevisaoChegada

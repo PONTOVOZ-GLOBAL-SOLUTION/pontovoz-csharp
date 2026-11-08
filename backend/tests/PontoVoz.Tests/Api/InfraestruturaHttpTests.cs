@@ -267,6 +267,36 @@ public sealed class InfraestruturaHttpTests
     }
 
     [Theory]
+    [InlineData("/")]
+    [InlineData("/swagger")]
+    [InlineData("/swagger/index.html")]
+    public async Task AtalhosDaDocumentacao_EmDevelopment_RedirecionamParaOScalar(string caminho)
+    {
+        await using ApiTeste api = await ApiTeste.CriarAsync();
+        using HttpClient cliente = api.Fabrica.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        using HttpResponseMessage resposta = await cliente.GetAsync(new Uri(caminho, UriKind.Relative), Ct);
+
+        Assert.Equal(HttpStatusCode.Redirect, resposta.StatusCode);
+        Assert.Equal("/scalar", resposta.Headers.Location?.OriginalString);
+    }
+
+    [Theory]
+    [InlineData("/")]
+    [InlineData("/swagger")]
+    public async Task AtalhosDaDocumentacao_ForaDeDevelopment_NaoExistem(string caminho)
+    {
+        await using ApiTeste api = await ApiTeste.CriarAsync(ambiente: "Production");
+        using HttpClient cliente = api.Fabrica.CreateClient(new Microsoft.AspNetCore.Mvc.Testing.WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        using HttpResponseMessage resposta = await cliente.GetAsync(new Uri(caminho, UriKind.Relative), Ct);
+
+        Assert.Equal(HttpStatusCode.NotFound, resposta.StatusCode);
+        JsonNode json = JsonNode.Parse(await resposta.Content.ReadAsStringAsync(Ct))!;
+        Assert.Equal("RotaNaoEncontrada", json["codigo"]!.GetValue<string>());
+    }
+
+    [Theory]
     [InlineData("GET", "/api/v1/admin/destinos")]
     [InlineData("POST", "/api/v1/admin/destinos")]
     public async Task RotasAdministrativasForaDoContrato_NaoExistem(string metodo, string modelo)

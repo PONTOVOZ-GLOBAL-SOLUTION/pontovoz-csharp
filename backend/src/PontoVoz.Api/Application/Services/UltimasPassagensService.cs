@@ -49,7 +49,7 @@ public sealed class UltimasPassagensService(
 
     /// <summary>
     /// Monta a resposta a partir dos dados já lidos e do instante <paramref name="agora"/>. Também é
-    /// usado pelo resumo (B9), que lê o relógio uma única vez para todas as partes.
+    /// usado pelo resumo, que lê o relógio uma única vez para todas as partes.
     /// </summary>
     internal static UltimasPassagensParadaDto Montar(Parada parada, IReadOnlyList<Linha> linhasDaParada, int? linhaId, IReadOnlyList<RegistroPassagem> ultimas, DateTimeOffset agora)
     {

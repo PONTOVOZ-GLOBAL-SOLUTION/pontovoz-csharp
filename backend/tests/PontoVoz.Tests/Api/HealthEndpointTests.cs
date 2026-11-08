@@ -20,9 +20,12 @@ public sealed class HealthEndpointTests : IDisposable
 
     private string ConnectionString => $"Data Source={_arquivo}";
 
+    // A migração automática de Development fica desligada: estes testes conferem o /health com o
+    // banco ausente ou sem migrations. A migração automática é testada em MigracaoAutomaticaTests.
     private WebApplicationFactory<Program> Api() =>
-        new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
-            builder.UseSetting("ConnectionStrings:PontoVoz", ConnectionString));
+        new WebApplicationFactory<Program>().WithWebHostBuilder(builder => builder
+            .UseSetting("ConnectionStrings:PontoVoz", ConnectionString)
+            .UseSetting("Banco:AplicarMigracoesAoIniciar", "false"));
 
     private async Task<(HttpStatusCode Status, string Corpo, JsonElement Json)> ObterHealthAsync()
     {

@@ -3,7 +3,7 @@ namespace PontoVoz.Api.Application.Consultas;
 /// <summary>
 /// Página pedida em uma listagem (contracts/api-v1.md, seção 1.5): <c>pagina</c> ≥ 1 e
 /// <c>tamanhoPagina</c> de 1 a 50. Valores fora da faixa são erro de programação aqui; a
-/// validação que devolve 400 ao cliente fica na camada da API (B5/B6).
+/// validação que devolve 400 ao cliente fica nos services e na camada HTTP.
 /// É uma classe, não uma <c>struct</c>: assim <c>new Paginacao()</c> sempre passa pelo construtor
 /// e recebe os valores padrão, em vez de campos zerados.
 /// </summary>

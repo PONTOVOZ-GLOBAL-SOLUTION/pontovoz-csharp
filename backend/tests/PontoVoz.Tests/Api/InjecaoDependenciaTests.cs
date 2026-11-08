@@ -22,7 +22,9 @@ public sealed class InjecaoDependenciaTests : IDisposable
     public void Interfaces_SaoResolvidasPelaInjecaoDeDependencia(Type interfaceDoServico, Type implementacao)
     {
         using WebApplicationFactory<Program> api = new WebApplicationFactory<Program>()
-            .WithWebHostBuilder(builder => builder.UseSetting("ConnectionStrings:PontoVoz", $"Data Source={_arquivo}"));
+            .WithWebHostBuilder(builder => builder
+                .UseSetting("ConnectionStrings:PontoVoz", $"Data Source={_arquivo}")
+                .UseSetting("Banco:AplicarMigracoesAoIniciar", "false"));
         using IServiceScope escopo = api.Services.CreateScope();
 
         object servico = escopo.ServiceProvider.GetRequiredService(interfaceDoServico);

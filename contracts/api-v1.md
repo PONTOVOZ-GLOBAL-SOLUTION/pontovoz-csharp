@@ -1101,7 +1101,9 @@ Por que as rotas não entram em conflito:
 - `/api/v1/admin/...` começa com o literal `admin`, que não é capturado por nenhuma rota pública.
 - O mesmo caminho só se repete com métodos diferentes ou em prefixos separados:
   `GET /api/v1/paradas/{id}` (público) e `PUT /api/v1/admin/paradas/{id}` (administrativo).
-- `/health`, `/openapi/v1.json` e `/scalar` ficam fora de `/api/v1`.
+- `/health`, `/openapi/v1.json` e `/scalar` ficam fora de `/api/v1`. Em Development, `/` e
+  `/swagger` redirecionam para `/scalar`; esses atalhos não são operações da API e não aparecem no
+  documento OpenAPI.
 
 Todas as rotas atendem a uma das quatro funções do totem (previsão, última passagem,
 alternativas e resumo), à identificação da parada ou ao cadastro mínimo necessário para a

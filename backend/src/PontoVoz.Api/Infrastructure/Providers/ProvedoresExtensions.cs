@@ -9,7 +9,7 @@ namespace PontoVoz.Api.Infrastructure.Providers;
 public static class ProvedoresExtensions
 {
     /// <summary>
-    /// Registra os provedores de previsão (B8): a configuração <c>Previsoes</c>, o provedor
+    /// Registra os provedores de previsão: a configuração <c>Previsoes</c>, o provedor
     /// simulado, o adaptador Olho Vivo (HttpClient próprio, HTTPS, prazo explícito e sem os loggers
     /// padrão, que gravariam a URL de autenticação com o token) e o seletor exposto como
     /// <see cref="IProvedorPrevisaoChegada"/>.

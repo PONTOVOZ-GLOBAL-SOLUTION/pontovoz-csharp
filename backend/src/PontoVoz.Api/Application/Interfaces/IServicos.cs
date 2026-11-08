@@ -3,7 +3,7 @@ using PontoVoz.Api.Application.Dtos;
 
 namespace PontoVoz.Api.Application.Interfaces;
 
-// Services de consulta usados pelos controllers públicos do B6. Todos validam os parâmetros,
+// Services de consulta usados pelos controllers públicos. Todos validam os parâmetros,
 // lançam ErroAplicacaoException com o código do contrato e devolvem DTOs prontos para serializar.
 
 /// <summary><c>GET /api/v1/paradas</c> e <c>GET /api/v1/paradas/{id}</c> (contrato, seções 4.1 e 4.2).</summary>

@@ -15,7 +15,7 @@ public interface IDestinoRepository
     /// <summary>
     /// Percursos diretos cadastrados da parada até o destino, só de linhas ativas que atendem a
     /// parada, com a linha carregada. Ordenados pelo tempo estimado e pelo código da linha. São os
-    /// dados de entrada do cálculo de alternativas (B9), que não acontece aqui.
+    /// dados de entrada do cálculo de alternativas, feito no service.
     /// </summary>
     Task<IReadOnlyList<PercursoEstimado>> ListarPercursosDiretosAsync(int paradaId, int destinoId, CancellationToken cancellationToken);
 }

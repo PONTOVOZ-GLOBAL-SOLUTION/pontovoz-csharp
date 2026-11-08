@@ -8,7 +8,7 @@ using PontoVoz.Api.Infrastructure.Persistence;
 namespace PontoVoz.Api.Infrastructure.Repositories;
 
 /// <summary>
-/// Consultas públicas de paradas (só ativas, sem rastreamento) e a escrita administrativa do B7
+/// Consultas públicas de paradas (só ativas, sem rastreamento) e a escrita administrativa
 /// (ativas e inativas, rastreadas para o EF Core gravar as mudanças).
 /// </summary>
 public sealed class ParadaRepository(PontoVozDbContext contexto) : IParadaRepository, ICadastroParadaRepository

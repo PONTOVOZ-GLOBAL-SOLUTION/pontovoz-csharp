@@ -4,7 +4,7 @@ namespace PontoVoz.Api.Domain.Entities;
 
 /// <summary>
 /// Base das entidades persistentes com identificador próprio.
-/// O <see cref="Id"/> é gerado pelo banco (B3): enquanto vale 0, a entidade ainda não foi
+/// O <see cref="Id"/> é gerado pelo banco: enquanto vale 0, a entidade ainda não foi
 /// persistida e só é igual a ela mesma.
 /// </summary>
 public abstract class EntidadeBase

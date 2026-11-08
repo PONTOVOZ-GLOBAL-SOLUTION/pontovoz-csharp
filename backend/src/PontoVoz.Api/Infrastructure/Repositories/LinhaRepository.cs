@@ -7,7 +7,7 @@ using PontoVoz.Api.Infrastructure.Persistence;
 
 namespace PontoVoz.Api.Infrastructure.Repositories;
 
-/// <summary>Consultas públicas de linhas (só ativas) e a escrita administrativa do B7 (ativas e inativas).</summary>
+/// <summary>Consultas públicas de linhas (só ativas) e a escrita administrativa (ativas e inativas).</summary>
 public sealed class LinhaRepository(PontoVozDbContext contexto) : ILinhaRepository, ICadastroLinhaRepository
 {
     public async Task<Pagina<Linha>> BuscarAtivasAsync(string? termo, Paginacao paginacao, CancellationToken cancellationToken) =>

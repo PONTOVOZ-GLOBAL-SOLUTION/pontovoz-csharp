@@ -5,7 +5,7 @@ namespace PontoVoz.Api.Controllers;
 
 /// <summary>
 /// Informa se o processo da API está em execução e o resultado de cada verificação registrada.
-/// Desde o B3, a verificação <c>banco-de-dados</c> confere o SQLite; com ela, o escopo é
+/// A verificação <c>banco-de-dados</c> confere o SQLite; com ela, o escopo é
 /// <c>processo-e-dependencias</c>, e uma falha devolve 503.
 /// </summary>
 [ApiController]

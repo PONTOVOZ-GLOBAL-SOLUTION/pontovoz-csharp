@@ -42,9 +42,9 @@ public static class DocumentacaoOpenApi
         documento.Info.Title = "PontoVoz API";
         documento.Info.Version = "v1";
         documento.Info.Description =
-            "API do totem PontoVoz (CitizenTech FIAP). São 13 operações de negócio e o GET /health: consultas públicas (B6), "
-            + "operações administrativas do operador (B7), previsões de chegada (B8, provedor simulado por padrão) "
-            + "e alternativas de deslocamento e resumo da parada (B9). "
+            "API do totem PontoVoz (CitizenTech FIAP). São 13 operações de negócio e o GET /health: consultas públicas, "
+            + "operações administrativas do operador, previsões de chegada (provedor simulado por padrão) "
+            + "e alternativas de deslocamento e resumo da parada. "
             + "Todos os dados de demonstração são simulados e marcados com dadosSimulados. "
             + "O adaptador da API Olho Vivo (SPTrans) vem desligado e não foi validado contra a API real.";
 

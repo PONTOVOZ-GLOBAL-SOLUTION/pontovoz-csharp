@@ -6,8 +6,8 @@ namespace PontoVoz.Api.Application.Dtos;
 
 /// <summary>
 /// Regras de serialização do contrato: nomes em camelCase, enums como texto e nulos sempre
-/// presentes (seções 1.2 e 1.4). Os testes de compatibilidade usam estas opções; o B6 aplica as
-/// mesmas regras aos controllers.
+/// presentes (seções 1.2 e 1.4). Os testes de compatibilidade usam estas opções, e os controllers
+/// aplicam as mesmas regras.
 /// </summary>
 public static class JsonContrato
 {

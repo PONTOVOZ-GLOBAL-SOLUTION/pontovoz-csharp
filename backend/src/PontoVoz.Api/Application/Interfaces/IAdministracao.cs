@@ -3,7 +3,7 @@ using PontoVoz.Api.Domain.Entities;
 
 namespace PontoVoz.Api.Application.Interfaces;
 
-// Operações administrativas do B7 (contracts/api-v1.md, seção 5). As rotas públicas continuam
+// Operações administrativas (contracts/api-v1.md, seção 5). As rotas públicas continuam
 // usando só as interfaces de consulta; estas são as de escrita, usadas apenas pelos services
 // administrativos. Ao contrário das consultas públicas, aqui paradas e linhas inativas também
 // são encontradas (contrato, D10).

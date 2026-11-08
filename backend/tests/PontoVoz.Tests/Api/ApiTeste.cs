@@ -70,8 +70,13 @@ public sealed class ApiTeste : IAsyncDisposable
         {
             builder.UseEnvironment(ambiente);
             builder.UseSetting("ConnectionStrings:PontoVoz", connectionString);
+            // O banco do teste já foi criado acima: a API não aplica migrations ao iniciar.
             builder.ConfigureAppConfiguration(configuracao => configuracao.AddInMemoryCollection(
-                new Dictionary<string, string?> { ["Admin:Chave"] = chaveAdministrativa ?? string.Empty }));
+                new Dictionary<string, string?>
+                {
+                    ["Admin:Chave"] = chaveAdministrativa ?? string.Empty,
+                    ["Banco:AplicarMigracoesAoIniciar"] = "false",
+                }));
             builder.ConfigureTestServices(services => services.AddSingleton<TimeProvider>(api.Relogio));
             configurar?.Invoke(builder);
         });

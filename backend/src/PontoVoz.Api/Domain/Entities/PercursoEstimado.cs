@@ -6,8 +6,8 @@ namespace PontoVoz.Api.Domain.Entities;
 /// <summary>
 /// Tempo estimado de uma linha, a partir de uma parada que ela atende, até um destino.
 /// É criado a partir da associação <see cref="ParadaLinha"/>, então não existe percurso de uma
-/// linha que não atende a parada. A chave será composta por (<see cref="ParadaId"/>,
-/// <see cref="LinhaId"/>, <see cref="DestinoId"/>) no B3.
+/// linha que não atende a parada. No banco, a chave é composta por (<see cref="ParadaId"/>,
+/// <see cref="LinhaId"/>, <see cref="DestinoId"/>).
 /// </summary>
 public sealed class PercursoEstimado
 {

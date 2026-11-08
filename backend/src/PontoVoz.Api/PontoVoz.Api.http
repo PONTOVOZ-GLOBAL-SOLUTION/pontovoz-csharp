@@ -1,11 +1,114 @@
-@PontoVoz.Api_HostAddress = http://localhost:5080
+# Exemplos das 14 operações da API (contracts/api-v1.md).
+# Abra no Visual Studio, no VS Code (extensão REST Client) ou no Rider, com a API em execução
+# pelo perfil "http". Os ids abaixo são os de um banco novo; confira-os nas respostas de
+# GET /api/v1/paradas?codigoExterno=SIM-P001 e GET /api/v1/destinos?termo=norte.
 
-GET {{PontoVoz.Api_HostAddress}}/health
+@host = http://localhost:5080
+@paradaId = 1
+@linhaId = 4
+@destinoId = 3
+
+### Saúde do processo e do banco
+GET {{host}}/health
 Accept: application/json
 
-###
-
-GET {{PontoVoz.Api_HostAddress}}/openapi/v1.json
+### 1. Buscar a parada do totem pelo código
+GET {{host}}/api/v1/paradas?codigoExterno=SIM-P001
 Accept: application/json
 
-###
+### 1. Buscar paradas por texto (sem diferenciar acentos)
+GET {{host}}/api/v1/paradas?termo=demonstracao&pagina=1&tamanhoPagina=20
+Accept: application/json
+
+### 2. Detalhe da parada, com as linhas que a atendem
+GET {{host}}/api/v1/paradas/{{paradaId}}
+Accept: application/json
+
+### 3. Buscar linhas
+GET {{host}}/api/v1/linhas?termo=104
+Accept: application/json
+
+### 4. Buscar destinos
+GET {{host}}/api/v1/destinos?termo=norte
+Accept: application/json
+
+### 5. Previsões de chegada (provedor simulado)
+GET {{host}}/api/v1/paradas/{{paradaId}}/previsoes
+Accept: application/json
+
+### 6. Últimas passagens registradas
+GET {{host}}/api/v1/paradas/{{paradaId}}/ultimas-passagens
+Accept: application/json
+
+### 7. Alternativas até um destino (menor tempo total)
+GET {{host}}/api/v1/paradas/{{paradaId}}/alternativas?destinoId={{destinoId}}
+Accept: application/json
+
+### 8. Resumo da parada para o totem
+GET {{host}}/api/v1/paradas/{{paradaId}}/resumo
+Accept: application/json
+
+# Rotas administrativas: em Development sem Admin:Chave configurada, o cabeçalho é dispensado.
+# Com chave configurada (user-secrets ou variável de ambiente), troque o marcador pela sua chave.
+# Estas rotas GRAVAM no banco configurado.
+@chave = <CHAVE_ADMINISTRATIVA_LOCAL>
+
+### 9. Cadastrar parada (fictícia: prefixo TESTE-, SIM- é reservado ao seed)
+POST {{host}}/api/v1/admin/paradas
+Content-Type: application/json
+X-PontoVoz-Admin-Key: {{chave}}
+
+{
+  "codigoExterno": "TESTE-P003",
+  "nome": "Parada Cadastro de Teste",
+  "endereco": null,
+  "coordenada": null,
+  "dadosSimulados": true
+}
+
+### 10. Atualizar ou desativar parada (troque o id pelo devolvido no cadastro)
+PUT {{host}}/api/v1/admin/paradas/3
+Content-Type: application/json
+X-PontoVoz-Admin-Key: {{chave}}
+
+{
+  "nome": "Parada Cadastro de Teste Renomeada",
+  "endereco": null,
+  "coordenada": null,
+  "ativa": true
+}
+
+### 11. Cadastrar linha
+POST {{host}}/api/v1/admin/linhas
+Content-Type: application/json
+X-PontoVoz-Admin-Key: {{chave}}
+
+{
+  "codigo": "TESTE-L005",
+  "letreiro": "TESTE-105",
+  "terminalPrincipal": "Terminal Demonstração Centro",
+  "terminalSecundario": "Terminal Demonstração Sul",
+  "sentido": "PrincipalParaSecundario",
+  "dadosSimulados": true
+}
+
+### 12. Associar uma linha a uma parada (idempotente; troque os ids pelos cadastrados)
+PUT {{host}}/api/v1/admin/paradas/3/linhas/5
+X-PontoVoz-Admin-Key: {{chave}}
+
+### 13. Registrar passagem observada
+# A API aceita observadaEm de 24 horas antes até 2 minutos depois do horário atual, sempre com fuso.
+# {{$datetime iso8601 -5 m}} gera o horário atual em UTC menos 5 minutos (por exemplo,
+# 2026-11-10T17:19:00.0000000+00:00), no Visual Studio e na extensão REST Client do VS Code.
+# Em outro cliente, troque pelo horário atual com fuso, por exemplo 2026-11-10T14:19:00-03:00.
+POST {{host}}/api/v1/admin/observacoes-passagem
+Content-Type: application/json
+X-PontoVoz-Admin-Key: {{chave}}
+
+{
+  "paradaId": {{paradaId}},
+  "linhaId": {{linhaId}},
+  "observadaEm": "{{$datetime iso8601 -5 m}}",
+  "prefixoVeiculo": null,
+  "origemRegistro": "operador-local"
+}

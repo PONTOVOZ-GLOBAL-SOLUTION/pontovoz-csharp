@@ -13,7 +13,7 @@ integrante entenda o que está entregando e consiga demonstrá-lo.
 | 0:00–0:45 | **Problema:** no ponto de ônibus de São Paulo, quem não tem smartphone não sabe quando a linha chega nem qual opção é melhor. O PontoVoz é um totem que responde por voz ou tela; este backend é a API que o totem e a IA consultam. | README da raiz |
 | 0:45–1:45 | **Arquitetura:** controllers recebem o HTTP, services aplicam as regras, o domínio guarda as invariantes e a infraestrutura fala com o SQLite pelo EF Core. Tudo é ligado por injeção de dependência no `Program.cs`. | `Program.cs` e a pasta `src/PontoVoz.Api/` |
 | 1:45–3:15 | **Demonstração:** no Scalar, consultar a parada `SIM-P001`, as previsões, as alternativas até o Terminal Norte e o resumo. Mostrar que a linha mais rápida é a de menor tempo total, não a que chega primeiro, e que tudo aparece como **simulado**. | `http://localhost:5080/scalar` |
-| 3:15–4:15 | **Qualidade:** 805 testes (domínio, aplicação, SQLite real e HTTP), erros padronizados em ProblemDetails, chave administrativa, falha do provedor tratada (503 nas previsões, resumo parcial). | `dotnet test` e `B10-validacao-final.md` |
+| 3:15–4:15 | **Qualidade:** 816 testes (domínio, aplicação, SQLite real e HTTP), erros padronizados em ProblemDetails, chave administrativa, falha do provedor tratada (503 nas previsões, resumo parcial). | `dotnet test` e `B10-validacao-final.md` |
 | 4:15–5:00 | **Limitações:** dados de demonstração fictícios, Olho Vivo desligado e não validado, interface do totem e voz em outros componentes. | `docs/dados.md` |
 
 ## Conceitos e onde estão no código
@@ -100,10 +100,12 @@ services.
 
 `Infrastructure/Persistence/PersistenciaExtensions.cs` (`AddPersistenciaPontoVoz` e
 `UsarSqlitePontoVoz`) registra o `PontoVozDbContext` com a connection string
-`ConnectionStrings:PontoVoz` (`Data Source=pontovoz.db`). O comando
-`dotnet ef database update --project src/PontoVoz.Api` aplica as migrations
-(`20261107211456_InitialCreate` e `20261107222533_AddSearchColumns`) e roda o seed pelo gancho
-`UseSeeding`. Os instantes são gravados como ticks UTC
+`ConnectionStrings:PontoVoz` (`Data Source=pontovoz.db`). As migrations
+(`20261107211456_InitialCreate` e `20261107222533_AddSearchColumns`) criam o esquema, e o seed roda
+pelos ganchos `UseSeeding` e `UseAsyncSeeding`. Em Development, a API as aplica ao iniciar
+(`PersistenciaExtensions.AplicarMigracoesEmDesenvolvimentoAsync`, chamado no `Program.cs`, com
+`Database.MigrateAsync`); nos outros ambientes, o banco é preparado com
+`dotnet ef database update --project src/PontoVoz.Api`. Os instantes são gravados como ticks UTC
 (`Persistence/Conversores/InstanteUtcParaTicksConverter.cs`).
 
 ### 11. Onde o LINQ aparece
@@ -184,7 +186,7 @@ de ambiente. Testes: `AdministracaoAutorizacaoTests`.
 
 ### 19. Como os testes comprovam as regras
 
-São 805 testes em `backend/tests/PontoVoz.Tests/`:
+São 816 testes em `backend/tests/PontoVoz.Tests/`:
 
 - **Domain:** regras e invariantes sem banco (`RegraTemporalPassagemTests`, `ParadaTests`);
 - **Application:** services com dublês de repositório (`DublesRepositorio`) e relógio controlado;
@@ -217,6 +219,7 @@ falta de credenciais. Veja [`../../docs/dados.md`](../../docs/dados.md).
 | O que acontece se o provedor de previsões cair? | `/previsoes` responde 503 com `Retry-After: 30`; `/alternativas` responde 200 `SemComparacao`; `/resumo` responde 200 `Parcial`. Nada é inventado para cobrir a falha. |
 | Como a rota administrativa é protegida? | Pelo `ChaveAdministrativaFilter`, aplicado na classe base `AdministracaoControllerBase`, com comparação em tempo constante e 401/403 em ProblemDetails. |
 | Como o erro chega ao cliente? | `TratadorExcecoes` converte as exceções em ProblemDetails com `codigo` e `traceId`; erros inesperados viram 500 com mensagem genérica, e o detalhe fica só no log. |
-| Como a migration e o seed são criados? | `dotnet ef database update` aplica `InitialCreate` e `AddSearchColumns`; o seed roda pelo `UseSeeding` e não duplica dados num banco já provisionado. |
+| Como a migration e o seed são criados? | Em Development, a API aplica `InitialCreate` e `AddSearchColumns` ao iniciar, com `Database.MigrateAsync`; fora dele, o `dotnet ef database update` faz o mesmo. O seed roda pelos ganchos `UseSeeding`/`UseAsyncSeeding` e não duplica dados num banco já provisionado (`MigracaoAutomaticaTests`). |
+| Por que não há `DELETE`? | A exclusão é lógica: `PUT /api/v1/admin/paradas/{id}` com `"ativa": false` tira a parada das consultas e preserva o histórico de passagens; as chaves estrangeiras usam `RESTRICT`. |
 | Os dados são da SPTrans? | Não. Os dados da demonstração são fictícios e marcados como simulados; a integração Olho Vivo está desligada e não foi validada. |
 | Como foi usada a IA? | Está registrado em `prompts.md`: o ChatGPT apoiou o planejamento, os prompts e as revisões, e o Claude Code escreveu o código, os testes e a documentação, com cada etapa autorizada pelo integrante. |

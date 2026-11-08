@@ -12,6 +12,41 @@ public static class PersistenciaExtensions
 {
     public const string NomeConnectionString = "PontoVoz";
 
+    /// <summary>Configuração que liga a aplicação das migrations ao iniciar (só vale em Development).</summary>
+    public const string ChaveAplicarMigracoesAoIniciar = "Banco:AplicarMigracoesAoIniciar";
+
+    /// <summary>
+    /// Em Development, com <c>Banco:AplicarMigracoesAoIniciar</c> verdadeira, aplica as migrations
+    /// pendentes e o seed de demonstração antes de a API atender requisições. Assim, quem executa o
+    /// projeto pela primeira vez não depende do <c>dotnet ef database update</c>. Usa as mesmas
+    /// migrations do comando (não usa <c>EnsureCreated</c>) e é idempotente: num banco já
+    /// atualizado e provisionado, nada é gravado. Fora de Development o banco nunca é alterado na
+    /// inicialização: a opção é ignorada, com um aviso no log.
+    /// </summary>
+    public static async Task AplicarMigracoesEmDesenvolvimentoAsync(this IHost host, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(host);
+        IConfiguration configuracao = host.Services.GetRequiredService<IConfiguration>();
+        if (!configuracao.GetValue<bool>(ChaveAplicarMigracoesAoIniciar))
+        {
+            return;
+        }
+
+        ILogger logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("PontoVoz.Api.Infrastructure.Persistence.Migracoes");
+        IHostEnvironment ambiente = host.Services.GetRequiredService<IHostEnvironment>();
+        if (!ambiente.IsDevelopment())
+        {
+            logger.LogWarning("{Chave} ignorada no ambiente {Ambiente}: as migrations só são aplicadas ao iniciar em Development.",
+                ChaveAplicarMigracoesAoIniciar, ambiente.EnvironmentName);
+            return;
+        }
+
+        await using AsyncServiceScope escopo = host.Services.CreateAsyncScope();
+        PontoVozDbContext contexto = escopo.ServiceProvider.GetRequiredService<PontoVozDbContext>();
+        await contexto.Database.MigrateAsync(cancellationToken);
+        logger.LogInformation("Banco verificado na inicialização: migrations pendentes e dados de demonstração aplicados quando necessário.");
+    }
+
     /// <summary>
     /// Registra o <see cref="PontoVozDbContext"/> com SQLite. Um caminho relativo em
     /// <c>Data Source</c> é resolvido a partir da pasta do projeto (content root), para que a API e
@@ -26,13 +61,13 @@ public static class PersistenciaExtensions
         services.AddDbContext<PontoVozDbContext>((provider, options) =>
             options.UsarSqlitePontoVoz(resolvida, new ProvisionamentoDemonstracao(provider.GetRequiredService<TimeProvider>())));
 
-        // Repositórios de consulta (B4): mesmo tempo de vida do DbContext.
+        // Repositórios de consulta: mesmo tempo de vida do DbContext.
         services.AddScoped<IParadaRepository, ParadaRepository>();
         services.AddScoped<ILinhaRepository, LinhaRepository>();
         services.AddScoped<IDestinoRepository, DestinoRepository>();
         services.AddScoped<IRegistroPassagemRepository, RegistroPassagemRepository>();
 
-        // Escrita das rotas administrativas (B7): as mesmas classes, pelas interfaces de cadastro.
+        // Escrita das rotas administrativas: as mesmas classes, pelas interfaces de cadastro.
         services.AddScoped<ICadastroParadaRepository, ParadaRepository>();
         services.AddScoped<ICadastroLinhaRepository, LinhaRepository>();
         services.AddScoped<ICadastroPassagemRepository, RegistroPassagemRepository>();

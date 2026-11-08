@@ -9,9 +9,9 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Disciplina | C# Software Development — backend (`backend/` e `contracts/`) |
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Equipe | Albert Katri (RM556544), Bruno Biletsky (RM554739) e Paulo Akira (RM556840), informados pelo integrante no prompt 35 |
-| Integrante responsável | Pendente (a equipe ainda não indicou o componente de cada integrante) |
+| Integrante responsável | Paulo Akira (RM556840): C# Software Development, backend deste repositório (informado no prompt 41). Componentes de Albert Katri e Bruno Biletsky pendentes. |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 35 |
+| Prompts registrados | 41 |
 
 ## Como a IA foi usada
 
@@ -109,6 +109,12 @@ reescrito.
 | [33](#prompt-33) | 08/11/2026 | Bloco B10: auditoria final, reprodutibilidade, documentação e preparação da entrega | Revisão, validação e documentação | — |
 | [34](#prompt-34) | 08/11/2026 | Bloco B10.1: pacote ZIP final para auditoria independente | Preparação para auditoria | — |
 | [35](#prompt-35) | 08/11/2026 | Bloco B10.2: ajustes finais de apresentação, validação e publicação | Correção, validação e publicação | `docs: finalize C# Global Solution delivery` |
+| [36](#prompt-36) | 08/11/2026 | Análise do PDF da FIAP e da entrega, sem alterações | Auditoria | — |
+| [37](#prompt-37) | 08/11/2026 | Redação do prompt do B11 para validação com o ChatGPT | Planejamento | — |
+| [38](#prompt-38) | 08/11/2026 | Bloco B11: complemento ao prompt 13 e execução da blindagem | Correção, implementação, testes e documentação | — |
+| [39](#prompt-39) | 08/11/2026 | Bloco B11: investigação da falha intermitente e fechamento | Diagnóstico e validação | — |
+| [40](#prompt-40) | 08/11/2026 | Bloco B11.1: pacote ZIP final para auditoria independente | Preparação para auditoria | — |
+| [41](#prompt-41) | 08/11/2026 | Bloco B11.2: ajustes finais e publicação definitiva | Correção, validação e publicação | `chore: finalize C# Global Solution submission` |
 
 ---
 
@@ -8983,3 +8989,766 @@ documentais sem mudar código nem configuração:
   inalterado e nenhuma chamada à SPTrans.
 - **Git:** publicado com o commit `docs: finalize C# Global Solution delivery`, sem trailer, e
   push normal.
+
+## Revisão da entrega frente ao PDF da FIAP
+
+<a id="prompt-36"></a>
+
+### Prompt 36 — Análise do PDF da FIAP e da entrega, sem alterações
+
+**Data:** 08/11/2026 · **Tipo:** Auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+@"C:\Users\paulo\Downloads\GS CitizenTech - 3ES Fev - FIAP 2026 -.pdf"
+analise o pdf, o que foi solicitado na entrega de C# Software Development. verifique se esta atendendo a todos os requisitos. se voce notar que esta faltando algo, porque o professor é muito exigente, quero que voce me liste tudo, e ainda nao execute nada. se voce notar resquicios de IA, e partes do projeto que obviamente ta nitido que foi apenas a IA que fez, lite tambem. ainda nao quero nenhuma ação, apenas uma analise completa do projeto inteiro. tambem quero que voce me de um retorno informando se todos os testes que o professor fará quando for corrigir, esta certo sem erro
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code extraiu o texto do
+PDF (40 páginas) e comparou o projeto com a página 30 (C# Software Development) e com as regras
+gerais (páginas 14, 17 a 21 e 23), sem alterar o projeto. Apontou como atendidos os cinco critérios
+técnicos e como lacunas: a explicação dos ODS e itens da ficha da CitizenTech retirados no B10.2, a
+falta de conversa com uma pessoa real, o banco que não era criado sem o `dotnet ef database update`
+(todas as rotas respondiam 500, confirmado numa cópia), `dotnet build` e `dotnet test` falhando na
+raiz, `/swagger` com 404, a exigência do .NET 10 e o arquivo `.http` desatualizado. Listou também os
+sinais evidentes do uso de IA (histórico de commits, `prompts.md`, volume de documentação,
+referências a blocos no código) e recomendou não escondê-los.
+
+<a id="prompt-37"></a>
+
+### Prompt 37 — Redação do prompt do B11 para validação com o ChatGPT
+
+**Data:** 08/11/2026 · **Tipo:** Planejamento · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+estou conversando com o chatgpt para te mandar os prompts para execução. o que eu falaria para voce, era para blindar o projeto de qualquer ponto que o professor pode identificar como possivel perda de nota. mas quero que voce escreva um prompt indicando tudo que voce faria, para eu validar com o chatgpt. nao execute nada no projeto ainda, só me de esse prompt completo explicando detalhadamente tudo o que falta para o projeto ficar 100% blindado e eu mandar para o gpt validar
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code não alterou o
+projeto e redigiu o prompt do B11 abaixo, com os pontos de decisão marcados para validação com o
+ChatGPT e os dados que só a equipe pode fornecer. O integrante levou esse texto ao ChatGPT; o
+complemento do prompt 38 registra as decisões tomadas a partir dele.
+
+**Prompt do B11 redigido pelo Claude Code (texto integral; não foi escrito pelo integrante):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 13 — BLOCO B11: BLINDAGEM FINAL DA ENTREGA DE C# SOFTWARE DEVELOPMENT
+
+Atue como engenheiro de software sênior e revisor exigente de entregas acadêmicas de C#/.NET.
+
+Repositório: https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local: C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz
+Commit-base esperado: 6a5aae6a285692abb04a460fd8494e959677f4ae
+Prazo da FIAP: 19/11/2026, 23h55.
+
+OBJETIVO
+Eliminar todos os pontos em que um professor exigente pode tirar nota, comparando o projeto com o
+PDF oficial "GS CitizenTech - 3ES Fev - FIAP 2026" (página 30 para C# e páginas 14, 17 a 21 e 23
+para as regras gerais), sem inventar dados, pesquisa, autoria ou resultados.
+
+Não faça commit nem push antes da auditoria independente deste bloco.
+
+==================================================================
+0. REGRAS INVIOLÁVEIS
+==================================================================
+- Não reescrever o histórico do Git (sem rebase, amend em commits publicados ou force push).
+  O trailer Co-Authored-By do primeiro commit (f7a8ccf) permanece; ele já está explicado no prompts.md.
+- Não esconder o uso de IA. O prompts.md só recebe acréscimos; prompts antigos não são alterados.
+- Não inventar pesquisa de campo, entrevistados, bairro, indicadores medidos, integração com
+  outras disciplinas, nomes, RMs ou responsabilidades. O que depender da equipe vira campo
+  "Pendente — preencher pela equipe".
+- Não expor a API em 0.0.0.0 sem autorização explícita minha.
+- Não colocar chaves, tokens ou senhas em arquivos versionados.
+- Não alterar o banco de desenvolvimento (backend/src/PontoVoz.Api/pontovoz.db); testes e
+  evidências usam bancos isolados.
+- Não executar `dotnet dev-certs https --trust`.
+- Qualquer mudança de comportamento da API exige atualizar o contrato (contracts/api-v1.md),
+  o OpenAPI exportado, os testes e a documentação no mesmo bloco.
+- Todo resultado informado precisa ter sido realmente executado, com binários recompilados.
+
+==================================================================
+1. ENTRADAS QUE A EQUIPE PRECISA FORNECER (Claude não deve inventar)
+==================================================================
+Se algum item não for informado, deixar o campo como pendente no README e listá-lo no relatório:
+a) Bairro ou ponto de ônibus real escolhido (página 20: "Cidade e bairro").
+b) Resumo da conversa com uma pessoa real que convive com o problema (páginas 17 a 19): data,
+   local, perfil sem dados pessoais (ex.: "passageira idosa, usuária diária da linha X"), o que
+   ela faz hoje e o que a atrapalha. Sem nome, telefone ou foto do rosto.
+c) O que cada disciplina da equipe entrega dentro do PontoVoz (Mobile, IoT, ML, SOA, Cybersecurity,
+   Operating Systems, Testing) e se alguma delas consome esta API (ex.: o app Expo).
+d) Componente ou disciplina de cada integrante (Albert Katri RM556544, Bruno Biletsky RM554739,
+   Paulo Akira RM556840).
+e) Aprovação da redação dos ODS e dos indicadores de impacto.
+
+==================================================================
+2. EXECUÇÃO SEM ERROS EM QUALQUER CENÁRIO DO PROFESSOR
+==================================================================
+Problemas confirmados num clone limpo no B10:
+- Sem `dotnet ef database update`, o /health responde 503 e TODAS as rotas respondem 500.
+- `dotnet build` e `dotnet test` na raiz do repositório falham com MSB1003 (não há solução na raiz).
+- /swagger e a raiz / respondem 404 (a documentação está só em /scalar).
+- A solução está em .slnx, que o Visual Studio só abre a partir da versão 2022 17.13.
+- O global.json exige o SDK 10; com só o .NET 8 instalado, o build falha.
+- launchSettings tem launchBrowser: false, então o F5 não abre nada.
+- PontoVoz.Api.http só tem /health e /openapi.
+
+2.1 Criação automática do banco (recomendado)
+- Aplicar as migrations e o seed ao iniciar, com Database.MigrateAsync, controlado pela
+  configuração `Banco:AplicarMigracoesAoIniciar`: verdadeira em Development (appsettings.Development.json)
+  e falsa por padrão nos demais ambientes.
+- Continua idempotente: o seed não duplica dados num banco já provisionado.
+- Manter `dotnet ef database update` documentado como alternativa.
+- Atenção aos testes: há testes que conferem 503 no /health quando o banco não existe ou não está
+  migrado. Eles devem desligar a nova opção explicitamente (UseSetting), e um teste novo deve
+  confirmar que, com a opção ligada, uma API iniciada sem banco cria o banco e responde 200.
+- Atualizar a documentação que hoje diz "A API não aplica migrations ao iniciar".
+
+2.2 Solução compatível
+- Criar na RAIZ do repositório um PontoVoz.sln no formato clássico, que abre em qualquer Visual
+  Studio 2022, com os projetos da API e dos testes. Assim, `dotnet build` e `dotnet test` funcionam
+  na raiz.
+- Decidir: remover backend/PontoVoz.slnx (recomendado, para não haver duas soluções) ou mantê-la.
+- Os testes encontram contracts/ subindo pelas pastas, então mudar a solução de lugar não os quebra.
+  Mesmo assim, conferir o script exportar-openapi.ps1 e todos os caminhos dos READMEs.
+- O `dotnet ef` continua com --project src/PontoVoz.Api a partir de backend/, ou com o caminho
+  completo a partir da raiz; documentar os dois.
+
+2.3 Versão do .NET
+- Manter o .NET 10 (LTS). Migrar para o .NET 8 exigiria trocar EF Core 10 por 8 e o OpenAPI nativo
+  por Swashbuckle: risco alto e nenhum ganho de nota.
+- Deixar o pré-requisito em destaque no topo do README, com o link oficial de download do SDK 10 e
+  o comando `dotnet --list-sdks` para conferir.
+- Decisão a validar: trocar rollForward para latestMajor (aceita SDKs 11+, se houver) ou manter
+  latestFeature.
+
+2.4 Documentação acessível por qualquer caminho
+- Em Development, redirecionar / e /swagger para /scalar, sem aparecerem no documento OpenAPI
+  (ExcludeFromDescription), para que o OpenAPI continue com as operações do contrato.
+- Atualizar os testes de rotas fora do contrato.
+- Decisão a validar: em vez do redirecionamento, adicionar Swagger UI. Recomendo NÃO adicionar,
+  para não criar uma dependência e uma segunda documentação.
+
+2.5 Experiência no Visual Studio
+- launchSettings: launchBrowser: true, com launchUrl "scalar", nos dois perfis.
+- PontoVoz.Api.http com exemplos das 14 operações, incluindo o corpo das rotas administrativas e
+  as variáveis de id.
+
+2.6 Integração contínua (opcional, recomendado)
+- GitHub Actions com restore, build e test em ubuntu-latest e windows-latest, para provar que os
+  testes passam fora da máquina do desenvolvedor, e o selo no README.
+- Hoje os testes só rodaram no Windows. Confirmar o fuso America/Sao_Paulo no Linux.
+- Não colocar segredos no workflow.
+
+==================================================================
+3. WEB API: COMPLETUDE REST (DECISÃO A VALIDAR)
+==================================================================
+- Hoje não há DELETE: o contrato substitui a exclusão pela desativação (ativa: false).
+  Um professor pode esperar CRUD completo.
+- Opção A (mínima): manter e explicar no README e no guia "exclusão lógica: a parada é desativada
+  para preservar o histórico de passagens".
+- Opção B (recomendada): adicionar DELETE /api/v1/admin/paradas/{id} como exclusão lógica
+  (desativa a parada e responde 204; 404 se não existir; protegido pela chave). Isso também exige
+  atualizar o contrato (nova seção, tabela de rotas, catálogo), o OpenAPI (15 operações), o
+  verificador, os testes (unitários e HTTP, com 401 e 403) e as evidências.
+- Opção C (opcional): GET /api/v1/linhas/{id}, para simetria com /paradas/{id}.
+- Não criar exclusão física: as chaves estrangeiras usam RESTRICT e o histórico precisa ser preservado.
+
+==================================================================
+4. POO E ARQUITETURA VISÍVEIS AO PROFESSOR
+==================================================================
+- Não criar código artificial só para "mostrar POO".
+- Tornar o polimorfismo de comportamento evidente: IProvedorPrevisaoChegada tem três implementações
+  (simulado, Olho Vivo e seletor). No README, na seção da tabela de critérios, mostrar um trecho
+  curto de código real de cada conceito: abstração/herança (RegistroPassagem), polimorfismo
+  (override e interface), encapsulamento (private set e fábricas) e objeto de valor (Coordenada).
+- As camadas são pastas de um único projeto. Recomendo NÃO separar em vários .csproj (refatoração
+  grande e arriscada perto do prazo). Em vez disso:
+  - explicar no README que se trata de um monólito modular;
+  - criar um teste de arquitetura que falhe se Domain usar namespaces de EF Core ou ASP.NET Core,
+    e se Controllers usarem PontoVozDbContext diretamente.
+
+==================================================================
+5. REGRAS GERAIS DO PDF (DOCUMENTAÇÃO CITIZENTECH)
+==================================================================
+5.1 Ficha da CitizenTech no início do README, na ordem da página 20:
+- Nome da CitizenTech.
+- Cidade e bairro.
+- Cidadão beneficiado.
+- Problema, em UMA frase.
+- Como funciona.
+- O que cada parte faz (uma linha por disciplina, com os dados do item 1c).
+- Link do repositório, explícito.
+- Indicador de impacto.
+- ODS conectados.
+
+5.2 ODS (página 14: OBRIGATÓRIO explicar a contribuição para as metas)
+- Restaurar a tabela que existia antes do B10.2: ODS 10 (meta 10.2) e ODS 11 (meta 11.2), com a
+  forma concreta como o backend contribui (informação acessível sem smartphone, dados para voz e tela,
+  previsibilidade do transporte).
+- Tirar "justificativa ainda em aprovação" depois da aprovação da equipe (item 1e).
+
+5.3 Indicadores de impacto
+- Indicador técnico medido de verdade: criar um script de medição local (por exemplo, N requisições
+  em cada rota pública, num banco isolado) e registrar o tempo médio e o p95 como evidência, com
+  data, máquina e comando. Não chamar isso de impacto social.
+- Outros indicadores técnicos, também medidos: taxa de testes aprovados e cobertura das rotas.
+- Indicadores de impacto social continuam como "metas para piloto, sem dados coletados", com a
+  forma de medição proposta.
+
+5.4 Problema real e pessoa real (páginas 17 a 19)
+- Seção "Validação com o cidadão" no README, preenchida só com o item 1b. Sem esse dado, a seção
+  fica pendente.
+
+5.5 Integração com as outras partes (página 17: "as partes conversam entre si")
+- Alinhar o texto do README com o que a equipe realmente constrói (item 1c). Hoje o README fala em
+  "interface do totem" e "voz e IA", que não correspondem às disciplinas do PDF.
+- Se o app Expo consumir esta API: documentar como chamar a API, configurar a origem dele em
+  Cors:OrigensPermitidas e explicar que, num celular físico, localhost não funciona. Expor na rede
+  local exige um perfil separado e documentado, e só com autorização explícita minha (regra do
+  item 0). Recomendo demonstrar no emulador ou no Expo Web.
+
+5.6 "Todo mundo constrói" e "saibam explicar cada linha" (página 21)
+- Manter o guia de apresentação. Acrescentar a cada pergunta o arquivo e a linha aproximada, para
+  estudo.
+- Seção no README "Como a equipe validou a entrega": só o que os integrantes realmente fizerem
+  (por exemplo, cada um executa o roteiro de demonstração na própria máquina e registra data e
+  resultado). Claude não preenche essa seção em nome deles.
+
+==================================================================
+6. QUALIDADE: REDUZIR O RUÍDO DE PROCESSO (SEM ESCONDER O USO DE IA)
+==================================================================
+Problemas encontrados:
+- 30 referências a blocos (B5, B6, B7...) dentro dos comentários C# (ex.: "o B6 aplica...").
+- 120 citações de "seção X do contrato" nos comentários.
+- 896 linhas de comentário XML para 5.539 linhas de código.
+- backend/README.md com cerca de 1.400 linhas organizado por bloco, com "retratos históricos".
+- "Conferido no B…" espalhado no contrato.
+
+Ações:
+- Código: retirar as referências a blocos dos comentários. Manter os comentários XML úteis nos
+  membros públicos e reduzir os que só repetem o nome do método. Manter as referências ao contrato
+  só onde explicam uma regra de negócio. Sem mudança de comportamento: build e 100% dos testes
+  aprovados depois.
+- backend/README.md: reorganizar por tema (Execução, Arquitetura, Domínio, Persistência e LINQ,
+  Web API, Segurança, Async, Testes, Configuração, Limitações), mais curto e objetivo. Mover a
+  história por bloco para docs/historico-desenvolvimento.md, sem apagar informação.
+- contracts/api-v1.md: mover as notas "Conferido no B…" para um anexo de verificação ou para as
+  evidências, mantendo as regras.
+- Manter o nome dos testes (renomear 805 testes é cosmético e arriscado).
+- Manter as evidências por bloco como estão (rastreabilidade).
+- O prompts.md continua integral: só recebe o registro deste prompt.
+
+==================================================================
+7. SEGURANÇA E DADOS (REVISÃO FINAL)
+==================================================================
+- Repetir a busca de segredos, tokens, chaves, caminhos pessoais, bancos, logs e temporários.
+- Manter o Olho Vivo desligado e a frase "não validado com credenciais oficiais".
+- Manter a limitação de origemRegistro documentada, sem mudar a regra.
+- Conferir que a criação automática do banco (2.1) não liga nada fora de Development.
+
+==================================================================
+8. VALIDAÇÃO FINAL (TUDO REAL E REGISTRADO EM B11-validacao.md)
+==================================================================
+Num clone novo, numa pasta vazia, simular os cenários do professor:
+1. Na raiz: `dotnet build` e `dotnet test` → código 0.
+2. Em backend/: os comandos do README → código 0.
+3. `dotnet run` SEM `dotnet ef database update` → banco criado, /health 200 e rotas 200.
+4. /, /swagger e /scalar → Scalar abre.
+5. As operações do contrato (14, ou 15 se o DELETE for aprovado), com os status esperados,
+   inclusive 401, 403 e 409.
+6. Indisponibilidade simulada → 503, 200 SemComparacao e 200 Parcial.
+7. Exportar o OpenAPI e comparar com a API real; verificador do contrato sem falhas.
+8. `dotnet ef migrations list` e `has-pending-model-changes`.
+9. CI verde, se o item 2.6 for aprovado.
+10. Total real de testes, sem falhas nem ignorados; build com 0 avisos.
+Atualizar INDICE-ENTREGA.md, o guia e o README com os números novos.
+Banco de desenvolvimento inalterado.
+
+==================================================================
+9. RELATÓRIO
+==================================================================
+A. Decisões tomadas em cada ponto "a validar".
+B. Mudanças de código, com o motivo de cada uma.
+C. Mudanças de documentação.
+D. Resultado de cada cenário do item 8.
+E. Testes: total, aprovados, falhos, ignorados.
+F. Pendências que dependem da equipe (item 1).
+G. Riscos que continuam.
+H. Estado do Git (sem commit e sem push).
+
+Execute exclusivamente o B11. Não faça commit nem push. Aguarde a auditoria independente.
+````
+
+## Bloco B11 — blindagem da entrega
+
+<a id="prompt-38"></a>
+
+### Prompt 38 — Bloco B11: complemento ao prompt 13 e execução da blindagem
+
+**Data:** 08/11/2026 · **Tipo:** Correção, implementação, testes e documentação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — COMPLEMENTO AO PROMPT 13 (B11)
+Antes de executar as alterações do B11, considere estas decisões finais.
+A prioridade é atender integralmente ao PDF da FIAP, corrigir falhas comprovadas de execução e melhorar a apresentação acadêmica. Não devemos ampliar a API ou a arquitetura simplesmente para antecipar expectativas hipotéticas do professor.
+1. Compatibilidade do Visual Studio
+Corrija a afirmação do item 2.2.
+O .NET 10 possui suporte oficial completo no Visual Studio 2026 (18.0 ou superior), não em qualquer Visual Studio 2022.
+A solução .sln clássica poderá facilitar o uso na raiz, mas não elimina o requisito de versão do SDK e da IDE.
+Documente Visual Studio 2026, VS Code e o SDK .NET 10 corretamente.
+Não migre para .NET 8.
+2. Solução na raiz e global.json
+Está autorizada a criação de uma solução clássica PontoVoz.sln na raiz para facilitar dotnet build e dotnet test.
+Porém, antes de fazê-la:
+
+* Inspecione o global.json atualmente localizado em backend/.
+* Garanta que executar comandos a partir da raiz utilize a configuração de SDK correta.
+* Preserve a configuração do test runner.
+* Revise caminhos dos scripts.
+* Não deixe duas configurações incompatíveis.
+* Execute testes de build a partir da raiz e de backend/.
+
+Não remova backend/PontoVoz.slnx sem demonstrar que sua remoção não prejudica os fluxos já existentes.
+3. Banco automático
+Autorizo a migração automática apenas em Development, por configuração explícita e desligada nos outros ambientes.
+Preserve os testes que verificam comportamento com banco indisponível.
+Crie testes que comprovem:
+
+* Banco inexistente criado corretamente.
+* Migrations aplicadas.
+* Seed idempotente.
+* Reinicialização sem duplicação.
+* Migração automática desligada em Production.
+* Ausência de alteração no banco de desenvolvimento existente.
+
+Não utilize EnsureCreated em substituição às migrations.
+4. Endpoints REST
+Não implemente DELETE nem GET /linhas/{id} no B11.
+O PDF não exige CRUD completo.
+Preserve as 14 operações atuais.
+A exclusão lógica já existe pelo mecanismo de desativação, e essa decisão pode ser explicada no README.
+Não amplie o contrato funcional sem necessidade.
+5. Documentação web
+Mantenha Scalar como documentação oficial.
+Não instale Swagger UI.
+Se implementar redirecionamentos de / ou /swagger para /scalar, faça apenas em Development, com testes, sem alterar o OpenAPI ou criar novas operações documentadas.
+Não trate esses redirecionamentos como requisito obrigatório.
+6. GitHub Actions
+Considere CI uma melhoria opcional.
+Primeiro conclua as correções obrigatórias e garanta que os testes locais continuam aprovados.
+Se adicionar CI, ele precisa passar realmente nos ambientes escolhidos. Não inclua selo de aprovação antes de o workflow executar com sucesso.
+Se encontrar incompatibilidade específica de ambiente, relate-a, sem alterar regras funcionais apenas para conseguir um selo.
+7. Critérios acadêmicos
+Priorize:
+
+1. Restaurar justificativas dos ODS e sua conexão com metas específicas.
+2. Completar a ficha CitizenTech sem inventar bairro ou pesquisa.
+3. Documentar apenas as integrações com disciplinas que a equipe efetivamente desenvolve.
+4. Melhorar as instruções de execução.
+5. Atualizar os exemplos .http.
+6. Preservar evidências de POO, Web API, EF Core + LINQ, Async/Await e qualidade.
+
+Não invente medições de impacto social.
+8. Qualidade do código e documentação
+Remova comentários redundantes e referências internas ao planejamento somente quando isso melhorar a compreensão técnica.
+Não faça uma refatoração extensa ou exclusivamente cosmética.
+Preserve os comentários que explicam decisões de negócio.
+Preserve o histórico real no prompts.md e não altere os prompts anteriores.
+Não apague informações para ocultar o uso de ferramentas de IA.
+9. Validação e publicação
+O B11 deve terminar com:
+
+* Build na raiz e em backend/.
+* Todos os testes aprovados.
+* API funcional em clone limpo.
+* Banco criado corretamente em Development.
+* 14 operações preservadas.
+* OpenAPI e Scalar funcionando.
+* Nenhum segredo versionado.
+* Nenhuma alteração no banco de desenvolvimento.
+* Documentação FIAP completa.
+* Relatório detalhado das alterações e pendências.
+
+Não faça commit nem push.
+Não afirme que todos os testes possíveis do professor funcionarão sem executá-los.
+Ao concluir, apresente o relatório e prepare o projeto para auditoria independente.
+Execute o B11 com esse escopo corrigido e sem ampliar desnecessariamente as funcionalidades.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code executou o B11 com o
+escopo do complemento, sem acrescentar rotas:
+
+- **Execução:** `PontoVoz.sln` (formato clássico) na raiz, com `global.json` e a ferramenta local
+  `dotnet-ef` movidos para a raiz, para valerem na raiz e em `backend/` (a `backend/PontoVoz.slnx`
+  foi mantida); migração automática só em Development (`Banco:AplicarMigracoesAoIniciar`, com
+  `Database.MigrateAsync`, ignorada fora de Development); redirecionamento de `/` e `/swagger` para
+  o Scalar só em Development, fora do OpenAPI; perfis do `launchSettings` abrindo o Scalar; arquivo
+  `.http` com as 14 operações.
+- **Testes:** 6 casos novos em `MigracaoAutomaticaTests` (banco criado, migrations aplicadas, seed
+  sem duplicação, banco existente sem alteração, Production e opção desligada sem criar o banco) e
+  5 dos atalhos; os testes de banco ausente passaram a desligar a opção explicitamente. Uma mutação
+  temporária confirmou que os testes detectam a remoção da proteção de Production. Total de 816.
+- **Código:** 28 comentários deixaram de citar os blocos do planejamento (B3, B5...), sem mudar
+  comportamento; a descrição do OpenAPI foi ajustada e o documento exportado de novo.
+- **Documentação:** ficha da CitizenTech na ordem do PDF, justificativas dos ODS com as metas 10.2 e
+  11.2, indicadores técnicos medidos e de impacto como metas, Visual Studio 2026 e .NET 10 nos
+  pré-requisitos, exclusão lógica explicada; campos que dependem da equipe (bairro, conversa com o
+  cidadão, demais disciplinas, componente de cada integrante) ficaram pendentes.
+- **Validação:** numa cópia limpa, build e testes na raiz e em `backend/`, API criando o banco sem
+  comando extra, reinício sem duplicação, Production sem criar o banco, cópia do banco de
+  desenvolvimento sem alteração e indisponibilidade simulada; registro em
+  `backend/docs/evidencias/B11-validacao.md`.
+- **Git:** não houve commit.
+
+<a id="prompt-39"></a>
+
+### Prompt 39 — Bloco B11: investigação da falha intermitente e fechamento
+
+**Data:** 08/11/2026 · **Tipo:** Diagnóstico e validação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — B11: INVESTIGAÇÃO DA FALHA INTERMITENTE E FECHAMENTO
+O progresso do B11 foi recebido.
+Há uma questão importante antes da auditoria independente: uma execução da suíte teve 1 falha entre os 816 testes, enquanto as execuções seguintes passaram.
+Não podemos declarar o projeto totalmente estável apenas porque a falha não se repetiu.
+1. Investigue a ocorrência
+Finalize e registre os resultados das execuções já iniciadas, sem abrir novas baterias extensas desnecessariamente.
+Procure identificar:
+
+* Nome exato do teste que falhou, caso exista registro.
+* Mensagem de erro e stack trace.
+* Se ocorreu após compilação limpa.
+* Se depende da ordem de execução.
+* Se utiliza relógio real, portas, arquivos temporários ou SQLite compartilhado.
+* Se há paralelismo ou estado estático compartilhado.
+* Se há processos ou arquivos não liberados corretamente.
+
+Se a falha não puder ser reproduzida, não invente sua causa.
+Registre no relatório que houve uma falha intermitente não identificada e informe a quantidade real de execuções posteriores aprovadas.
+2. Melhore o diagnóstico, se necessário
+Se voltar a ocorrer:
+
+* Capture o resultado em TRX ou log equivalente.
+* Identifique a classe e o caso exato.
+* Reproduza isoladamente.
+* Compare execução sequencial com paralela, se apropriado.
+* Corrija a causa comprovada, não apenas o sintoma.
+
+Não desative testes, não aumente tempos de espera arbitrariamente e não marque casos como ignorados apenas para obter uma suíte verde.
+3. Verifique as mudanças estruturais do B11
+Confirme especialmente:
+
+* `dotnet build` e `dotnet test` na raiz.
+* Os mesmos comandos a partir de `backend/`.
+* Seleção correta do SDK com o `global.json` na nova localização.
+* `dotnet tool restore` funcionando nos locais documentados.
+* Scripts e caminhos atualizados.
+* API iniciando sem banco em Development.
+* Banco e seed criados apenas quando a configuração permitir.
+* Production sem migração automática.
+* Testes de indisponibilidade do banco preservados.
+* Nenhuma alteração no banco de desenvolvimento.
+* 14 operações preservadas.
+* OpenAPI idêntico ao exportado.
+
+4. Documentação acadêmica
+Confirme que a justificativa dos ODS 10 e 11 foi restaurada e que a ficha CitizenTech apresenta os campos da página 20.
+Não preencha bairro, entrevista com cidadão ou integração com outras disciplinas sem dados reais da equipe.
+Não declare que Testing & QA está concluído, pois essa entrega ainda não foi iniciada.
+Preserve integralmente o histórico verdadeiro do `prompts.md`.
+5. Encerramento
+Conclua a evidência `B11-validacao.md` com resultados efetivamente verificados.
+No relatório, diferencie claramente:
+
+* Verificações aprovadas.
+* Verificações não realizadas.
+* Riscos resolvidos.
+* Riscos ainda existentes.
+* Falha intermitente observada e situação da investigação.
+
+Não faça commit nem push.
+Não inicie novas funcionalidades.
+Ao terminar, apresente o relatório completo para auditoria independente e preparação de um novo ZIP do B11.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code registrou que a
+falha intermitente (1 em 816, numa execução em `backend/` logo depois de `dotnet build
+--no-incremental`) não pôde ser identificada: a saída daquela execução foi filtrada só para os
+totais e não guardou o nome do teste nem o stack trace. Depois dela, a suíte passou em 28 execuções
+completas seguidas, inclusive as duas da validação final com relatório TRX (816 de 816 em cada). A
+leitura dos testes apontou fatores de risco, registrados como hipóteses sem confirmação: esperas
+reais curtas no teste de paralelismo do resumo, testes de cancelamento que esperam um log por até
+10 segundos e `SqliteConnection.ClearAllPools()` chamado durante a execução paralela. Nenhum teste
+foi desativado, ignorado ou teve o tempo de espera aumentado. A validação final repetiu todos os
+cenários do B11 numa cópia limpa, e o resultado está em `backend/docs/evidencias/B11-validacao.md`.
+Não houve commit.
+
+<a id="prompt-40"></a>
+
+### Prompt 40 — Bloco B11.1: pacote ZIP final para auditoria independente
+
+**Data:** 08/11/2026 · **Tipo:** Preparação para auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — B11.1: PREPARAÇÃO PARA AUDITORIA FINAL
+Recebi o relatório completo do B11.
+O trabalho está concluído localmente, com 816 testes aprovados, 28 execuções consecutivas sem novas falhas, migração automática em Development, solução .sln na raiz, documentação atualizada e 14 operações preservadas.
+Não quero iniciar outro bloco de desenvolvimento.
+Antes de autorizar a publicação definitiva, precisamos gerar o último ZIP para auditoria independente.
+1. Estado inicial
+Confirme:
+
+* Diretório correto do PontoVoz.
+* Branch main.
+* HEAD e origin/main em `6a5aae6a285692abb04a460fd8494e959677f4ae`.
+* Presença das 46 alterações locais do B11.
+* Nenhum commit ou push novo.
+* Nenhum processo de teste ou API ainda em execução.
+
+Não descarte alterações.
+Não modifique o código.
+2. Gerar ZIP
+Crie:
+`PontoVoz-B11-Auditoria-Final.zip`
+Local:
+`C:\Users\paulo\Projetos\`
+Use criação exclusiva para não sobrescrever arquivos existentes.
+Inclua todos os arquivos necessários para reconstruir o projeto, utilizando o estado atual da pasta de trabalho, inclusive arquivos novos e modificados não commitados.
+Inclua obrigatoriamente:
+
+* PontoVoz.sln da raiz.
+* global.json da raiz.
+* .config/dotnet-tools.json da raiz.
+* backend/ e toda a solução.
+* Código-fonte completo.
+* Todos os testes, inclusive MigracaoAutomaticaTests.
+* Contracts e exemplos.
+* OpenAPI exportado.
+* Scripts.
+* Arquivos de configuração versionáveis.
+* READMEs.
+* Ficha CitizenTech e ODS.
+* docs/ e evidências.
+* B11-validacao.md.
+* INDICE-ENTREGA.md.
+* GUIA-APRESENTACAO-CSHARP.md.
+* prompts.md.
+* Arquivo PontoVoz.Api.http.
+
+Não utilize apenas git archive HEAD, pois isso excluiria alterações locais.
+3. Exclusões de segurança
+Não inclua:
+
+* .git/.
+* bin/.
+* obj/.
+* Bancos SQLite.
+* Logs.
+* Relatórios temporários de teste.
+* ZIPs anteriores.
+* Tokens e chaves reais.
+* User-secrets.
+* Arquivos temporários e backups.
+
+Preserve os testes e as evidências legítimas.
+4. Verificação obrigatória
+Depois de gerar o ZIP:
+
+1. Confirme sua integridade.
+2. Informe o tamanho em bytes.
+3. Informe a quantidade de arquivos.
+4. Calcule o SHA-256.
+5. Compare byte a byte todos os arquivos do ZIP com a pasta de trabalho.
+6. Confirme a presença das 46 alterações B11.
+7. Confirme que os arquivos movidos estão nas localizações corretas.
+8. Confirme o OpenAPI com 14 operações.
+9. Confirme a presença dos 816 testes e da documentação das 28 execuções aprovadas.
+10. Confirme a documentação transparente da falha intermitente não identificada.
+11. Confirme a ausência de segredos.
+12. Confirme que nenhum ZIP anterior foi sobrescrito.
+13. Confirme que o Git continua sem commit e sem push.
+
+Não é necessário repetir as 28 execuções de testes. Utilize os resultados já registrados.
+5. Relatório
+Apresente:
+A. Caminho completo do ZIP.
+B. Tamanho.
+C. Quantidade de arquivos.
+D. SHA-256.
+E. Integridade byte a byte.
+F. Conferência das alterações do B11.
+G. Segurança.
+H. Estado final do Git.
+I. Confirmação de que nenhum código foi alterado nesta etapa.
+J. Confirmação de que não houve commit nem push.
+Não publique ainda. Não inicie Testing & QA. Prepare exclusivamente o ZIP para a auditoria final.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code gerou
+`PontoVoz-B11-Auditoria-Final.zip` com criação exclusiva, a partir da pasta de trabalho: 210
+arquivos, iguais byte a byte, com as 46 alterações do B11 (inclusive `global.json` e
+`.config/dotnet-tools.json` nos novos locais, sem os antigos), sem `.git`, binários, bancos, logs,
+relatórios de teste nem segredos. Os ZIPs anteriores ficaram intactos. Nenhum arquivo do projeto foi
+alterado e não houve commit.
+
+<a id="prompt-41"></a>
+
+### Prompt 41 — Bloco B11.2: ajustes finais e publicação definitiva
+
+**Data:** 08/11/2026 · **Tipo:** Correção, validação e publicação · **Commit:** `chore: finalize C# Global Solution submission`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — B11.2: AJUSTES FINAIS E PUBLICAÇÃO DEFINITIVA
+A auditoria independente do ZIP `PontoVoz-B11-Auditoria-Final.zip` foi concluída.
+Resultado: APROVADO TECNICAMENTE, condicionado a três correções pontuais de documentação.
+O pacote foi verificado com 210 arquivos e SHA-256:
+`5ce74128825f024d8ed5aa57b34a770a0071d3bf70f5decf44b1d00626180aed`
+A auditoria confirmou:
+
+* Estrutura .NET coerente.
+* Migrações em Development protegidas.
+* 14 operações no OpenAPI.
+* 165 caminhos relativos válidos.
+* Evidências dos 816 testes.
+* Ausência de arquivos indevidos.
+* Nenhuma regressão evidente no código alterado.
+
+Não quero iniciar B12 nem acrescentar funcionalidades.
+1. Corrigir o arquivo .http
+Arquivo:
+`backend/src/PontoVoz.Api/PontoVoz.Api.http`
+O exemplo da operação `POST /api/v1/admin/observacoes-passagem` contém uma data fixa:
+`2026-11-10T14:24:00-03:00`
+Isso não é adequado para demonstração, pois a API exige uma observação realizada nas últimas 24 horas e permite somente dois minutos de tolerância futura.
+Substitua esse exemplo por uma alternativa adequada para execução futura.
+Se houver uma variável dinâmica de data/hora compatível com o cliente HTTP utilizado, empregue-a somente após verificar sua sintaxe.
+Caso contrário, utilize um marcador claro e uma instrução objetiva para substituir pela data/hora atual com fuso antes da execução.
+Não altere a regra temporal de negócio.
+Não modifique os testes apenas para aceitar uma data fixa.
+2. Corrigir a descrição da integração entre disciplinas
+Arquivo:
+`README.md`
+A ficha CitizenTech afirma que o backend é "consumido pelas demais partes".
+Isso ainda não foi comprovado.
+A equipe utiliza a mesma ideia central, PontoVoz, mas os integrantes desenvolvem suas disciplinas separadamente.
+Reescreva a descrição de maneira fiel:
+
+* O backend C# disponibiliza uma API REST que pode ser utilizada por outras partes da solução.
+* A integração efetiva com as disciplinas dos colegas ainda não foi confirmada.
+* Não inventar aplicativos, dispositivos, integrações ou entregáveis dos colegas.
+* Preservar os campos pendentes para informações ainda não fornecidas.
+
+Não modifique as funcionalidades da API para forçar integração.
+3. Atualizar a identificação e o estado
+No README principal, registre a responsabilidade já confirmada:
+Paulo Akira — RM556840 — C# Software Development (backend deste repositório).
+A disciplina de Testing & Quality Assurance também será realizada por Paulo, mas ainda NÃO foi iniciada. Não apresente QA como concluído ou entregue.
+Mantenha as responsabilidades de Albert e Bruno pendentes até confirmação.
+No `backend/README.md`, atualize a situação do B11 para "concluído e auditado", sem declarar que a entrega já foi enviada à FIAP.
+Preserve as evidências e o registro de uma falha intermitente não identificada, seguida de 28 execuções completas aprovadas.
+4. Não modificar o restante
+Não alterar:
+
+* Controllers.
+* Services.
+* Domain.
+* Infrastructure.
+* Migrations.
+* Contrato funcional.
+* Rotas.
+* Segurança.
+* Algoritmos.
+* Testes existentes.
+
+Não implementar DELETE ou Swagger UI.
+Não reestruturar projetos.
+Não remover testes.
+Não reescrever commits antigos.
+Não alterar o histórico anterior do prompts.md.
+Não inventar pesquisa de campo, bairro ou resultados de impacto.
+5. Registrar este prompt
+Acrescente a transcrição fiel deste prompt ao prompts.md, seguindo a numeração e o padrão existentes.
+Preserve todos os registros anteriores.
+6. Verificação final
+Depois dos ajustes:
+
+* Verifique o diff.
+* Confirme os três ajustes.
+* Confirme que nenhuma funcionalidade foi modificada.
+* Execute `dotnet build` com compilação limpa.
+* Execute uma vez a suíte completa de testes com relatório TRX.
+* Execute o verificador do contrato.
+* Confirme 14 operações no OpenAPI.
+* Verifique os links relativos.
+* Repita a busca de segredos.
+* Confirme que o banco original não foi alterado.
+
+Não é necessário executar novamente dezenas de baterias de testes.
+Se algum teste falhar, investigue e não publique uma versão com falha conhecida sem diagnóstico.
+7. Publicação autorizada
+Se todas as verificações essenciais forem aprovadas:
+
+1. Revise os arquivos staged.
+2. Faça o commit:
+
+`chore: finalize C# Global Solution submission`
+
+3. Use a autoria legítima configurada.
+4. Execute push normal para origin/main.
+5. Não use force push.
+6. Confirme que main e origin/main apontam para o mesmo commit.
+7. Confirme que a árvore está limpa.
+
+A publicação não equivale ao envio da tarefa à FIAP.
+8. Pacote definitivo
+Depois da publicação, gere um ZIP atualizado com o conteúdo final do commit, fora do repositório, sem sobrescrever os arquivos de auditoria anteriores.
+Nome sugerido:
+`PontoVoz-CSharp-Entrega-Publicada.zip`
+Exclua .git, bin, obj, bancos, logs, segredos e arquivos temporários.
+Informe SHA-256, tamanho e quantidade de arquivos.
+9. Relatório conclusivo
+Apresente exclusivamente:
+A. Três correções realizadas.
+B. Resultado final do build.
+C. Resultado final dos testes: aprovados, falhos e ignorados.
+D. Resultado do verificador e OpenAPI.
+E. Resultado da verificação de segurança.
+F. Hash completo do commit.
+G. Confirmação do push.
+H. Estado da árvore Git.
+I. Caminho e SHA-256 do ZIP publicado.
+J. Pendências acadêmicas que somente a equipe pode preencher.
+K. Checklist objetivo para enviar o repositório à FIAP.
+Não inicie Testing & QA.
+Não crie outro bloco.
+Finalize e publique o backend C# se todas as verificações acima passarem.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code fez as três
+correções de documentação, sem mudar funcionalidades:
+
+- **`PontoVoz.Api.http`:** a data fixa do registro de passagem foi trocada pela variável
+  `{{$datetime iso8601 -5 m}}`, com a sintaxe conferida na documentação oficial do Visual Studio
+  (horário atual em UTC menos 5 minutos, com fuso), e uma instrução para outros clientes. A regra
+  temporal e os testes não mudaram.
+- **README, ficha CitizenTech:** o backend passou a ser descrito como uma API REST que pode ser
+  utilizada por outras partes, com a integração com as outras disciplinas registrada como não
+  confirmada; os campos pendentes foram mantidos.
+- **Integrantes e estado:** Paulo Akira (RM556840) como responsável por C# Software Development e
+  por Testing & Quality Assurance, esta ainda não iniciada; Albert Katri e Bruno Biletsky com o
+  componente pendente; o B11 registrado como concluído e auditado no `backend/README.md`.
+- **Validação e publicação:** build limpo, suíte completa com relatório TRX, verificador do contrato,
+  OpenAPI, links, busca de segredos e banco de desenvolvimento conferidos antes do commit
+  `chore: finalize C# Global Solution submission`, publicado com push normal.
