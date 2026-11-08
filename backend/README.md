@@ -5,7 +5,7 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B7 — operações administrativas protegidas por chave.** Hoje o backend:
+**Bloco B8 — previsões de chegada com provedor simulado.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -25,10 +25,13 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - tem as **cinco rotas administrativas do B7**, usadas pelo operador para cadastrar paradas e
   linhas, associá-las e registrar observações manuais de passagem, protegidas pela chave
   `X-PontoVoz-Admin-Key` (veja [Rotas administrativas](#rotas-administrativas-b7));
-- tem **663 testes**: 278 de domínio, 93 da camada de aplicação, 118 de integração com SQLite real
-  e 174 pela API em execução (142 acrescentados no B7).
+- responde às **previsões de chegada do B8** com um provedor **simulado** (horários fictícios
+  calculados no instante da consulta) e tem um adaptador para a API Olho Vivo da SPTrans,
+  **desligado** e nunca testado contra a API real (veja [Previsões](#previsões-de-chegada-b8));
+- tem **756 testes**: 278 de domínio, 112 da camada de aplicação, 172 de integração e de
+  provedores e 194 pela API em execução (94 acrescentados no B8).
 
-Previsões (B8), alternativas e resumo (B9) **ainda não existem** e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
+Alternativas e resumo (B9) **ainda não existem** e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
 seção 9.
 
 ## Requisitos de ambiente
@@ -264,9 +267,10 @@ backend/
 │  │  ├─ Mapeamentos/            entidades → DTOs e horário de São Paulo
 │  │  ├─ Services/               services de consulta (B5) e administrativos (B7)
 │  │  └─ Validacao/              validação dos parâmetros e dos corpos
-│  ├─ Infrastructure/            EF Core, repositórios e provedores (B3, B4, B8)
+│  ├─ Infrastructure/            EF Core, repositórios e provedores de previsão (B3, B4, B7, B8)
 │  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
-│  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4 e B7)
+│  │  ├─ Repositories/           implementações das interfaces com EF Core e LINQ (B4 e B7)
+│  │  └─ Providers/              provedor simulado, adaptador Olho Vivo e seletor (B8)
 │  ├─ Security/                  chave das rotas administrativas (B7)
 │  └─ Middleware/                ProblemDetails, tratamento global de erros, JSON e CORS (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
@@ -878,11 +882,13 @@ repetem validações. Evidências reais em
 | GET | `/api/v1/linhas` | `termo`, `pagina`, `tamanhoPagina` | 200, 400 |
 | GET | `/api/v1/destinos` | `termo`, `pagina`, `tamanhoPagina` | 200, 400 |
 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | `id` na rota, `linhaId` opcional | 200, 400, 404, 422 |
+| GET | `/api/v1/paradas/{id}/previsoes` (B8) | `id` na rota, `linhaId` opcional | 200, 400, 404, 422, 503 |
 
 Todas podem devolver 500 `ErroInterno`. Paginação: `pagina` ≥ 1 (padrão 1) e `tamanhoPagina` de
 1 a 50 (padrão 20). `termo` tem de 2 a 60 caracteres e não diferencia maiúsculas nem acentos.
 
-**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/previsoes` (B8), `/alternativas` e `/resumo` (B9).
+**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/alternativas` e `/resumo` (B9).
+As previsões estão em [Previsões de chegada](#previsões-de-chegada-b8).
 As rotas administrativas estão em [Rotas administrativas](#rotas-administrativas-b7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
 a rota só será criada com todas as partes.
 
@@ -1011,7 +1017,7 @@ dotnet test --filter-namespace "PontoVoz.Tests.Api"
 | Funciona (B6) | Pendente |
 |---|---|
 | Cinco consultas públicas e `/health` | Rotas administrativas com chave (feitas no B7) |
-| ProblemDetails 400, 404, 422 e 500 | Previsões e o 503 `ProvedorPrevisoesIndisponivel` (B8) |
+| ProblemDetails 400, 404, 422 e 500 | Previsões e o 503 `ProvedorPrevisoesIndisponivel` (feitos no B8) |
 | CORS por configuração | Alternativas e resumo (B9) |
 | OpenAPI, Scalar e exportação do documento | URL do frontend em `Cors:OrigensPermitidas` (equipe) |
 
@@ -1154,6 +1160,101 @@ Os testes HTTP usam arquivos SQLite temporários e nunca o `pontovoz.db`. A chav
 valor fictício identificado como tal, e a configuração `Admin:Chave` de cada teste é definida pelo
 próprio teste, para que um user-secret da máquina não mude o resultado.
 
+## Previsões de chegada (B8)
+
+`GET /api/v1/paradas/{id}/previsoes` devolve as próximas chegadas previstas nas linhas da parada
+(contrato, seção 4.5). Uma previsão é uma **estimativa**, com `nivelConfirmacao: "Previsao"`: ela
+não é uma passagem observada e nunca aparece em `ultimas-passagens`. Evidências reais em
+[`docs/evidencias/B8-previsoes.md`](docs/evidencias/B8-previsoes.md).
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/previsoes"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/previsoes?linhaId=2"
+```
+
+(Troque `1` e `2` pelos ids recebidos de `/api/v1/paradas?codigoExterno=SIM-P001` e de
+`/api/v1/linhas`.)
+
+### Respostas
+
+| Situação | Status | Corpo |
+|---|---|---|
+| Previsão para todas as linhas | 200 | `status: "Disponivel"`, `linhasSemPrevisao: []` |
+| Previsão para parte das linhas | 200 | `status: "Disponivel"`, `linhasSemPrevisao` preenchida, aviso `PrevisaoParcial` |
+| Provedor sem previsões | 200 | `status: "SemPrevisoes"`, `previsoes: []`, aviso `SemPrevisoes` |
+| Parada sem linhas | 200 | listas vazias e aviso `ParadaSemLinhas`, **sem consultar o provedor** |
+| `linhaId` inválido | 400 | `RequisicaoInvalida` |
+| Parada ou linha inexistente ou inativa | 404 | `ParadaNaoEncontrada` ou `LinhaNaoEncontrada` |
+| Linha que não atende a parada | 422 | `LinhaNaoAtendeParada` |
+| Provedor indisponível | **503** | `ProvedorPrevisoesIndisponivel`, com o cabeçalho `Retry-After: 30` |
+
+As validações (400, 404 e 422) vêm antes da consulta ao provedor. `previsoes` sai ordenada por
+`previstaPara` e `codigoLinha`; `linhasSemPrevisao`, por `codigoLinha`. Horários no fuso de São
+Paulo; `esperaMinutos` é arredondado para baixo e nunca é negativo.
+
+### Provedores
+
+| Componente | Papel |
+|---|---|
+| `IProvedorPrevisaoChegada` (Application) | Interface do provedor. Uma falha volta como `ResultadoProvedor.Indisponivel`, não como exceção, para o B9 reutilizar o provedor no resumo e nas alternativas |
+| `ProvedorPrevisaoSimulado` | **Padrão.** Calcula as chegadas das linhas `SIM-` no instante da consulta, sem gravar nada (regra em [`../docs/dados.md`](../docs/dados.md)) |
+| `ProvedorOlhoVivo` | Adaptador HTTP da API Olho Vivo v2.1. **Desligado**, testado só com respostas simuladas |
+| `SeletorProvedorPrevisao` | Decide por configuração quem responde. Dados `SIM-` ficam sempre no simulado |
+| `PrevisoesService` | Valida, consulta o provedor uma vez com o instante do `TimeProvider` e monta a resposta |
+
+O provedor simulado reproduz o exemplo do contrato com o relógio em 10/11/2026 às 14h32
+(`SIM-L002` às 14h33 e 14h51, `SIM-L004` às 14h40, `SIM-L001` sem previsão), mas não guarda essa
+data: a grade de cada linha é contada em minutos desde uma âncora fixa e vale em qualquer dia.
+
+### Configuração (`Previsoes`)
+
+| Chave | Padrão | Para que serve |
+|---|---|---|
+| `Previsoes:SimularIndisponibilidade` | `false` | R6: faz as previsões responderem 503, para testar e demonstrar o erro. Não há rota para ligar. |
+| `Previsoes:OlhoVivo:Habilitado` | `false` | Liga o adaptador Olho Vivo |
+| `Previsoes:OlhoVivo:Token` | — | Token da SPTrans. **Só** por user-secrets ou variável de ambiente |
+| `Previsoes:OlhoVivo:UrlBase` | `https://api.olhovivo.sptrans.com.br/v2.1/` | Endereço oficial (só HTTPS) |
+| `Previsoes:OlhoVivo:TempoLimiteSegundos` | `5` | Prazo de cada chamada à SPTrans |
+| `Previsoes:OlhoVivo:Paradas` e `:Linhas` | vazios | Correspondência declarada entre os códigos do PontoVoz e os da SPTrans |
+
+Para demonstrar o 503 (PowerShell, a partir de `backend/`):
+
+```powershell
+$env:Previsoes__SimularIndisponibilidade = "true"; dotnet run --project src/PontoVoz.Api --launch-profile http
+```
+
+Com isso, `GET /previsoes` de uma parada com linhas responde 503; uma parada sem linhas continua
+200, e as outras consultas continuam funcionando. Feche a API (ou remova a variável) para voltar
+ao normal.
+
+O adaptador Olho Vivo só faz chamadas com `Habilitado`, um token e códigos oficiais declarados,
+e nunca para dados `SIM-`. Uma falha dele (autenticação, prazo, conexão, HTTP ou JSON inesperado)
+vira 503, sem trocar por previsões simuladas. O que foi e o que **não** foi verificado está em
+[`../docs/dados.md`](../docs/dados.md#dados-públicos-api-olho-vivo-da-sptrans).
+
+### Testes do B8
+
+| Classe | Testes | O que cobre |
+|---|---|---|
+| `ProvedorPrevisaoSimuladoTests` | 22 | Exemplo do contrato, grade em datas variadas, chegada no instante exato, previsão vencida, espera, meia-noite e virada de mês e ano, repetição, linhas sem configuração, indisponibilidade, cancelamento, nada gravado |
+| `ProvedorOlhoVivoTests` | 32 | Adaptador com HTTP falso: resposta válida, sem previsões, autenticação recusada, erro HTTP, falha de conexão, prazo esgotado, cancelamento, JSON inválido, dados `SIM-` e códigos sem correspondência nunca enviados, horário `HH:mm` perto da meia-noite, token fora dos logs, seleção do provedor |
+| `PrevisoesServiceTests` | 19 | Ordem 400 → 404 → 422 → provedor, estados, avisos, 503, parada sem linhas sem consultar o provedor, instante único, `CancellationToken` |
+| `PrevisoesHttpTests` | 21 | Igualdade com `previsoes.json` e com o 503 do contrato, `Retry-After`, tipos do JSON, erros, acesso público, nada gravado, Olho Vivo com HTTP falso pela API real, cancelamento |
+
+```bash
+dotnet test --filter-class "*Previs*"
+```
+
+```bash
+dotnet test --filter-class "*ProvedorOlhoVivoTests"
+```
+
+Nenhum teste acessa a SPTrans, e nenhum depende do relógio real: o instante é sempre controlado
+(`FakeTimeProvider`) ou informado pelo teste.
+
 ## Próximas etapas
 
 | Bloco | Conteúdo |
@@ -1164,7 +1265,7 @@ próprio teste, para que um user-secret da máquina não mude o resultado.
 | B4 | Repositórios com consultas LINQ, com testes (concluído) |
 | B5 | Services, DTOs e injeção de dependência, com testes (concluído) |
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído) |
-| B7 | Endpoints administrativos com chave de acesso (concluído, aguardando auditoria) |
-| B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo) |
+| B7 | Endpoints administrativos com chave de acesso (concluído) |
+| B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo desligado) (concluído, aguardando auditoria) |
 | B9 | Alternativas de deslocamento e resumo da parada |
 | B10 | Documentação final, evidências e entrega |

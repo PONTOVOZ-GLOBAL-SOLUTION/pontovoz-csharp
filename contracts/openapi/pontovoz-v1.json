@@ -2,7 +2,7 @@
   "openapi": "3.1.1",
   "info": {
     "title": "PontoVoz API",
-    "description": "API do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados: consultas públicas (B6) e operações administrativas do operador (B7). Previsões, alternativas e resumo estão planejados em contracts/api-v1.md. Todos os dados de demonstração são simulados e marcados com dadosSimulados.",
+    "description": "API do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados: consultas públicas (B6), operações administrativas do operador (B7) e previsões de chegada (B8, provedor simulado por padrão). Alternativas e resumo estão planejados em contracts/api-v1.md. Todos os dados de demonstração são simulados e marcados com dadosSimulados.",
     "version": "v1"
   },
   "servers": [
@@ -108,6 +108,14 @@
           },
           "503": {
             "description": "Service Unavailable",
+            "headers": {
+              "Retry-After": {
+                "description": "Segundos até uma nova tentativa (sempre 30).",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "text/plain": {
                 "schema": {
@@ -401,6 +409,108 @@
           },
           "422": {
             "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paradas/{id}/previsoes": {
+      "get": {
+        "tags": [
+          "Paradas"
+        ],
+        "summary": "Próximas chegadas previstas nas linhas da parada.",
+        "description": "Uma previsão é uma estimativa do provedor (nivelConfirmacao = Previsao), não uma passagem\r\nobservada: ela nunca aparece em ultimas-passagens. Por padrão o provedor é simulado (origem\r\nSimulado), com horários fictícios calculados no instante da consulta; nenhuma previsão é\r\noficial da SPTrans. Previsões vencidas não são devolvidas. Com o provedor indisponível, a\r\nresposta é 503 ProvedorPrevisoesIndisponivel com Retry-After: 30.",
+        "operationId": "ObterPrevisoes",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id interno da parada (inteiro ≥ 1).",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "linhaId",
+            "in": "query",
+            "description": "Opcional: limita a uma linha que atende a parada.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrevisoesParadaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "headers": {
+              "Retry-After": {
+                "description": "Segundos até uma nova tentativa (sempre 30).",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            },
             "content": {
               "application/problem+json": {
                 "schema": {
@@ -1774,6 +1884,107 @@
         },
         "description": "`Passagem` mais `paradaId` (seção 5.6): o recibo do registro manual. Minutos e\r\ndesatualização são calculados no instante do registro (seção 4.6.3)."
       },
+      "PrevisaoDto": {
+        "required": [
+          "linhaId",
+          "codigoLinha",
+          "letreiro",
+          "previstaPara",
+          "esperaMinutos",
+          "prefixoVeiculo",
+          "nivelConfirmacao"
+        ],
+        "type": "object",
+        "properties": {
+          "linhaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoLinha": {
+            "type": "string"
+          },
+          "letreiro": {
+            "type": "string"
+          },
+          "previstaPara": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "esperaMinutos": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "prefixoVeiculo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nivelConfirmacao": {
+            "$ref": "#/components/schemas/NivelConfirmacao"
+          }
+        },
+        "description": "`Previsao` (seção 4.5): uma chegada prevista, nunca uma passagem. `previstaPara` no\r\nhorário de São Paulo; `esperaMinutos` arredondado para baixo e nunca negativo."
+      },
+      "PrevisoesParadaDto": {
+        "required": [
+          "paradaId",
+          "codigoExternoParada",
+          "nomeParada",
+          "status",
+          "origem",
+          "dadosSimulados",
+          "consultadoEm",
+          "previsoes",
+          "linhasSemPrevisao",
+          "avisos"
+        ],
+        "type": "object",
+        "properties": {
+          "paradaId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "codigoExternoParada": {
+            "type": "string"
+          },
+          "nomeParada": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusPrevisao"
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemDado"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          },
+          "consultadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "previsoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrevisaoDto"
+            }
+          },
+          "linhasSemPrevisao": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenciaLinhaDto"
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvisoDto"
+            }
+          }
+        },
+        "description": "`PrevisoesParada` (seção 4.5)."
+      },
       "ProblemDetails": {
         "type": "object",
         "properties": {
@@ -1864,6 +2075,13 @@
           "SecundarioParaPrincipal"
         ],
         "description": "Sentido de um cadastro de linha. Cada sentido é um cadastro separado."
+      },
+      "StatusPrevisao": {
+        "enum": [
+          "Disponivel",
+          "SemPrevisoes",
+          "ProvedorIndisponivel"
+        ]
       },
       "TipoDestino": {
         "enum": [

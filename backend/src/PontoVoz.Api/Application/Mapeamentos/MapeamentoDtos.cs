@@ -73,5 +73,19 @@ public static class MapeamentoDtos
             dto.OficialSptrans, dto.OrigemRegistro, dto.DadosSimulados, dto.Aviso);
     }
 
+    /// <summary><c>Previsao</c> (seção 4.5): horário em São Paulo e espera calculada na <paramref name="referencia"/>.</summary>
+    public static PrevisaoDto ParaDto(this PrevisaoChegada previsao, DateTimeOffset referencia)
+    {
+        ArgumentNullException.ThrowIfNull(previsao);
+        return new PrevisaoDto(
+            previsao.Linha.LinhaId,
+            previsao.Linha.CodigoLinha,
+            previsao.Linha.Letreiro,
+            HorarioSaoPaulo.Converter(previsao.PrevistaParaUtc),
+            previsao.EsperaMinutos(referencia),
+            previsao.PrefixoVeiculo,
+            previsao.NivelConfirmacao);
+    }
+
     private static CoordenadaDto ParaDto(this Coordenada coordenada) => new(coordenada.Latitude, coordenada.Longitude);
 }

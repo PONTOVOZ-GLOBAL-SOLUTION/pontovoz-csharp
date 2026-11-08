@@ -1,6 +1,7 @@
 using PontoVoz.Api.Application;
 using PontoVoz.Api.Documentacao;
 using PontoVoz.Api.Infrastructure.Persistence;
+using PontoVoz.Api.Infrastructure.Providers;
 using PontoVoz.Api.Middleware;
 using PontoVoz.Api.Security;
 
@@ -14,6 +15,7 @@ builder.Services.AddDocumentacaoPontoVoz();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddPersistenciaPontoVoz(builder.Configuration, builder.Environment);
+builder.Services.AddProvedoresPrevisaoPontoVoz(builder.Configuration);
 builder.Services.AddAplicacaoPontoVoz();
 builder.Services.AddSegurancaAdministrativa();
 

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
+using PontoVoz.Api.Domain.Exceptions;
+
 namespace PontoVoz.Api.Middleware;
 
 /// <summary>
@@ -25,6 +27,12 @@ internal sealed class TratadorExcecoes(IProblemDetailsService problemDetails, IL
 
         ProblemDetails problema = esperado ?? ProblemasHttp.ErroInterno();
         httpContext.Response.StatusCode = problema.Status!.Value;
+        if (exception is ProvedorPrevisoesIndisponivelException)
+        {
+            // Seção 4.5: o cliente pode tentar de novo depois deste intervalo.
+            httpContext.Response.Headers.RetryAfter = ProvedorPrevisoesIndisponivelException.SegundosParaNovaTentativa.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
+
         return await problemDetails.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,

@@ -26,6 +26,7 @@ public static class DocumentacaoOpenApi
             opcoes.AddDocumentTransformer(DescreverDocumento);
             opcoes.AddDocumentTransformer(RetirarNuloDosEnumsObrigatorios);
             opcoes.AddOperationTransformer(ExigirChaveNasRotasAdministrativas);
+            opcoes.AddOperationTransformer(DocumentarRetryAfter);
             opcoes.AddSchemaTransformer(MarcarCamposObrigatorios);
         });
 
@@ -34,8 +35,9 @@ public static class DocumentacaoOpenApi
         documento.Info.Title = "PontoVoz API";
         documento.Info.Version = "v1";
         documento.Info.Description =
-            "API do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados: consultas públicas (B6) e "
-            + "operações administrativas do operador (B7). Previsões, alternativas e resumo estão planejados em contracts/api-v1.md. "
+            "API do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados: consultas públicas (B6), "
+            + "operações administrativas do operador (B7) e previsões de chegada (B8, provedor simulado por padrão). "
+            + "Alternativas e resumo estão planejados em contracts/api-v1.md. "
             + "Todos os dados de demonstração são simulados e marcados com dadosSimulados.";
 
         documento.Components ??= new OpenApiComponents();
@@ -74,6 +76,22 @@ public static class DocumentacaoOpenApi
                     esquema.Properties[nome] = alternativas.Single(a => a.Type != JsonSchemaType.Null);
                 }
             }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>O 503 de previsões traz <c>Retry-After: 30</c> (seção 4.5).</summary>
+    private static Task DocumentarRetryAfter(OpenApiOperation operacao, OpenApiOperationTransformerContext contexto, CancellationToken cancellationToken)
+    {
+        if (operacao.Responses?.TryGetValue("503", out IOpenApiResponse? resposta) == true && resposta is OpenApiResponse editavel)
+        {
+            editavel.Headers ??= new Dictionary<string, IOpenApiHeader>();
+            editavel.Headers["Retry-After"] = new OpenApiHeader
+            {
+                Description = "Segundos até uma nova tentativa (sempre 30).",
+                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer },
+            };
         }
 
         return Task.CompletedTask;

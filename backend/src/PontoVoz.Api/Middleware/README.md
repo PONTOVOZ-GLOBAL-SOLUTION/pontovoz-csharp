@@ -18,3 +18,7 @@ Corpos JSON (B7): um corpo malformado, ausente ou com `Content-Type` que não é
 `RequisicaoInvalida` em `errors.corpo` (o filtro que devolveria 415 sem `codigo` foi retirado), e
 os erros de leitura de um campo (`$.dadosSimulados`) saem com o nome do campo do contrato.
 Os 401 e 403 das rotas administrativas são montados em `Security/ChaveAdministrativaFilter`.
+
+Previsões (B8): a exceção de domínio `ProvedorPrevisoesIndisponivelException` vira 503
+`ProvedorPrevisoesIndisponivel`, e o `TratadorExcecoes` acrescenta `Retry-After: 30`. Só ela
+produz 503: um erro inesperado do banco continua sendo 500 `ErroInterno`.

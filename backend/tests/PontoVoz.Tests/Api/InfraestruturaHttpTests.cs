@@ -203,7 +203,7 @@ public sealed class InfraestruturaHttpTests
         Assert.Equal(HttpStatusCode.OK, resposta.Status);
         JsonObject caminhos = resposta.Json["paths"]!.AsObject();
 
-        // 11 operações: /health, as 5 consultas públicas do B6 e as 5 rotas administrativas do B7.
+        // 12 operações: /health, as 5 consultas públicas do B6, as 5 rotas administrativas do B7 e as previsões do B8.
         string[] operacoes = [.. caminhos
             .SelectMany(par => par.Value!.AsObject().Select(op => $"{op.Key.ToUpperInvariant()} {par.Key}"))
             .Order(StringComparer.Ordinal)];
@@ -213,6 +213,7 @@ public sealed class InfraestruturaHttpTests
                 "GET /api/v1/linhas",
                 "GET /api/v1/paradas",
                 "GET /api/v1/paradas/{id}",
+                "GET /api/v1/paradas/{id}/previsoes",
                 "GET /api/v1/paradas/{id}/ultimas-passagens",
                 "GET /health",
                 "POST /api/v1/admin/linhas",
@@ -264,12 +265,11 @@ public sealed class InfraestruturaHttpTests
     }
 
     [Theory]
-    [InlineData("GET", "/api/v1/paradas/{parada}/previsoes")]
     [InlineData("GET", "/api/v1/paradas/{parada}/alternativas?destinoId=1")]
     [InlineData("GET", "/api/v1/paradas/{parada}/resumo")]
     [InlineData("GET", "/api/v1/admin/destinos")]
     [InlineData("POST", "/api/v1/admin/destinos")]
-    public async Task RotasDeB8EB9EAdministrativasExtras_NaoExistem(string metodo, string modelo)
+    public async Task RotasDeB9EAdministrativasExtras_NaoExistem(string metodo, string modelo)
     {
         await using ApiTeste api = await ApiTeste.CriarAsync();
         ApiTeste.Resposta busca = await api.GetAsync("/api/v1/paradas?codigoExterno=SIM-P001");

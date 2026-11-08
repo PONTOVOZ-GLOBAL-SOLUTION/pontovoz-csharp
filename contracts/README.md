@@ -3,10 +3,11 @@
 Esta pasta reúne os contratos que permitem à interface do totem e ao componente de voz e IA
 consumir o backend C# sem depender de detalhes internos dele.
 
-> **Estado atual (Bloco B7):** o contrato v1 está **consolidado** e serve de base para a implementação.
+> **Estado atual (Bloco B8):** o contrato v1 está **consolidado** e serve de base para a implementação.
 > Estão implementados o `GET /health`, as cinco consultas públicas do B6 (paradas, detalhe da
-> parada, linhas, destinos e últimas passagens) e as cinco rotas administrativas do B7.
-> Previsões, alternativas e resumo continuam **planejados** (B8 e B9). Os JSON de [`exemplos/`](exemplos/) mostram o
+> parada, linhas, destinos e últimas passagens), as cinco rotas administrativas do B7 e as
+> previsões de chegada do B8, com o provedor **simulado**. O adaptador Olho Vivo está desligado e
+> não foi testado contra a API real. Alternativas e resumo continuam **planejados** (B9). Os JSON de [`exemplos/`](exemplos/) mostram o
 > formato combinado; os das rotas implementadas são comparados com as respostas reais nos testes
 > do backend.
 
@@ -51,7 +52,7 @@ Para iniciar a API, siga [`../backend/README.md`](../backend/README.md).
 | 2 | GET | `/api/v1/paradas/{id}` | **Implementado (B6)** |
 | 3 | GET | `/api/v1/linhas` | **Implementado (B6)** |
 | 4 | GET | `/api/v1/destinos` | **Implementado (B6)** |
-| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Planejado (B8) |
+| 5 | GET | `/api/v1/paradas/{id}/previsoes` | **Implementado (B8)**, provedor simulado |
 | 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | **Implementado (B6)** |
 | 7 | GET | `/api/v1/paradas/{id}/alternativas?destinoId=` | Planejado (B9) |
 | 8 | GET | `/api/v1/paradas/{id}/resumo` | Planejado (B9) |
@@ -293,3 +294,4 @@ revisão humana nem os testes da API.
 | 07/11/2026 | B6: cinco consultas públicas implementadas (paradas, detalhe, linhas, destinos e últimas passagens), com ProblemDetails, CORS por `Cors:OrigensPermitidas` e `openapi/pontovoz-v1.json` exportado. Conferências registradas em `api-v1.md`: valores de `type`, 400 de model binding, 404 sem `codigo` para rota fora do padrão e 500 genérico. O resumo fica para o B9, sem parte antecipada no B6. Nenhum campo ou regra dos exemplos mudou. |
 | 07/11/2026 | B6.1: todo erro passa a ter `codigo`. Novos códigos no catálogo (seção 7 de `api-v1.md`): `RotaNaoEncontrada` (404, caminho sem rota correspondente, inclusive `id` fora do padrão) e `MetodoNaoPermitido` (405). Mudança aditiva; nenhum código ou campo existente mudou. |
 | 08/11/2026 | B7: as cinco rotas administrativas implementadas, com a chave da seção 5.1. Conferências registradas em `api-v1.md`: valores de `type` de 401, 403 e 409, erros de corpo (campos obrigatórios, JSON inválido, número como texto, data sem fuso) e 409 também em gravação simultânea. A frase sobre `origemRegistro` foi corrigida: o padrão do campo não impede toda informação pessoal (um número só de dígitos passa); a regra não mudou. |
+| 08/11/2026 | B8: `GET /previsoes` implementado com o provedor simulado (R1), a indisponibilidade simulável por configuração (R6) e o adaptador Olho Vivo preparado e desligado (R8). Conferências registradas em `api-v1.md` (seção 4.5): igualdade com os exemplos, arredondamento da espera, ordem das validações. Tempo limite da Olho Vivo definido (1.10) e `type` do 503 conferido. A nota da seção 11 passou a informar o estado de cada requisito. Nenhum campo ou regra dos exemplos mudou. |

@@ -14,7 +14,7 @@ namespace PontoVoz.Api.Controllers;
 [ApiController]
 [Route("api/v1/paradas")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json")]
-public sealed class ParadasController(IParadaService paradas, IUltimasPassagensService passagens) : ControllerBase
+public sealed class ParadasController(IParadaService paradas, IUltimasPassagensService passagens, IPrevisoesService previsoes) : ControllerBase
 {
     /// <summary>Busca paradas ativas por nome ou código, ou identifica a parada do totem pelo <c>codigoExterno</c>.</summary>
     /// <param name="termo">Trecho do nome ou do código, de 2 a 60 caracteres, sem diferenciar maiúsculas e acentos.</param>
@@ -56,4 +56,25 @@ public sealed class ParadasController(IParadaService paradas, IUltimasPassagensS
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, "application/problem+json")]
     public Task<UltimasPassagensParadaDto> ObterUltimasPassagens(int id, [FromQuery] int? linhaId, CancellationToken cancellationToken) =>
         passagens.ObterAsync(id, linhaId, cancellationToken);
+
+    /// <summary>Próximas chegadas previstas nas linhas da parada.</summary>
+    /// <remarks>
+    /// Uma previsão é uma estimativa do provedor (nivelConfirmacao = Previsao), não uma passagem
+    /// observada: ela nunca aparece em ultimas-passagens. Por padrão o provedor é simulado (origem
+    /// Simulado), com horários fictícios calculados no instante da consulta; nenhuma previsão é
+    /// oficial da SPTrans. Previsões vencidas não são devolvidas. Com o provedor indisponível, a
+    /// resposta é 503 ProvedorPrevisoesIndisponivel com Retry-After: 30.
+    /// </remarks>
+    /// <param name="id">Id interno da parada (inteiro ≥ 1).</param>
+    /// <param name="linhaId">Opcional: limita a uma linha que atende a parada.</param>
+    /// <param name="cancellationToken">Cancelamento da requisição.</param>
+    [HttpGet("{id:int:min(1)}/previsoes")]
+    [EndpointName("ObterPrevisoes")]
+    [ProducesResponseType<PrevisoesParadaDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status422UnprocessableEntity, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable, "application/problem+json")]
+    public Task<PrevisoesParadaDto> ObterPrevisoes(int id, [FromQuery] int? linhaId, CancellationToken cancellationToken) =>
+        previsoes.ObterAsync(id, linhaId, cancellationToken);
 }

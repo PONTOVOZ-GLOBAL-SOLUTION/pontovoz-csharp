@@ -1,7 +1,7 @@
 # Contrato REST v1 do PontoVoz
 
-**Versão do documento:** B7, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
-acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 e o B7
+**Versão do documento:** B8, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
+acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6, o B7 e o B8
 atualizaram o estado da implementação e registraram as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
 O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 
@@ -12,8 +12,11 @@ O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 >   `GET /api/v1/paradas/{id}/ultimas-passagens`.
 > - **Implementado e testado (B7):** as cinco rotas administrativas da seção 5, protegidas pela
 >   chave da seção 5.1.
-> - **Planejado:** previsões (B8), alternativas (B9) e resumo (B9). Elas **ainda não existem**
->   na API e respondem 404 `RotaNaoEncontrada`.
+> - **Implementado e testado (B8):** `GET /api/v1/paradas/{id}/previsoes`, com o provedor
+>   **simulado**. O adaptador Olho Vivo existe, mas está desligado e **nunca foi testado contra a
+>   API real** da SPTrans (veja [`../docs/dados.md`](../docs/dados.md)).
+> - **Planejado:** alternativas (B9) e resumo (B9). Elas **ainda não existem** na API e respondem
+>   404 `RotaNaoEncontrada`.
 > - Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado. Os das
 >   rotas implementadas são comparados com as respostas HTTP reais nos testes do backend; os
 >   das rotas planejadas ainda não são resultados de execução.
@@ -171,7 +174,8 @@ oficialmente confirmada.**
 
 - Toda operação recebe o `CancellationToken` da requisição. Se o cliente desistir, o
   processamento é interrompido e **nenhuma resposta** é enviada. Isso não é tratado como erro.
-- O provedor de previsões é o único serviço externo. Ele terá um **tempo limite** definido no B8.
+- O provedor de previsões é o único serviço externo. O **tempo limite** do adaptador Olho Vivo é
+  de 5 segundos por chamada (`Previsoes:OlhoVivo:TempoLimiteSegundos`, definido no B8).
   O provedor está **indisponível** quando falha, não responde no prazo ou está desligado.
 - Consequência da indisponibilidade, pela regra da seção [2](#2-política-de-respostas):
   - `GET /previsoes` devolve **503**, porque a previsão é todo o conteúdo dele;
@@ -425,7 +429,7 @@ pessoa que escolha. Se não devolver nenhum, a IA informa que o destino não est
 | Erros | **400** `RequisicaoInvalida` · **404** `ParadaNaoEncontrada`, `LinhaNaoEncontrada` · **422** `LinhaNaoAtendeParada` · **503** `ProvedorPrevisoesIndisponivel` |
 | Acesso | Público |
 | Dependências | `IProvedorPrevisaoChegada` (simulado por padrão; Olho Vivo desligado) e repositório de paradas |
-| Bloco | B8 |
+| Bloco | B8 (**implementado**; provedor simulado) |
 
 **`PrevisoesParada`**
 
@@ -462,6 +466,20 @@ Regras:
   marcados como `Simulado` e calculados a partir do relógio do servidor (requisito R1, seção 11).
   O adaptador Olho Vivo continua desligado até ser testado com credenciais
   (veja [`../docs/dados.md`](../docs/dados.md)).
+
+Conferido no B8:
+
+- Com o relógio controlado em 10/11/2026 às 14h32, a resposta da API é igual a
+  [`exemplos/previsoes.json`](exemplos/previsoes.json) (sem os ids internos), e o 503 é igual a
+  [`exemplos/erro-provedor-previsoes-indisponivel.json`](exemplos/erro-provedor-previsoes-indisponivel.json)
+  (sem `traceId` e com o `instance` da parada consultada).
+- `esperaMinutos` é arredondado para baixo: uma chegada exatamente no instante da consulta tem
+  espera 0, e uma chegada 30 segundos depois também.
+- O provedor só é consultado depois das validações (400, 404 e 422). Uma parada sem linhas
+  responde 200 sem consultar o provedor, mesmo com ele indisponível.
+- A indisponibilidade pode ser simulada pela configuração `Previsoes:SimularIndisponibilidade`
+  (R6). Não há rota para ligá-la.
+- Uma falha da Olho Vivo não é substituída por previsões simuladas: a resposta é 503.
 
 ### 4.6 `GET /api/v1/paradas/{id}/ultimas-passagens` — última passagem por linha
 
@@ -936,7 +954,7 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 
 | Campo | Descrição |
 |---|---|
-| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6 e no B7: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `…#section-15.5.2` (401), `…#section-15.5.4` (403), `…#section-15.5.5` (404), `…#section-15.5.6` (405), `…#section-15.5.10` (409), `https://tools.ietf.org/html/rfc4918#section-11.2` (422) e `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500). **Não use para decidir lógica.** |
+| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6 e no B7: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `…#section-15.5.2` (401), `…#section-15.5.4` (403), `…#section-15.5.5` (404), `…#section-15.5.6` (405), `…#section-15.5.10` (409), `https://tools.ietf.org/html/rfc4918#section-11.2` (422), `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500) e `…#section-15.6.4` (503). **Não use para decidir lógica.** |
 | `title` | Resumo legível |
 | `status` | Código HTTP |
 | `detail` | Explicação do caso, sem dados internos nem rastros de pilha |
@@ -1035,7 +1053,7 @@ mostrar a `mensagem` como está.
 | 2 | GET | `/api/v1/paradas/{id}` | Público | **Implementado (B6)** |
 | 3 | GET | `/api/v1/linhas` | Público | **Implementado (B6)** |
 | 4 | GET | `/api/v1/destinos` | Público | **Implementado (B6)** |
-| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | Planejado (B8) |
+| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | **Implementado (B8)** |
 | 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado (B6)** |
 | 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | Planejado (B9) |
 | 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | Planejado (B9; a parte prevista para o B6 não foi antecipada) |
@@ -1096,8 +1114,8 @@ e as correções da B1.3 estão em D17 a D19.
 
 ## 11. Requisitos para os próximos blocos
 
-Regras que o contrato pressupõe e que **ainda precisam ser implementadas**. Nenhuma delas existe
-no código hoje.
+Regras que o contrato pressupõe, com o bloco responsável. O estado em 08/11/2026 (B8) está na
+nota logo abaixo da tabela.
 
 | # | Requisito | Bloco | Como testar |
 |---|---|---|---|
@@ -1109,3 +1127,8 @@ no código hoje.
 | R6 | O provedor simulado terá uma opção para simular a indisponibilidade, usada nos testes e na demonstração do 503 e do resumo parcial. | B8 | Teste dos dois comportamentos |
 | R7 | A busca por `termo` usa uma coluna normalizada (minúsculas e sem acentos), porque o SQLite não ignora acentos. | B3/B4 | Teste: `demonstracao` encontra `Demonstração` |
 | R8 | O adaptador Olho Vivo só faz sentido para códigos reais da SPTrans. Para os dados `SIM-`, as previsões vêm sempre do provedor simulado. | B8 | Documentado em `docs/dados.md` quando o adaptador existir |
+
+Estado (B8): R1, R6 implementados no B8; R3 e R4 no B3 e no B7; R5 no B2 e no B5; R7 no B4. R2 é
+seguido: nenhum horário fixo está no código, no seed ou nos testes de regra (só os testes que
+comparam com os exemplos usam o instante deles). R8: adaptador Olho Vivo implementado, desligado
+por padrão e testado só com respostas simuladas; os dados `SIM-` nunca são enviados à SPTrans.

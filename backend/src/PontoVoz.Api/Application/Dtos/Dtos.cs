@@ -59,3 +59,29 @@ public sealed record UltimasPassagensParadaDto(
     IReadOnlyList<PassagemDto> Passagens,
     IReadOnlyList<ReferenciaLinhaDto> LinhasSemRegistro,
     IReadOnlyList<AvisoDto> Avisos);
+
+/// <summary>
+/// <c>Previsao</c> (seção 4.5): uma chegada prevista, nunca uma passagem. <c>previstaPara</c> no
+/// horário de São Paulo; <c>esperaMinutos</c> arredondado para baixo e nunca negativo.
+/// </summary>
+public sealed record PrevisaoDto(
+    int LinhaId,
+    string CodigoLinha,
+    string Letreiro,
+    DateTimeOffset PrevistaPara,
+    int EsperaMinutos,
+    string? PrefixoVeiculo,
+    NivelConfirmacao NivelConfirmacao);
+
+/// <summary><c>PrevisoesParada</c> (seção 4.5).</summary>
+public sealed record PrevisoesParadaDto(
+    int ParadaId,
+    string CodigoExternoParada,
+    string NomeParada,
+    StatusPrevisao Status,
+    OrigemDado Origem,
+    bool DadosSimulados,
+    DateTimeOffset ConsultadoEm,
+    IReadOnlyList<PrevisaoDto> Previsoes,
+    IReadOnlyList<ReferenciaLinhaDto> LinhasSemPrevisao,
+    IReadOnlyList<AvisoDto> Avisos);

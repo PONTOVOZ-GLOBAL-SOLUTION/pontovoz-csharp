@@ -10,7 +10,7 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Integrante responsável | Pendente (nome e RM) |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 26 |
+| Prompts registrados | 29 |
 
 ## Como a IA foi usada
 
@@ -99,6 +99,9 @@ reescrito.
 | [24](#prompt-24) | 08/11/2026 | Bloco B7 (09.1): retomada e conclusão após a interrupção | Continuação: testes, documentação e evidências | — |
 | [25](#prompt-25) | 08/11/2026 | Bloco B7.2: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
 | [26](#prompt-26) | 08/11/2026 | Bloco B7.3: validação final e publicação do B7 | Validação e publicação | `feat: implement secured administrative REST API` |
+| [27](#prompt-27) | 08/11/2026 | Bloco B8: previsões de chegada, provedor simulado, adaptador Olho Vivo e testes | Implementação, testes e documentação | — |
+| [28](#prompt-28) | 08/11/2026 | Bloco B8.1: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
+| [29](#prompt-29) | 08/11/2026 | Bloco B8.2: validação final e publicação do B8 | Validação e publicação | `feat: implement simulated arrival predictions and Olho Vivo adapter` |
 
 ---
 
@@ -5797,3 +5800,885 @@ conferiu na API real, sobre um banco isolado, as 11 operações, a matriz da cha
 associação idempotente, o registro manual não verificado, o histórico após desativar, a ausência
 das rotas do B8 e B9, o OpenAPI igual ao exportado e o Scalar, sem alterar o banco de
 desenvolvimento. Publicou o B7 com o commit `feat: implement secured administrative REST API`, sem trailer, e push normal.
+
+---
+
+## Bloco B8 — previsões de chegada
+
+<a id="prompt-27"></a>
+
+### Prompt 27 — Bloco B8: previsões de chegada, provedor simulado, adaptador Olho Vivo e testes
+
+**Data:** 08/11/2026 · **Tipo:** Implementação, testes e documentação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 10 — BLOCO B8: PREVISÕES DE CHEGADA, PROVEDOR SIMULADO, ADAPTADOR OLHO VIVO E TESTES
+Atue como engenheiro de software sênior especializado em C#/.NET 10, ASP.NET Core, integração de APIs, arquitetura de aplicações e testes automatizados.
+Você é responsável pela execução técnica completa do backend C# do PontoVoz.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit publicado esperado:
+`f9661ba5ec8b374f963c987211315dae8899d2a8`
+Os blocos B0 a B7 estão concluídos e publicados.
+Sua tarefa é implementar exclusivamente o B8 — Previsões de Chegada, conforme o contrato REST já aprovado.
+Não implemente B9 ou B10. Não faça commit ou push antes da auditoria.
+1. PRIORIDADE ABSOLUTA — EXIGÊNCIAS OFICIAIS DA FIAP
+A disciplina C# Software Development exige:
+
+* POO — 3,0 pontos.
+* Web API — 2,5 pontos.
+* EF Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade de código — 2,0 pontos.
+
+Também exige interfaces, injeção de dependência, testes unitários, README, documentação dos endpoints, evidências e integração com a proposta CitizenTech.
+Todos esses requisitos devem continuar atendidos.
+Não adicione recursos não previstos pelo contrato ou pelo planejamento.
+O objetivo do B8 é implementar corretamente uma fonte intercambiável de previsões, um provedor fictício funcional e o endpoint público de previsões de chegada.
+A integração real com a SPTrans não deve ser apresentada como funcionando sem credenciais, autorização e teste efetivo.
+2. INSPEÇÃO INICIAL OBRIGATÓRIA
+Antes de qualquer alteração:
+
+1. Confirme o diretório correto.
+2. Verifique `git status`.
+3. Confirme branch main.
+4. Confirme HEAD no commit esperado.
+5. Confirme sincronização com origin/main.
+6. Confirme árvore de trabalho limpa.
+7. Leia `contracts/api-v1.md`, especialmente as seções 1.7, 1.8, 1.10, 2, 4.5, 7, 8, 9 e 11.
+8. Leia `contracts/exemplos/previsoes.json`.
+9. Leia `contracts/exemplos/erro-provedor-previsoes-indisponivel.json`.
+10. Leia `docs/dados.md`.
+11. Examine as classes `PrevisaoChegada`, `ResultadoProvedor`, `ReferenciaLinha`, os enums e os testes existentes.
+12. Examine `CatalogoAvisos`, os DTOs, os services, os repositórios e os Controllers.
+13. Examine o tratamento global de ProblemDetails.
+14. Examine as configurações, o OpenAPI e os testes HTTP.
+15. Confirme os testes existentes antes de desenvolver.
+
+Não presuma propriedades, nomes, formatos ou comportamentos sem conferir o código real.
+3. ESCOPO EXATO DO B8
+Implemente o endpoint:
+`GET /api/v1/paradas/{id}/previsoes`
+Com filtro opcional:
+`?linhaId=`
+Inclua os componentes necessários:
+
+* Interface do provedor de previsões.
+* Provedor simulado padrão.
+* Service de previsões.
+* DTOs de resposta.
+* Controller REST.
+* Opção de simular indisponibilidade.
+* Tratamento HTTP 503.
+* Adaptador HTTP Olho Vivo preparado e desligado por padrão.
+* Testes unitários, de integração e HTTP.
+* OpenAPI e Scalar atualizados.
+* Documentação e evidências.
+
+Não implemente ainda:
+
+* Alternativas de deslocamento.
+* Resumo agregado.
+* Interface ou voz do totem.
+* Rastreamento de veículos.
+* Mapas.
+* Cadastro de linhas adicionais.
+* Autenticação de passageiros.
+* Novos endpoints não previstos.
+* Persistência das previsões simuladas.
+
+4. INTERFACE DO PROVEDOR
+Implemente a interface `IProvedorPrevisaoChegada`, ou utilize a equivalente existente, respeitando as responsabilidades do contrato.
+O objetivo é permitir a troca da origem das previsões sem modificar o serviço de aplicação.
+Requisitos:
+
+* Receber a parada e as linhas relevantes, usando os tipos e dados efetivamente disponíveis.
+* Retornar um `ResultadoProvedor` coerente.
+* Utilizar `CancellationToken`.
+* Preservar o `OrigemDado`.
+* Distinguir resposta sem previsões de indisponibilidade.
+* Permitir que o B9 reutilize o serviço/provedor.
+* Evitar acoplamento do domínio a HTTP e à SPTrans.
+* Não expor `IQueryable` ou `DbContext` nas interfaces.
+
+Aproveite as classes de domínio que já existem.
+Não crie um framework genérico desnecessário.
+5. PROVEDOR SIMULADO — R1 E R2
+Implemente um provedor que calcule previsões fictícias a partir do horário atual, usando `TimeProvider`.
+Regra obrigatória: as previsões simuladas devem ser calculadas no momento da consulta. Não devem ser gravadas no SQLite.
+Cada linha simulada deverá ter uma configuração de demonstração com:
+
+* Intervalo recorrente.
+* Defasagem fixa.
+* Quantidade de próximas chegadas, quando aplicável.
+* Prefixos fictícios de veículos.
+* Identificação pelo código estável da linha, nunca por IDs internos fixos.
+
+A configuração precisa ser determinística.
+Utilize a mesma regra de cálculo em datas diferentes, inclusive depois de reiniciar a aplicação.
+Não coloque uma data fixa de novembro de 2026 no algoritmo.
+Os horários específicos do exemplo JSON existem somente como referência para a comparação do contrato.
+Compatibilidade com o exemplo
+Com o relógio controlado em 10/11/2026 às 14h32, horário de São Paulo, o exemplo de `previsoes.json` mostra:
+
+* SIM-L002: chegadas às 14h33 e 14h51.
+* SIM-L004: chegada às 14h40.
+* SIM-L001: sem previsão.
+
+Escolha uma configuração recorrente de intervalos e defasagens que reproduza esse cenário sem codificar a data do exemplo.
+A regra deve continuar funcionando nos dias seguintes, não apenas nesse instante.
+Não simule previsões para linhas desconhecidas como se fossem linhas reais.
+Regras temporais
+
+* Nunca devolver previsões vencidas.
+* Uma previsão exatamente no instante da consulta pode ter espera de 0 minuto.
+* O número de minutos de espera nunca pode ser negativo.
+* Preservar UTC internamente.
+* Exibir horário de São Paulo na resposta.
+* Utilizar o mesmo instante de referência para calcular as previsões, esperas e `consultadoEm`.
+* Testar limites de segundos e minutos.
+* Testar horários próximos de meia-noite.
+* Testar mudança de dia e de mês.
+* Não criar observações de passagem ao gerar previsões.
+
+Preserve a implementação já existente de `PrevisaoChegada` e `ResultadoProvedor` sempre que possível.
+6. FONTE E CONFIABILIDADE
+O provedor simulado deve retornar:
+
+* `origem: "Simulado"`.
+* `dadosSimulados: true` quando houver dados fictícios utilizados.
+* `nivelConfirmacao: "Previsao"` em cada chegada prevista.
+* Aviso `DadosSimulados`, quando cabível.
+
+Nenhuma previsão é uma passagem observada.
+Nenhum resultado simulado pode ser apresentado como dado oficial ou confirmado pela SPTrans.
+A consulta de previsões não deve modificar o histórico de últimas passagens.
+Preserve a distinção entre:
+
+* Método de obtenção do dado.
+* Natureza fictícia ou não.
+* Nível de confirmação.
+
+Para paradas ou linhas administrativas, preserve a regra do aviso `CadastroNaoVerificado` prevista na seção 8 do contrato.
+7. SERVICE DE PREVISÕES
+Implemente a camada Application responsável por:
+
+1. Validar os parâmetros.
+2. Consultar a parada.
+3. Confirmar se ela existe e está ativa.
+4. Validar `linhaId`, quando informado.
+5. Confirmar que a linha existe e está ativa.
+6. Confirmar que a linha atende à parada.
+7. Identificar as linhas ativas que serão consultadas.
+8. Consultar o provedor.
+9. Montar o DTO `PrevisoesParada`.
+10. Produzir avisos estruturados.
+11. Ordenar as previsões.
+12. Identificar linhas sem previsão.
+
+A ordem de validação deve seguir o contrato:
+400 → 404 → 422 → consulta ao provedor.
+Uma entrada inválida não deve consultar o provedor.
+Se a parada não possuir linhas ativas associadas, retorne 200 com listas vazias e aviso `ParadaSemLinhas`, sem consultar o provedor.
+Não crie consultas redundantes desnecessárias.
+Use interfaces de repositórios e DI.
+Não acesse o SQLite diretamente na camada Application.
+8. RESPOSTA DO ENDPOINT
+Implemente exatamente o DTO previsto na seção 4.5:
+`PrevisoesParada`
+Campos:
+
+* `paradaId`
+* `codigoExternoParada`
+* `nomeParada`
+* `status`
+* `origem`
+* `dadosSimulados`
+* `consultadoEm`
+* `previsoes`
+* `linhasSemPrevisao`
+* `avisos`
+
+Cada item de `previsoes` deve conter:
+
+* `linhaId`
+* `codigoLinha`
+* `letreiro`
+* `previstaPara`
+* `esperaMinutos`
+* `prefixoVeiculo`
+* `nivelConfirmacao`
+
+Ordenação
+
+* `previsoes`: por previstaPara crescente e depois codigoLinha.
+* `linhasSemPrevisao`: por codigoLinha.
+
+Inclua critério final determinístico de desempate quando necessário, sem alterar a ordem contratual.
+Estados
+A. Previsões para todas as linhas
+
+* HTTP 200.
+* `status: "Disponivel"`.
+* `linhasSemPrevisao: []`.
+
+B. Previsões para parte das linhas
+
+* HTTP 200.
+* `status: "Disponivel"`.
+* `linhasSemPrevisao` preenchida.
+* Aviso `PrevisaoParcial`.
+
+C. Provedor respondeu sem previsões
+
+* HTTP 200.
+* `status: "SemPrevisoes"`.
+* `previsoes: []`.
+* Aviso `SemPrevisoes`.
+
+D. Parada sem linhas
+
+* HTTP 200.
+* Listas vazias.
+* Aviso `ParadaSemLinhas`.
+* Não consultar o provedor.
+
+E. Provedor indisponível
+
+* HTTP 503.
+* ProblemDetails.
+* Código `ProvedorPrevisoesIndisponivel`.
+* Cabeçalho `Retry-After: 30`.
+
+O valor `ProvedorIndisponivel` não deve ser devolvido como uma resposta HTTP 200 nesse endpoint.
+Esse status será usado dentro do resumo do B9.
+9. OPÇÃO DE SIMULAR INDISPONIBILIDADE — R6
+Implemente uma opção de configuração para simular a indisponibilidade do provedor.
+Requisitos:
+
+* Desligada por padrão.
+* Utilizada nos testes e na demonstração do 503.
+* Configurável sem modificar código-fonte.
+* Documentada no README.
+* Não exposta como rota pública para ativar falhas.
+* Não altera o banco.
+* Não remove os dados simulados existentes.
+* Não interfere nas consultas de paradas, linhas, destinos ou últimas passagens.
+
+Quando a opção estiver ativa e houver uma consulta válida que precise do provedor:
+
+* O endpoint deverá devolver 503.
+* O código será `ProvedorPrevisoesIndisponivel`.
+* O cabeçalho deverá ser `Retry-After: 30`.
+
+Uma parada sem linhas continua retornando 200 sem consultar o provedor, conforme o contrato.
+10. ADAPTADOR HTTP OLHO VIVO — R8
+O planejamento do projeto prevê um adaptador para a API Olho Vivo da SPTrans.
+Implemente somente o adaptador necessário para permitir futura integração, sem ativá-lo por padrão.
+Fonte de referência
+Use a documentação oficial da SPTrans como base:
+https://www.sptrans.com.br/desenvolvedores/api-do-olho-vivo-guia-de-referencia/documentacao-api
+Também existe documentação da API v2.1 no portal de APIs da Prefeitura de São Paulo.
+Confira a documentação oficial antes de definir URLs, autenticação e formato de resposta.
+Não suponha que um endpoint ou host antigo continua disponível sem verificação.
+Requisitos
+
+* Utilizar HttpClient via injeção de dependência.
+* Utilizar HTTPS.
+* Configurar tempo limite explícito, documentado.
+* Autenticação prevista pela documentação oficial.
+* Credenciais fora do repositório.
+* Não registrar tokens em logs ou erros.
+* Não realizar chamadas reais sem configuração e autorização.
+* Tratar corretamente falha de autenticação.
+* Tratar timeout.
+* Tratar falha de conexão.
+* Tratar HTTP não bem-sucedido.
+* Tratar JSON inválido ou inesperado.
+* Interpretar previsões retornadas.
+* Não incluir previsões já vencidas.
+* Preservar o instante de referência e o fuso correto.
+* Não inventar veículos ou horários em caso de resposta incompleta.
+* Propagar CancellationToken.
+* Distinguir cancelamento do cliente de indisponibilidade do provedor.
+
+Proibição importante
+O adaptador não deve enviar códigos SIM- à SPTrans.
+Os códigos fictícios do seed não correspondem a identificadores oficiais de parada ou linha.
+Para os dados SIM-, as previsões devem sempre utilizar o provedor simulado.
+Não suponha que um código administrativo é automaticamente um código real e validado da SPTrans.
+Sem correspondência oficial comprovada, não execute chamadas reais.
+Testes do adaptador
+Utilize um HttpMessageHandler falso ou mecanismo equivalente para simular respostas da API.
+Cubra pelo menos estes cenários:
+
+1. Autenticação bem-sucedida e resposta válida.
+2. Autenticação recusada.
+3. Timeout.
+4. Erro HTTP ou de conexão.
+5. JSON inválido ou campos obrigatórios ausentes.
+6. Resposta válida sem previsões.
+
+Também teste o bloqueio de códigos SIM- e a ausência de chamadas externas quando o adaptador estiver desabilitado.
+Não afirme que esses testes simulados comprovam funcionamento contra a API real da SPTrans.
+Se encontrar divergência entre diferentes versões da documentação oficial, documente o problema e limite o adaptador ao que for verificável, sem inventar uma integração completa.
+11. SELEÇÃO DO PROVEDOR
+O funcionamento padrão do PontoVoz deve permanecer:
+Provedor simulado, sem necessidade de token externo.
+Prepare uma seleção de provedor por configuração ou estratégia equivalente, mantendo o desenho simples.
+Requisitos:
+
+* Não precisar alterar Controllers para trocar o provedor.
+* Não ativar Olho Vivo sem configuração explícita.
+* Manter dados SIM- no provedor simulado.
+* Não utilizar integração externa para a demonstração obrigatória.
+* Não apresentar fallback fictício como se fosse previsão real após uma falha externa.
+* Manter compatibilidade com os services de B9.
+
+Não implemente múltiplas políticas complexas de fallback não previstas no contrato.
+12. TIMEOUT, ERROS E CANCELAMENTO
+O contrato determina um limite de tempo para o provedor externo.
+Defina e documente um tempo limite razoável e configurável.
+Quando o provedor falhar, estiver desligado ou não responder no prazo:
+
+* A consulta de previsões deve devolver 503.
+* A resposta deve usar `application/problem+json`.
+* O código deve ser `ProvedorPrevisoesIndisponivel`.
+* A mensagem deve ser a do contrato.
+* O cabeçalho `Retry-After` deve ser 30.
+
+Integre essa condição ao tratamento centralizado do B6 sem alterar indevidamente os outros erros.
+Não converta qualquer exceção de aplicação em indisponibilidade do provedor.
+Erros inesperados do banco continuam sendo erros internos, não falha da SPTrans.
+Se o cliente cancelar a requisição, propague o cancelamento sem produzir artificialmente um 500 ou um 503.
+Não exponha tokens, connection strings, stack traces ou dados internos.
+13. TESTES UNITÁRIOS
+Preserve os 663 testes existentes.
+Crie testes adequados para:
+
+* Provedor simulado.
+* Regra de intervalos e defasagens.
+* Horários futuros.
+* Horário exatamente igual ao instante de consulta.
+* Previsões vencidas descartadas.
+* Espera em minutos.
+* Troca de dia e mês.
+* Repetição do padrão em datas diferentes.
+* Linhas sem previsão.
+* Várias previsões para a mesma linha.
+* Ordenação determinística.
+* Status Disponivel.
+* Status SemPrevisoes.
+* Provedor indisponível.
+* TimeProvider controlado.
+* CancellationToken.
+* Origem e dados simulados.
+* Ausência de gravação de previsões no SQLite.
+
+Não crie testes baseados no relógio real que possam falhar dependendo da hora da execução.
+Use FakeTimeProvider ou os utilitários de teste já presentes.
+14. TESTES DE SERVICES
+Teste:
+
+1. Parada válida.
+2. Parada inexistente.
+3. Parada inativa.
+4. Identificador de rota inválido.
+5. linhaId inválido.
+6. Linha inexistente.
+7. Linha inativa.
+8. Linha que não atende a parada.
+9. Parada sem linhas.
+10. Previsão para todas as linhas.
+11. Previsão parcial.
+12. Sem previsões.
+13. Indisponibilidade.
+14. Ordem dos avisos.
+15. Dados administrativos não verificados.
+16. Consulta ao provedor somente depois das validações.
+17. Ausência de chamada ao provedor para parada sem linhas.
+18. Propagação de CancellationToken.
+
+Não duplique regras de domínio já implementadas.
+15. TESTES HTTP E SQLITE REAL
+Utilize WebApplicationFactory e SQLite isolado, preservando a estrutura de testes atual.
+Teste o endpoint:
+`GET /api/v1/paradas/{id}/previsoes`
+Verifique:
+
+* 200 com previsões.
+* 200 com previsão parcial.
+* 200 sem previsões.
+* 200 para parada sem linhas.
+* 400 para linhaId inválido.
+* 404 para parada inexistente ou inativa.
+* 404 para linha inexistente.
+* 422 para linha não associada à parada.
+* 503 para provedor indisponível.
+* Retry-After: 30.
+* Campos e enums JSON.
+* Datas com fuso.
+* Prefixos de veículo.
+* Avisos corretos.
+* Campos nulos presentes.
+* Ordenação.
+* Acessibilidade pública sem chave administrativa.
+* Nenhuma alteração no histórico de passagens.
+* Nenhuma previsão persistida no banco.
+* Compatibilidade com as rotas B6 e B7.
+* Cancelamento da requisição.
+* Não vazamento de informações sensíveis.
+
+Compare a resposta com `contracts/exemplos/previsoes.json` usando horário controlado, normalizando apenas IDs internos legítimos e campos realmente dinâmicos.
+Compare o 503 com `erro-provedor-previsoes-indisponivel.json`.
+Não altere os exemplos apenas para fazer o teste passar.
+16. OPENAPI E SCALAR
+Atualize a documentação automática para incluir a nova operação:
+`GET /api/v1/paradas/{id}/previsoes`
+Documente:
+
+* Parâmetros.
+* DTO de resposta.
+* Códigos 200, 400, 404, 422 e 503.
+* ProblemDetails.
+* Retry-After.
+* Origem simulada.
+* Diferença entre previsão e passagem observada.
+
+Ao concluir B8, o OpenAPI deverá conter:
+
+* 5 operações públicas anteriores.
+* 5 operações administrativas.
+* 1 nova operação pública de previsões.
+* GET /health.
+
+Total esperado: 12 operações efetivamente implementadas.
+Alternativas e resumo continuam pendentes para B9.
+Reexecute:
+`pwsh ./scripts/exportar-openapi.ps1`
+Confirme que o documento exportado é igual ao gerado pela API real.
+Preserve Scalar.
+17. DOCUMENTAÇÃO E TRANSPARÊNCIA DOS DADOS
+Atualize:
+
+* README.md da raiz.
+* backend/README.md.
+* Infrastructure/README.md.
+* Application/README.md, quando necessário.
+* contracts/README.md.
+* contracts/api-v1.md, somente no que for necessário para indicar o B8 implementado.
+* contracts/openapi/pontovoz-v1.json.
+* docs/dados.md.
+* prompts.md.
+
+Atenção especial a docs/dados.md: atualmente algumas seções ainda descrevem o projeto como estando no B0 ou B3. Atualize o estado para refletir o código real, sem alterar a origem dos dados.
+O documento deve distinguir claramente:
+
+* Provedor simulado funcional.
+* Adaptador Olho Vivo preparado, mas desligado.
+* Integração real não testada, caso não exista credencial.
+* Dados fictícios utilizados na demonstração.
+* Ausência de dados oficiais de chegada quando não houver integração real.
+
+Não declare integração oficial funcionando com base apenas em testes com stubs.
+Registre os prompts em prompts.md, preservando o histórico e a atribuição correta das ferramentas.
+Não omita nem falsifique o uso de IA.
+Não adicione marcas promocionais ou trailers automáticos de ferramentas.
+18. EVIDÊNCIAS DO B8
+Crie:
+`backend/docs/evidencias/B8-previsoes.md`
+Inclua evidências reais de:
+
+* Provedor simulado.
+* Resposta HTTP 200.
+* Previsão parcial.
+* Resposta sem previsões.
+* Resposta 503.
+* Cabeçalho Retry-After.
+* Testes de horários.
+* Testes do adaptador com HTTP simulado.
+* Segurança das credenciais.
+* Ausência de chamadas reais indevidas.
+* OpenAPI e Scalar.
+* Total real de testes.
+* Build.
+
+Não invente resultados nem imagens.
+Não inclua chaves ou tokens nas evidências.
+19. VALIDAÇÃO FINAL
+Execute:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Execute também:
+
+* Verificador do contrato.
+* Testes unitários do provedor.
+* Testes de services.
+* Testes HTTP.
+* Testes do adaptador Olho Vivo com stubs.
+* Teste de igualdade do OpenAPI.
+* Teste da API real.
+* Verificação do Scalar.
+
+Confirme:
+
+* Todos os testes antigos preservados.
+* Novos testes aprovados.
+* 0 avisos e 0 erros no build.
+* API com 12 operações.
+* Dados SIM- sempre simulados.
+* Nenhuma previsão vencida.
+* Nenhuma previsão falsamente oficial.
+* Nenhum segredo versionado.
+* Nenhuma alteração inesperada no banco.
+* B9 não antecipado.
+
+Se o executável estiver bloqueado por uma instância antiga da API, você já está autorizado a verificar e encerrar exclusivamente processos confirmados do PontoVoz, sem interromper outras aplicações.
+Não utilize resultados de testes executados sobre binários antigos como validação final.
+Corrija qualquer falha encontrada antes de concluir o bloco.
+20. GIT
+Não execute commit.
+Não execute git push.
+Não utilize force push.
+Não altere commits anteriores.
+Não descarte alterações.
+Não versionar bancos, segredos ou arquivos temporários.
+Deixe o B8 localmente implementado para auditoria.
+21. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo simples do B8.
+B. Arquivos criados e modificados.
+C. Interface e provedores de previsão.
+D. Algoritmo do provedor simulado.
+E. Tratamento dos horários e do TimeProvider.
+F. Service e DTOs.
+G. Endpoint HTTP e respostas.
+H. Condições 200, 400, 404, 422 e 503.
+I. Opção de indisponibilidade.
+J. Adaptador Olho Vivo: o que foi implementado, o que foi testado com stub e o que NÃO foi testado com a API real.
+K. Resultados dos testes por grupo.
+L. Total de testes aprovados, falhos e ignorados.
+M. Resultado do build e dos comandos EF Core.
+N. OpenAPI e Scalar.
+O. Evidências registradas.
+P. Confirmação de ausência de segredos e chamadas externas indevidas.
+Q. Compatibilidade com o contrato.
+R. Critérios oficiais da FIAP implementados e pendentes.
+S. Estado do Git.
+T. Problemas encontrados e soluções.
+U. Pendências para B9.
+Inclua uma explicação didática curta:
+
+* Como o PontoVoz calcula uma chegada prevista.
+* Por que os dados são simulados.
+* Como o programa utiliza TimeProvider.
+* Qual é a diferença entre previsão de chegada e última passagem registrada.
+* Como o sistema reage quando o provedor está indisponível.
+
+Execute somente B8. Não faça commit, não faça push e não inicie B9.
+Conclua o bloco e aguarde a auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a ferramenta implementou
+`GET /api/v1/paradas/{id}/previsoes`:
+- **Provedores:** a interface `IProvedorPrevisaoChegada` (uma falha volta como indisponibilidade,
+  não como exceção, para o B9 reutilizar), o provedor simulado padrão (grade de chegadas por linha,
+  contada em minutos desde uma âncora fixa e calculada no instante da consulta, sem data no código e
+  sem gravar nada), o adaptador Olho Vivo (v2.1, conferido na documentação oficial da SPTrans,
+  desligado por padrão, só HTTPS, prazo de 5 s, sem enviar dados `SIM-`, com o token fora dos logs)
+  e um seletor por configuração.
+- **Service e HTTP:** validação 400 → 404 → 422 antes do provedor, parada sem linhas sem consultar o
+  provedor, avisos do contrato, 503 `ProvedorPrevisoesIndisponivel` com `Retry-After: 30` pelo
+  tratamento central e a opção `Previsoes:SimularIndisponibilidade` (R6).
+- **Testes:** 94 novos (provedor simulado, adaptador com HTTP falso, service e HTTP); a resposta da
+  API ficou igual a `previsoes.json` e ao exemplo do 503. Um teste encontrou um erro no adaptador
+  (JSON com tipo inesperado viraria 500), corrigido. No total, 756 testes passaram. Nenhum teste
+  acessou a API real da SPTrans, e a integração real **não** foi testada (sem credenciais).
+- **Documentação:** OpenAPI com 12 operações, contrato, READMEs, `docs/dados.md` (antes ainda no
+  estado do B0) e `backend/docs/evidencias/B8-previsoes.md`, com respostas reais em banco isolado.
+- **Git:** não houve commit.
+
+<a id="prompt-28"></a>
+
+### Prompt 28 — Bloco B8.1: pacote ZIP para auditoria independente do código
+
+**Data:** 08/11/2026 · **Tipo:** Preparação para auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B8.1 — PREPARAÇÃO DO CÓDIGO PARA AUDITORIA INDEPENDENTE
+O relatório do B8 foi recebido.
+A implementação está aprovada em princípio, mas, antes de autorizar commit e push, faremos uma auditoria independente dos arquivos reais do projeto.
+Sua tarefa agora é preparar um ZIP completo e atualizado, preservando integralmente o trabalho realizado.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Commit-base publicado:
+`f9661ba5ec8b374f963c987211315dae8899d2a8`
+1. PRESERVAÇÃO DO PROJETO
+Antes de qualquer operação:
+
+1. Confirme o diretório correto.
+2. Confirme a branch main.
+3. Confirme HEAD e origin/main no commit esperado.
+4. Execute git status.
+5. Liste arquivos modificados e ainda não versionados.
+6. Confirme que todas as alterações B8 permanecem presentes.
+
+O relatório informou 21 arquivos modificados e 14 novos.
+Não descarte alterações.
+Não execute git reset --hard ou git clean.
+Não recomece o B8.
+Não implemente funcionalidades adicionais.
+2. GERAR ZIP COMPLETO
+Crie um arquivo chamado:
+`PontoVoz-B8-Auditoria.zip`
+Salve-o fora da pasta controlada pelo Git, preferencialmente em:
+`C:\Users\paulo\Projetos\`
+O ZIP deve conter o projeto completo no estado atual da pasta local, incluindo arquivos ainda não commitados.
+Inclua obrigatoriamente:
+
+* README.md da raiz.
+* prompts.md.
+* contracts/, incluindo exemplos, verificador e OpenAPI exportado.
+* docs/, incluindo docs/dados.md.
+* backend/src/, com todas as camadas do projeto.
+* backend/tests/, incluindo os novos testes do B8.
+* backend/docs/evidencias/.
+* Scripts.
+* Arquivos de solução e projetos .NET.
+* Configurações versionáveis necessárias à execução.
+* READMEs das camadas.
+
+Confirme especialmente a presença de:
+
+* IPrevisoes.cs.
+* PrevisoesService.cs.
+* ProvedorPrevisaoSimulado.cs.
+* ProvedorOlhoVivo.cs.
+* SeletorProvedorPrevisao.cs.
+* OpcoesPrevisoes.cs.
+* ProvedoresExtensions.cs.
+* ProvedorPrevisoesIndisponivelException.cs.
+* Todos os quatro grupos de testes novos.
+* B8-previsoes.md.
+* B8-scalar-previsoes.jpg.
+
+Use os caminhos reais encontrados no projeto.
+Não utilize somente git archive HEAD, porque isso excluiria os arquivos novos do B8 ainda não publicados.
+3. EXCLUSÕES DE SEGURANÇA
+Não inclua:
+
+* .git/
+* bin/
+* obj/
+* .vs/
+* .idea/
+* TestResults/
+* Bancos SQLite.
+* Arquivos -shm e -wal.
+* Arquivos de user-secrets.
+* Tokens reais.
+* Chaves de API.
+* Senhas reais.
+* Logs privados.
+* Arquivos temporários.
+* Backups desnecessários.
+
+Preserve os exemplos fictícios de testes e as evidências acadêmicas adequadas.
+4. VERIFICAR INTEGRIDADE E SEGURANÇA
+Após gerar o ZIP:
+
+1. Teste sua integridade.
+2. Conte os arquivos incluídos.
+3. Confirme que todos os arquivos novos e alterados do B8 estão presentes.
+4. Compare byte a byte os arquivos do ZIP com a pasta local.
+5. Confirme a presença das 12 operações previstas no código e OpenAPI.
+6. Confirme a inclusão dos testes do provedor simulado.
+7. Confirme a inclusão dos testes do adaptador Olho Vivo.
+8. Confirme que não há bancos, binários ou segredos.
+9. Calcule o SHA-256.
+10. Informe o caminho completo do arquivo.
+
+Caso identifique alguma informação sensível nos documentos, não a publique nem a inclua no ZIP; relate o problema.
+5. OBSERVAÇÕES PARA A AUDITORIA
+Não altere o código nesta etapa.
+A auditoria independente verificará especialmente:
+
+* Algoritmo de previsões e TimeProvider.
+* Separação entre dados simulados e oficiais.
+* Tratamento de indisponibilidade.
+* Resposta 503 e Retry-After.
+* Segurança do adaptador Olho Vivo.
+* Autenticação e tratamento de sessão do adaptador.
+* Ausência de tokens em logs.
+* Ausência de chamadas externas indevidas.
+* Aderência ao contrato.
+* Testes de integração.
+* Documentação e evidências.
+
+A integração real Olho Vivo deverá continuar identificada como não validada contra a API oficial, pois não foram executados testes reais.
+6. RELATÓRIO FINAL
+Apresente:
+A. Caminho completo do ZIP.
+B. Tamanho do arquivo.
+C. Quantidade de arquivos.
+D. SHA-256.
+E. Confirmação de que todas as alterações locais B8 estão incluídas.
+F. Confirmação da presença dos testes e evidências.
+G. Resultado da verificação de segurança.
+H. Estado do Git.
+I. Confirmação de que não houve commit nem push.
+Não inicie B9. Não faça commit ou push. Apenas prepare o ZIP e aguarde a auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code gerou
+`PontoVoz-B8-Auditoria.zip` na pasta acima do repositório, a partir da árvore de trabalho
+(arquivos versionados e os novos do B8 ainda não commitados), sem `.git`, binários, bancos SQLite,
+logs nem segredos. Conferiu a integridade, os 197 arquivos, a presença e a igualdade byte a byte
+dos 35 arquivos alterados ou novos do B8, as 12 operações nos controllers e no OpenAPI exportado,
+os quatro grupos de testes novos, a ausência de bancos e chaves, e informou o SHA-256. Nenhum
+código foi alterado e não houve commit.
+
+<a id="prompt-29"></a>
+
+### Prompt 29 — Bloco B8.2: validação final e publicação do B8
+
+**Data:** 08/11/2026 · **Tipo:** Validação e publicação · **Commit:** `feat: implement simulated arrival predictions and Olho Vivo adapter`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B8.2 — VALIDAÇÃO FINAL E PUBLICAÇÃO AUTORIZADA
+O ZIP PontoVoz-B8-Auditoria.zip foi recebido e auditado.
+A auditoria confirmou a integridade dos 197 arquivos, o cálculo recorrente das previsões, a estrutura do provedor simulado, o tratamento de indisponibilidade, o adaptador Olho Vivo desligado por padrão, os testes e as 12 operações do OpenAPI.
+O B8 está aprovado para publicação, condicionado à última validação automática.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base:
+`f9661ba5ec8b374f963c987211315dae8899d2a8`
+1. Verifique o estado do projeto
+Antes de editar:
+
+* Confirme o diretório e a branch main.
+* Confirme HEAD e origin/main no commit esperado.
+* Preserve todos os arquivos locais do B8.
+* Compare o estado de trabalho com o ZIP auditado.
+* Não descarte alterações.
+* Não modifique a arquitetura sem necessidade.
+
+2. Validação final
+Execute a partir de backend/:
+
+* dotnet restore
+* dotnet build --no-incremental
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Execute também o verificador de contrato.
+O último relatório apontou 756 testes aprovados, 0 falhas, 0 ignorados e compilação sem avisos.
+Confirme o resultado real atual, utilizando os binários recompilados.
+3. Conferências específicas do B8
+Verifique novamente:
+
+* Provedor simulado como padrão.
+* Algoritmo determinístico em datas diferentes.
+* Nenhuma previsão vencida.
+* TimeProvider utilizado corretamente.
+* Dados fictícios sempre identificados como simulados.
+* Nenhuma previsão apresentada como passagem observada.
+* Endpoint GET /api/v1/paradas/{id}/previsoes.
+* Respostas HTTP 200, 400, 404, 422 e 503.
+* Retry-After: 30 na indisponibilidade.
+* Nenhuma gravação de previsões no SQLite.
+* Nenhuma chamada não autorizada à SPTrans.
+* Nenhum token em logs, arquivos versionados ou respostas.
+* Cancelamento propagado.
+* OpenAPI com 12 operações.
+* Documento OpenAPI exportado igual ao documento gerado.
+* Scalar funcionando.
+
+Não execute chamadas reais à Olho Vivo sem credenciais e autorização.
+O adaptador ainda não foi validado com a API real. Preserve essa ressalva em toda a documentação.
+4. Documentação acadêmica
+Confirme que estão atualizados:
+
+* README da raiz.
+* README do backend.
+* READMEs das camadas envolvidas.
+* contracts/api-v1.md.
+* contracts/README.md.
+* contracts/openapi/pontovoz-v1.json.
+* docs/dados.md.
+* backend/docs/evidencias/B8-previsoes.md.
+* prompts.md.
+
+Registre integralmente esta instrução como próximo prompt do histórico.
+Preserve a identificação fiel do uso do ChatGPT e do Claude Code.
+Não altere a regra origemRegistro nesta etapa; a limitação já está documentada e não pertence ao escopo do B8.
+5. Segurança e arquivos preparados
+Antes do commit:
+
+* Revise o diff.
+* Confira todos os arquivos staged.
+* Não inclua arquivos SQLite.
+* Não inclua binários nem arquivos temporários.
+* Não inclua chaves, tokens ou credenciais.
+* Não inclua o ZIP de auditoria.
+* Não inclua informações privadas nas evidências.
+* Preserve os exemplos de teste fictícios.
+
+6. Commit autorizado
+Se todas as verificações passarem, faça o commit:
+`feat: implement simulated arrival predictions and Olho Vivo adapter`
+Confirme que a mensagem gravada é exatamente essa.
+Use a autoria legítima e o e-mail noreply configurado.
+Não acrescente trailer automático de ferramenta.
+Não reescreva commits anteriores.
+7. Push autorizado
+Depois da validação e do commit correto, execute push normal para origin/main.
+Não utilize force push.
+Confirme main e origin/main sincronizadas e árvore limpa.
+Se uma validação relevante falhar e não puder ser corrigida com segurança, não publique.
+8. Relatório final
+Apresente:
+A. Resumo da publicação.
+B. Total de testes aprovados, falhos e ignorados.
+C. Resultado do build e EF Core.
+D. Resultado do verificador de contratos.
+E. Confirmação das 12 operações e Scalar.
+F. Confirmação de que Olho Vivo continua desativado e não foi validado em produção.
+G. Confirmação de ausência de segredos.
+H. Hash completo do commit.
+I. Mensagem gravada.
+J. Resultado do push.
+K. Estado final do Git.
+L. Pendências para B9.
+Não implemente B9. Publique somente o B8 e aguarde a próxima orientação.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code confirmou que a
+árvore de trabalho era idêntica ao ZIP auditado e repetiu restore, build completo
+(`--no-incremental`, 0 avisos e 0 erros), os 756 testes com os binários recompilados, os comandos
+`dotnet ef` e o verificador do contrato, sem alterar o banco de desenvolvimento. Na API real, sobre
+um banco isolado, conferiu as previsões simuladas (todas futuras), as respostas 200, 400, 404, 422
+e 503 com `Retry-After: 30`, a ausência de gravação, nenhuma chamada à SPTrans, as 12 operações do
+OpenAPI iguais ao arquivo exportado e o Scalar. O adaptador Olho Vivo continua desligado e não
+validado contra a API real. Publicou o B8 com o commit `feat: implement simulated arrival predictions and Olho Vivo adapter`, sem trailer, e push normal.

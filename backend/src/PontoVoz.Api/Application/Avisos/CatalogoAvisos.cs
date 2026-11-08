@@ -23,6 +23,12 @@ public static class CatalogoAvisos
     public static readonly AvisoDto PassagemNaoRegistrada =
         new("PassagemNaoRegistrada", "Não há passagem registrada para algumas linhas desta parada.");
 
+    public static readonly AvisoDto SemPrevisoes =
+        new("SemPrevisoes", "Não há previsão de chegada para as linhas desta parada no momento.");
+
+    public static readonly AvisoDto PrevisaoParcial =
+        new("PrevisaoParcial", "Não há previsão de chegada para algumas linhas desta parada.");
+
     public static readonly AvisoDto ObservacaoSimulada =
         new("ObservacaoSimulada", "Observação simulada criada com os dados de demonstração. Não é um registro oficial da SPTrans.");
 

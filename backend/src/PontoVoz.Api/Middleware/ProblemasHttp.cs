@@ -62,6 +62,8 @@ internal static class ProblemasHttp
             Validacao(new Dictionary<string, string[]> { [erro.Campo] = [erro.Message] }),
         RegraNegocioException erro =>
             Criar(new ProblemDetails(), StatusCodes.Status422UnprocessableEntity, TituloRegraNegocio(erro.Codigo), erro.Codigo, erro.Message),
+        ProvedorPrevisoesIndisponivelException erro =>
+            Criar(new ProblemDetails(), StatusCodes.Status503ServiceUnavailable, "Previsões indisponíveis", erro.Codigo, erro.Message),
         _ => null,
     };
 

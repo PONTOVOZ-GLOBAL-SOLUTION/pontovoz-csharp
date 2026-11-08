@@ -9,8 +9,8 @@ de aplicação, DTOs de entrada e saída e mapeamentos entre entidades e DTOs.
 | Pasta | Conteúdo | Estado |
 |---|---|---|
 | `Consultas/` | `Paginacao`, `Pagina<T>`, `ConsultaParadas` e `ConsultaPaginada` | B4 e B5 |
-| `Interfaces/` | Interfaces dos repositórios (B4), dos services de consulta (B5) e, em `IAdministracao.cs`, dos services administrativos, dos repositórios de escrita e de `IUnidadeTrabalho` (B7) | B4, B5 e B7 |
-| `Services/` | Services de consulta (B5) e administrativos: `AdministracaoParadasService`, `AdministracaoLinhasService` e `ObservacoesPassagemService` (B7) | B5 e B7 |
+| `Interfaces/` | Interfaces dos repositórios (B4), dos services de consulta (B5), em `IAdministracao.cs` os administrativos e `IUnidadeTrabalho` (B7), e em `IPrevisoes.cs` o `IProvedorPrevisaoChegada` e o `IPrevisoesService` (B8) | B4, B5, B7 e B8 |
+| `Services/` | Services de consulta (B5), administrativos (B7) e `PrevisoesService` (B8) | B5, B7 e B8 |
 | `Dtos/` | DTOs do contrato, `JsonContrato`, corpos e respostas administrativos e `DataHoraComFusoConverter`, que exige o fuso em `observadaEm` | B5 e B7 |
 | `Validacao/` | `ValidacaoParametros` (query) e `ValidacaoCorpo` (corpos administrativos), sobre a base `ColetorErros`; aplicam as regras do domínio e devolvem todos os erros juntos | B5 e B7 |
 | `Erros/` | `ErroAplicacaoException` (inclusive 409 `CodigoJaCadastrado`), `TipoErroAplicacao` e `ViolacaoUnicidadeException` | B5 e B7 |
