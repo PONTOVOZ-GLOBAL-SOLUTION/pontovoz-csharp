@@ -43,9 +43,17 @@ public sealed class UltimasPassagensService(
 
         DateTimeOffset agora = relogio.GetUtcNow();
         IReadOnlyList<Linha> linhasDaParada = await linhas.ListarAtivasDaParadaAsync(parada.Id, cancellationToken);
-        List<Linha> consultadas = [.. linhasDaParada.Where(linha => linhaId is null || linha.Id == linhaId)];
         IReadOnlyList<RegistroPassagem> ultimas = await passagens.ListarUltimasPorLinhaAsync(parada.Id, agora, linhaId, cancellationToken);
+        return Montar(parada, linhasDaParada, linhaId, ultimas, agora);
+    }
 
+    /// <summary>
+    /// Monta a resposta a partir dos dados já lidos e do instante <paramref name="agora"/>. Também é
+    /// usado pelo resumo (B9), que lê o relógio uma única vez para todas as partes.
+    /// </summary>
+    internal static UltimasPassagensParadaDto Montar(Parada parada, IReadOnlyList<Linha> linhasDaParada, int? linhaId, IReadOnlyList<RegistroPassagem> ultimas, DateTimeOffset agora)
+    {
+        List<Linha> consultadas = [.. linhasDaParada.Where(linha => linhaId is null || linha.Id == linhaId)];
         List<PassagemDto> passagensDto = [.. ultimas.Select(passagem => passagem.ParaDto(agora))];
         var linhasComRegistro = ultimas.Select(passagem => passagem.LinhaId).ToHashSet();
         List<ReferenciaLinhaDto> semRegistro = [.. consultadas

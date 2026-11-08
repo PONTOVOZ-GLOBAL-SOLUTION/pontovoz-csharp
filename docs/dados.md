@@ -4,9 +4,10 @@ Este documento registra a origem de cada dado usado pelo PontoVoz. A regra é
 simples: **nenhum dado é apresentado como real ou oficial sem que a fonte tenha
 sido verificada.**
 
-> **Estado atual (Bloco B8, 08/11/2026):** todos os dados que o backend usa são **fictícios**,
+> **Estado atual (Bloco B9, 08/11/2026):** todos os dados que o backend usa são **fictícios**,
 > criados para a demonstração: o seed do SQLite (B3), os cadastros feitos pelas rotas
-> administrativas (B7) e as previsões de chegada do provedor simulado (B8). O adaptador para a API
+> administrativas (B7), as previsões de chegada do provedor simulado (B8) e os percursos estimados
+> usados nas alternativas de deslocamento (B9). O adaptador para a API
 > Olho Vivo da SPTrans existe no código, mas está **desligado** e **nunca foi testado contra a API
 > real**. Portanto, o PontoVoz **não tem nenhum dado oficial de chegada** de ônibus.
 
@@ -30,6 +31,9 @@ sido verificada.**
 - **Previsões de chegada (B8):** calculadas pelo provedor simulado no instante de cada consulta,
   **sem gravação no banco**. Saem com `origem: "Simulado"`, `dadosSimulados: true`, aviso
   `DadosSimulados` e `nivelConfirmacao: "Previsao"`.
+- **Alternativas de deslocamento (B9):** usam só os percursos estimados cadastrados no seed
+  (`origemPercurso: "Simulado"`, aviso `PercursoEstimado`), sem trânsito em tempo real, baldeação
+  ou rota inventada. Nenhuma alternativa é uma rota oficial da SPTrans.
 - Nenhum nome, código, endereço ou horário real da SPTrans é copiado ou inventado como se fosse real.
 
 ### Como o provedor simulado calcula uma chegada

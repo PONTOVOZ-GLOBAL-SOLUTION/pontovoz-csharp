@@ -29,6 +29,27 @@ public static class CatalogoAvisos
     public static readonly AvisoDto PrevisaoParcial =
         new("PrevisaoParcial", "Não há previsão de chegada para algumas linhas desta parada.");
 
+    public static readonly AvisoDto ProvedorIndisponivel =
+        new("ProvedorIndisponivel", "O serviço de previsões não está disponível no momento. Tente novamente em instantes.");
+
+    public static readonly AvisoDto LimitacaoLinhasDiretas =
+        new("LimitacaoLinhasDiretas", "Considera apenas linhas diretas desta parada, sem baldeação nem outros meios de transporte.");
+
+    public static readonly AvisoDto PercursoEstimado =
+        new("PercursoEstimado", "Os tempos de percurso são estimativas simuladas para demonstração e não consideram o trânsito em tempo real.");
+
+    public static readonly AvisoDto ComparacaoIncompleta =
+        new("ComparacaoIncompleta", "Algumas linhas não têm previsão de chegada e ficaram fora da comparação.");
+
+    public static readonly AvisoDto SemComparacao =
+        new("SemComparacao", "Nenhuma linha direta tem previsão de chegada no momento. Não é possível indicar a alternativa mais rápida.");
+
+    public static readonly AvisoDto SemLinhaDireta =
+        new("SemLinhaDireta", "Não há linha direta cadastrada desta parada até o destino.");
+
+    public static readonly AvisoDto ResumoParcial =
+        new("ResumoParcial", "As previsões estão indisponíveis no momento. As demais informações da parada continuam válidas.");
+
     public static readonly AvisoDto ObservacaoSimulada =
         new("ObservacaoSimulada", "Observação simulada criada com os dados de demonstração. Não é um registro oficial da SPTrans.");
 

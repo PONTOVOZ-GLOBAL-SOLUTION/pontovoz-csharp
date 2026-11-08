@@ -19,6 +19,8 @@ internal sealed class DublesRepositorio : IParadaRepository, ILinhaRepository, I
 
     public List<RegistroPassagem> Passagens { get; } = [];
 
+    public List<PercursoEstimado> Percursos { get; } = [];
+
     public List<string> Chamadas { get; } = [];
 
     public (string? Termo, string? Codigo, Paginacao? Paginacao) UltimaBuscaParadas { get; private set; }
@@ -73,11 +75,22 @@ internal sealed class DublesRepositorio : IParadaRepository, ILinhaRepository, I
         return Task.FromResult(new Pagina<Destino>(ativos, paginacao.Pagina, paginacao.TamanhoPagina, ativos.Count));
     }
 
-    Task<Destino?> IDestinoRepository.ObterAtivoAsync(int id, CancellationToken cancellationToken) =>
-        throw new NotSupportedException("Não usado pelos services do B5.");
+    Task<Destino?> IDestinoRepository.ObterAtivoAsync(int id, CancellationToken cancellationToken)
+    {
+        Chamadas.Add("Destinos.Obter");
+        return Task.FromResult(Destinos.SingleOrDefault(d => d.Id == id && d.Ativo));
+    }
 
-    Task<IReadOnlyList<PercursoEstimado>> IDestinoRepository.ListarPercursosDiretosAsync(int paradaId, int destinoId, CancellationToken cancellationToken) =>
-        throw new NotSupportedException("Não usado pelos services do B5.");
+    /// <summary>Os mesmos filtros do repositório real: parada, linha e destino ativos; ordem por minutos e código.</summary>
+    Task<IReadOnlyList<PercursoEstimado>> IDestinoRepository.ListarPercursosDiretosAsync(int paradaId, int destinoId, CancellationToken cancellationToken)
+    {
+        Chamadas.Add("Destinos.Percursos");
+        IReadOnlyList<PercursoEstimado> resultado = [.. Percursos
+            .Where(p => p.ParadaId == paradaId && p.DestinoId == destinoId && p.Parada.Ativa && p.Linha.Ativa && p.Destino.Ativo)
+            .OrderBy(p => p.MinutosEstimados)
+            .ThenBy(p => p.Linha.Codigo, StringComparer.Ordinal)];
+        return Task.FromResult(resultado);
+    }
 
     /// <summary>Devolve as passagens cadastradas como "últimas"; a seleção real é testada no SQLite.</summary>
     Task<IReadOnlyList<RegistroPassagem>> IRegistroPassagemRepository.ListarUltimasPorLinhaAsync(int paradaId, DateTimeOffset referencia, int? linhaId, CancellationToken cancellationToken)

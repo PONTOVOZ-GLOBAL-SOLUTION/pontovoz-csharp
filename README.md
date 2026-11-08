@@ -2,14 +2,14 @@
 
 **Global Solution FIAP 2026.2** · Engenharia de Software · Tema **CitizenTech**
 
-> **Status real (Bloco B8):** o backend C# já responde às consultas públicas de paradas,
-> linhas, destinos, últimas passagens e **previsões de chegada**, com dados **simulados** de
-> demonstração, além do `GET /health` e da documentação OpenAPI/Scalar. O operador já cadastra
-> paradas e linhas e registra passagens observadas pelas rotas administrativas, protegidas por
-> chave. As previsões vêm de um provedor simulado; a integração com a API Olho Vivo da SPTrans
-> está preparada, mas desligada e não testada. Alternativas de deslocamento e o resumo do totem
-> ainda **não** estão implementados. A interface do totem e o componente de voz e IA são de outros integrantes e
-> ainda estão pendentes.
+> **Status real (Bloco B9):** o backend C# implementa todas as rotas previstas no contrato:
+> consultas de paradas, linhas, destinos e últimas passagens, **previsões de chegada**,
+> **alternativas de deslocamento** até um destino e o **resumo** da parada para o totem, além do
+> `GET /health` e da documentação OpenAPI/Scalar. O operador cadastra paradas e linhas e registra
+> passagens pelas rotas administrativas, protegidas por chave. Todos os dados são **simulados**:
+> as previsões vêm de um provedor simulado, e a integração com a API Olho Vivo da SPTrans está
+> preparada, mas desligada e não testada. A interface do totem e o componente de voz e IA são de
+> outros integrantes e ainda estão pendentes.
 
 ---
 
@@ -53,7 +53,7 @@ Um totem instalado no ponto de ônibus, que o passageiro usa por voz ou por toqu
 
 | Componente | Responsabilidade | Situação |
 |---|---|---|
-| Backend C# / ASP.NET Core (`backend/`) | API REST, regras de negócio, persistência com EF Core e SQLite | Em desenvolvimento (B0 a B8 concluídos: consultas públicas, operações administrativas e previsões simuladas implementadas) |
+| Backend C# / ASP.NET Core (`backend/`) | API REST, regras de negócio, persistência com EF Core e SQLite | Em desenvolvimento (B0 a B9 concluídos: todas as rotas do contrato implementadas, com dados simulados) |
 | Interface do totem | Tela de consulta acessível | Responsabilidade de outro integrante — pendente |
 | Voz e IA conversacional | Reconhecimento de fala, diálogo e síntese de voz, consumindo a API | Responsabilidade de outro integrante — pendente |
 | Contratos de integração (`contracts/`) | Documentação dos endpoints para os demais componentes | Contrato v1 consolidado e OpenAPI exportado da API (só os endpoints implementados) |
@@ -63,7 +63,7 @@ Um totem instalado no ponto de ônibus, que o passageiro usa por voz ou por toqu
 O andamento de cada item é atualizado aqui conforme os blocos são concluídos. Todos os dados
 atuais são **simulados** e identificados como tal nas respostas.
 
-**Implementado (até o Bloco B8):**
+**Implementado (até o Bloco B9):**
 
 - Consulta de **paradas**, inclusive a identificação da parada do totem pelo código externo.
 - **Detalhe da parada**, com as linhas que a atendem.
@@ -81,12 +81,13 @@ atuais são **simulados** e identificados como tal nas respostas.
   como tal, é o padrão. O adaptador para a API Olho Vivo da SPTrans está pronto, mas **desligado**
   e nunca foi testado contra a API real; por isso o projeto não tem previsões oficiais (detalhes
   em [docs/dados.md](docs/dados.md)).
+- **Alternativas de deslocamento** pelas linhas diretas cadastradas, ordenadas pelo **tempo total
+  estimado** (espera + percurso simulado), e não por quem chega primeiro. Linhas sem previsão
+  aparecem sem posição.
+- **Resumo agregado do totem**, que reúne parada, previsões e últimas passagens numa chamada e
+  continua respondendo, como resumo parcial, com o provedor de previsões indisponível.
 
-**Planejado para os próximos blocos:**
-
-- **Alternativas de deslocamento** por linhas diretas, ordenadas pelo tempo total estimado (B9).
-- **Resumo agregado do totem**, que reúne parada, previsões e últimas passagens em uma chamada
-  (B9).
+**Pendente (B10):** revisão final da entrega, da documentação acadêmica e dos testes globais.
 
 Detalhes técnicos e instruções de execução: [backend/README.md](backend/README.md).
 

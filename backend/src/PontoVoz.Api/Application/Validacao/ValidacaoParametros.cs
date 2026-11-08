@@ -72,6 +72,18 @@ internal sealed partial class ValidacaoParametros : ColetorErros
         return valida ? new Paginacao(numero, tamanho) : null;
     }
 
+    /// <summary>Identificador obrigatório da query string (por exemplo, <c>destinoId</c>): presente e ≥ 1.</summary>
+    public int? IdObrigatorio(int? id, string campo)
+    {
+        if (id is null)
+        {
+            Adicionar(campo, $"O campo {campo} é obrigatório.");
+            return null;
+        }
+
+        return IdOpcional(id, campo);
+    }
+
     /// <summary>Identificador opcional da query string (por exemplo, <c>linhaId</c>): se informado, ≥ 1.</summary>
     public int? IdOpcional(int? id, string campo)
     {

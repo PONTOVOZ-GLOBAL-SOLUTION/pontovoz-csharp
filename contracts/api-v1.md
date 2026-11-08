@@ -1,11 +1,11 @@
 # Contrato REST v1 do PontoVoz
 
-**Versão do documento:** B8, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
-acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6, o B7 e o B8
+**Versão do documento:** B9, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
+acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 ao B9
 atualizaram o estado da implementação e registraram as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
 O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 
-> **O que já existe e o que é planejado**
+> **O que já existe**
 >
 > - **Implementado e testado (B6):** `GET /health`, `GET /api/v1/paradas`,
 >   `GET /api/v1/paradas/{id}`, `GET /api/v1/linhas`, `GET /api/v1/destinos` e
@@ -15,11 +15,11 @@ O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 > - **Implementado e testado (B8):** `GET /api/v1/paradas/{id}/previsoes`, com o provedor
 >   **simulado**. O adaptador Olho Vivo existe, mas está desligado e **nunca foi testado contra a
 >   API real** da SPTrans (veja [`../docs/dados.md`](../docs/dados.md)).
-> - **Planejado:** alternativas (B9) e resumo (B9). Elas **ainda não existem** na API e respondem
->   404 `RotaNaoEncontrada`.
+> - **Implementado e testado (B9):** `GET /api/v1/paradas/{id}/alternativas` e
+>   `GET /api/v1/paradas/{id}/resumo`. Com isso, as **13 rotas de negócio** do contrato e o
+>   `/health` estão implementados; nenhuma rota do contrato continua pendente.
 > - Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado. Os das
->   rotas implementadas são comparados com as respostas HTTP reais nos testes do backend; os
->   das rotas planejadas ainda não são resultados de execução.
+>   rotas públicas são comparados com as respostas HTTP reais nos testes do backend.
 > - O documento OpenAPI gerado pela API (`/openapi/v1.json`) descreve apenas o que já foi
 >   implementado. A cópia exportada está em [`openapi/pontovoz-v1.json`](openapi/pontovoz-v1.json).
 > - Os horários de **10/11/2026** que aparecem nos exemplos são **fixos e só ilustrativos**.
@@ -620,8 +620,8 @@ Esses casos viram testes de domínio e de serviço com `FakeTimeProvider` (B2 e 
 | Sucesso | **200**, `AlternativasDeslocamento`, inclusive quando o provedor de previsões está indisponível |
 | Erros | **400** `RequisicaoInvalida` (`destinoId` ausente ou inválido) · **404** `ParadaNaoEncontrada`, `DestinoNaoEncontrado` |
 | Acesso | Público |
-| Dependências | `IProvedorPrevisaoChegada`, repositório de percursos estimados (seed) e o serviço de alternativas. A consulta ao provedor e ao banco acontecem em paralelo com `Task.WhenAll`. |
-| Bloco | B9 |
+| Dependências | `IProvedorPrevisaoChegada`, repositório de percursos estimados (seed) e o serviço de alternativas. Depois da validação (400 → 404), os percursos diretos são lidos primeiro e só então o provedor é consultado, para as linhas desses percursos; com `SemLinhaDireta` o provedor não é consultado. Não há `Task.WhenAll` nesta rota (o paralelismo fica no resumo, 4.8). |
+| Bloco | B9 (**implementado**) |
 
 **Cálculo:**
 
@@ -696,6 +696,21 @@ Exemplos:
 Fora do MVP: baldeações, outros meios de transporte, trânsito em tempo real e rotas que não
 estejam cadastradas. Nenhuma rota é inventada.
 
+Conferido no B9:
+
+- Com o relógio controlado em 10/11/2026 às 14h32, as respostas da API são iguais a
+  `alternativas.json` e, com o provedor indisponível, a `alternativas-sem-comparacao.json`
+  (sem os ids internos).
+- Validação 400 (`destinoId` ausente ou inválido) → 404 (parada, destino) → percursos → provedor.
+  Com `SemLinhaDireta` o provedor não é consultado; se a parada não tem nenhuma linha, a resposta
+  também traz `ParadaSemLinhas`.
+- Ordem dos avisos, seguindo os exemplos: primeiro a causa (`ParadaSemLinhas`, `SemLinhaDireta`,
+  ou `ProvedorIndisponivel`/`SemPrevisoes` e `SemComparacao`); depois `DadosSimulados`,
+  `CadastroNaoVerificado`, `LimitacaoLinhasDiretas`, `PercursoEstimado` e, por último,
+  `ComparacaoIncompleta`.
+- Não há `Task.WhenAll` nas alternativas: o provedor precisa das linhas diretas, que vêm da consulta
+  de percursos, e não deve ser consultado com `SemLinhaDireta`. O paralelismo fica no resumo.
+
 ### 4.8 `GET /api/v1/paradas/{id}/resumo` — resumo para o totem
 
 | Item | Definição |
@@ -708,7 +723,7 @@ estejam cadastradas. Nenhuma rota é inventada.
 | Erros | **404** `ParadaNaoEncontrada` |
 | Acesso | Público |
 | Dependências | Os mesmos serviços de 4.2, 4.5 e 4.6. Provedor e banco são consultados em paralelo com `Task.WhenAll`; as consultas ao banco são feitas em sequência no mesmo `DbContext`. |
-| Bloco | B9. O planejamento previa uma parte no B6, que não foi antecipada: a rota só será criada com todas as partes (previsões do B8 e alternativas do B9). |
+| Bloco | B9 (**implementado**). O planejamento previa uma parte no B6, que não foi antecipada. |
 
 **`ResumoParada`**
 
@@ -730,6 +745,19 @@ Exemplos: [`exemplos/resumo.json`](exemplos/resumo.json) (`situacao: "Completo"`
 [`exemplos/resumo-provedor-indisponivel.json`](exemplos/resumo-provedor-indisponivel.json)
 (`situacao: "Parcial"`, `partesIndisponiveis: ["previsoes"]` e aviso `ResumoParcial`). No
 segundo, a parada, as linhas e as últimas passagens continuam disponíveis.
+
+Conferido no B9:
+
+- As respostas da API são iguais a `resumo.json` e, com o provedor indisponível, a
+  `resumo-provedor-indisponivel.json` (sem os ids internos). As três partes são montadas pelos
+  mesmos métodos das rotas individuais.
+- O relógio é lido **uma vez** por requisição: o mesmo instante vale para os três `consultadoEm`,
+  as esperas, os minutos desde a observação e a desatualização.
+- A parada e as linhas são lidas primeiro; depois, o provedor e a consulta de últimas passagens rodam
+  juntos com `Task.WhenAll`. A consulta de passagens é a única operação no `DbContext` nesse momento,
+  e o provedor não usa o banco: nenhuma operação do EF Core roda em paralelo com outra.
+- Previsão parcial ou provedor sem previsões continuam `Completo`; só a indisponibilidade torna o
+  resumo `Parcial`. Parada sem linhas: 200, sem consultar o provedor. Uma falha do banco continua 500.
 
 ---
 
@@ -998,8 +1026,8 @@ Conferido no B6:
   `/api/v1/rota-inexistente`, devolve **404** `RotaNaoEncontrada`, com `title` "Rota não
   encontrada". Um método não aceito (por exemplo, `POST /api/v1/paradas`) devolve **405**
   `MetodoNaoPermitido`. Os 404 `ParadaNaoEncontrada` e `LinhaNaoEncontrada` são os de um `id`
-  válido que não existe ou está inativo. As rotas ainda não implementadas (B7 a B9) também
-  respondem `RotaNaoEncontrada`.
+  válido que não existe ou está inativo. No B6, as rotas ainda não implementadas (B7 a B9) também
+  respondiam `RotaNaoEncontrada`; desde o B9, todas as rotas do contrato existem.
 - O 500 tem sempre `title` "Erro interno", `codigo` `ErroInterno` e o `detail` genérico
   "Ocorreu um erro inesperado. Tente novamente mais tarde."; o erro real fica só no log.
 
@@ -1055,8 +1083,8 @@ mostrar a `mensagem` como está.
 | 4 | GET | `/api/v1/destinos` | Público | **Implementado (B6)** |
 | 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | **Implementado (B8)** |
 | 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado (B6)** |
-| 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | Planejado (B9) |
-| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | Planejado (B9; a parte prevista para o B6 não foi antecipada) |
+| 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | **Implementado (B9)** |
+| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | **Implementado (B9)** |
 | 9 | POST | `/api/v1/admin/paradas` | Chave | **Implementado (B7)** |
 | 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | **Implementado (B7)** |
 | 11 | POST | `/api/v1/admin/linhas` | Chave | **Implementado (B7)** |
@@ -1114,7 +1142,7 @@ e as correções da B1.3 estão em D17 a D19.
 
 ## 11. Requisitos para os próximos blocos
 
-Regras que o contrato pressupõe, com o bloco responsável. O estado em 08/11/2026 (B8) está na
+Regras que o contrato pressupõe, com o bloco responsável. O estado em 08/11/2026 (B9) está na
 nota logo abaixo da tabela.
 
 | # | Requisito | Bloco | Como testar |
@@ -1128,7 +1156,7 @@ nota logo abaixo da tabela.
 | R7 | A busca por `termo` usa uma coluna normalizada (minúsculas e sem acentos), porque o SQLite não ignora acentos. | B3/B4 | Teste: `demonstracao` encontra `Demonstração` |
 | R8 | O adaptador Olho Vivo só faz sentido para códigos reais da SPTrans. Para os dados `SIM-`, as previsões vêm sempre do provedor simulado. | B8 | Documentado em `docs/dados.md` quando o adaptador existir |
 
-Estado (B8): R1, R6 implementados no B8; R3 e R4 no B3 e no B7; R5 no B2 e no B5; R7 no B4. R2 é
+Estado (B9): R1, R6 implementados no B8; R3 e R4 no B3 e no B7; R5 no B2 e no B5; R7 no B4. R2 é
 seguido: nenhum horário fixo está no código, no seed ou nos testes de regra (só os testes que
 comparam com os exemplos usam o instante deles). R8: adaptador Olho Vivo implementado, desligado
 por padrão e testado só com respostas simuladas; os dados `SIM-` nunca são enviados à SPTrans.

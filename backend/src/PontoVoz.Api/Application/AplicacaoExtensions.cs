@@ -16,6 +16,8 @@ public static class AplicacaoExtensions
         services.AddScoped<IDestinoService, DestinoService>();
         services.AddScoped<IUltimasPassagensService, UltimasPassagensService>();
         services.AddScoped<IPrevisoesService, PrevisoesService>();
+        services.AddScoped<IAlternativasService, AlternativasService>();
+        services.AddScoped<IResumoParadaService, ResumoParadaService>();
 
         // Operações administrativas (B7).
         services.AddScoped<IAdministracaoParadasService, AdministracaoParadasService>();

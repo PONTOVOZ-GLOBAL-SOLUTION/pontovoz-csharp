@@ -14,7 +14,12 @@ namespace PontoVoz.Api.Controllers;
 [ApiController]
 [Route("api/v1/paradas")]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status500InternalServerError, "application/problem+json")]
-public sealed class ParadasController(IParadaService paradas, IUltimasPassagensService passagens, IPrevisoesService previsoes) : ControllerBase
+public sealed class ParadasController(
+    IParadaService paradas,
+    IUltimasPassagensService passagens,
+    IPrevisoesService previsoes,
+    IAlternativasService alternativas,
+    IResumoParadaService resumo) : ControllerBase
 {
     /// <summary>Busca paradas ativas por nome ou código, ou identifica a parada do totem pelo <c>codigoExterno</c>.</summary>
     /// <param name="termo">Trecho do nome ou do código, de 2 a 60 caracteres, sem diferenciar maiúsculas e acentos.</param>
@@ -77,4 +82,39 @@ public sealed class ParadasController(IParadaService paradas, IUltimasPassagensS
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status503ServiceUnavailable, "application/problem+json")]
     public Task<PrevisoesParadaDto> ObterPrevisoes(int id, [FromQuery] int? linhaId, CancellationToken cancellationToken) =>
         previsoes.ObterAsync(id, linhaId, cancellationToken);
+
+    /// <summary>Compara as linhas diretas da parada até um destino, pelo menor tempo total estimado.</summary>
+    /// <remarks>
+    /// Só linhas diretas com percurso cadastrado, sem baldeação. Tempo total = espera da próxima
+    /// chegada + percurso estimado (simulado). Comparáveis primeiro, por tempo total, espera e código,
+    /// com posição 1, 2, 3...; depois as linhas sem previsão, sem posição. situacao: Comparadas,
+    /// SemComparacao (nenhuma linha com previsão, inclusive com o provedor indisponível, ainda 200) ou
+    /// SemLinhaDireta (lista vazia, provedor não consultado). comparacaoCompleta só é true quando todas
+    /// as linhas foram comparadas. Nenhum resultado é uma rota oficial da SPTrans.
+    /// </remarks>
+    /// <param name="id">Id interno da parada (inteiro ≥ 1).</param>
+    /// <param name="destinoId">Obrigatório: id do destino (inteiro ≥ 1), obtido em GET /api/v1/destinos.</param>
+    /// <param name="cancellationToken">Cancelamento da requisição.</param>
+    [HttpGet("{id:int:min(1)}/alternativas")]
+    [EndpointName("ObterAlternativas")]
+    [ProducesResponseType<AlternativasDeslocamentoDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<HttpValidationProblemDetails>(StatusCodes.Status400BadRequest, "application/problem+json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<AlternativasDeslocamentoDto> ObterAlternativas(int id, [FromQuery, CampoObrigatorio] int? destinoId, CancellationToken cancellationToken) =>
+        alternativas.ObterAsync(id, destinoId, cancellationToken);
+
+    /// <summary>Resumo para o totem: parada, previsões e últimas passagens numa só resposta.</summary>
+    /// <remarks>
+    /// As três partes têm o mesmo formato das rotas individuais e o mesmo instante (consultadoEm).
+    /// Com o provedor de previsões indisponível, a resposta continua 200: situacao Parcial,
+    /// partesIndisponiveis ["previsoes"], aviso ResumoParcial e previsoes.status ProvedorIndisponivel.
+    /// </remarks>
+    /// <param name="id">Id interno da parada (inteiro ≥ 1).</param>
+    /// <param name="cancellationToken">Cancelamento da requisição.</param>
+    [HttpGet("{id:int:min(1)}/resumo")]
+    [EndpointName("ObterResumo")]
+    [ProducesResponseType<ResumoParadaDto>(StatusCodes.Status200OK, "application/json")]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound, "application/problem+json")]
+    public Task<ResumoParadaDto> ObterResumo(int id, CancellationToken cancellationToken) =>
+        resumo.ObterAsync(id, cancellationToken);
 }

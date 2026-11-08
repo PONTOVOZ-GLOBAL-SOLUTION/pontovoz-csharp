@@ -49,29 +49,43 @@ public sealed class PrevisoesService(
         // Parada sem linhas: 200 com listas vazias, sem consultar o provedor (seção 4.5).
         if (consultadas.Count == 0)
         {
-            return Montar(parada, consultadas, StatusPrevisao.SemPrevisoes, provedor.OrigemPara(parada), agora, []);
+            return Montar(parada, consultadas, resultado: null, provedor.OrigemPara(parada), agora);
         }
 
         ResultadoProvedor resultado = await provedor.ConsultarAsync(parada, consultadas, agora, cancellationToken);
+
+        // Neste endpoint a previsão é todo o conteúdo: indisponível vira 503 (seção 2, D2).
         if (!resultado.ProvedorDisponivel)
         {
             throw new ProvedorPrevisoesIndisponivelException();
         }
 
+        return Montar(parada, consultadas, resultado, resultado.Origem, agora);
+    }
+
+    /// <summary>
+    /// Monta <c>PrevisoesParada</c> a partir do resultado do provedor (ou <c>null</c> quando a parada
+    /// não tem linhas e o provedor não foi consultado) e do instante <paramref name="agora"/>. Também é
+    /// usado pelo resumo (B9): lá um provedor indisponível aparece como
+    /// <c>status: "ProvedorIndisponivel"</c>, com <c>previsoes: []</c> e todas as linhas em
+    /// <c>linhasSemPrevisao</c>, em vez do 503 (seções 4.5 e 4.8).
+    /// </summary>
+    internal static PrevisoesParadaDto Montar(Parada parada, IReadOnlyList<Linha> linhasConsultadas, ResultadoProvedor? resultado, OrigemDado origem, DateTimeOffset agora)
+    {
+        List<Linha> consultadas = [.. linhasConsultadas];
+
         // Só as linhas consultadas; a ordem do contrato é previstaPara e codigoLinha, com o prefixo como desempate final.
         var idsConsultados = consultadas.Select(linha => linha.Id).ToHashSet();
-        List<PrevisaoChegada> previsoes = [.. resultado.Previsoes
+        List<PrevisaoChegada> previsoes = [.. (resultado?.Previsoes ?? [])
             .Where(previsao => idsConsultados.Contains(previsao.Linha.LinhaId))
             .OrderBy(previsao => previsao.PrevistaParaUtc)
             .ThenBy(previsao => previsao.Linha.CodigoLinha, StringComparer.Ordinal)
             .ThenBy(previsao => previsao.PrefixoVeiculo, StringComparer.Ordinal)];
 
-        StatusPrevisao status = previsoes.Count > 0 ? StatusPrevisao.Disponivel : StatusPrevisao.SemPrevisoes;
-        return Montar(parada, consultadas, status, resultado.Origem, agora, previsoes);
-    }
+        StatusPrevisao status = resultado is { ProvedorDisponivel: false } ? StatusPrevisao.ProvedorIndisponivel
+            : previsoes.Count > 0 ? StatusPrevisao.Disponivel
+            : StatusPrevisao.SemPrevisoes;
 
-    private static PrevisoesParadaDto Montar(Parada parada, List<Linha> consultadas, StatusPrevisao status, OrigemDado origem, DateTimeOffset agora, List<PrevisaoChegada> previsoes)
-    {
         var comPrevisao = previsoes.Select(previsao => previsao.Linha.LinhaId).ToHashSet();
         List<ReferenciaLinhaDto> semPrevisao = [.. consultadas
             .Where(linha => !comPrevisao.Contains(linha.Id))
@@ -93,13 +107,22 @@ public sealed class PrevisoesService(
             HorarioSaoPaulo.Converter(agora),
             [.. previsoes.Select(previsao => previsao.ParaDto(agora))],
             semPrevisao,
-            MontarAvisos(parada, consultadas, previsoes, semPrevisao, dadosSimulados));
+            MontarAvisos(parada, consultadas, status, previsoes, semPrevisao, dadosSimulados));
     }
 
-    /// <summary>Avisos na ordem do exemplo do contrato: natureza do dado, cadastro, e depois a situação da consulta.</summary>
-    private static List<AvisoDto> MontarAvisos(Parada parada, List<Linha> consultadas, List<PrevisaoChegada> previsoes, List<ReferenciaLinhaDto> semPrevisao, bool dadosSimulados)
+    /// <summary>
+    /// Avisos na ordem dos exemplos do contrato: com o provedor indisponível, esse aviso vem primeiro
+    /// (<c>resumo-provedor-indisponivel.json</c>); depois a natureza do dado, o cadastro e a situação da consulta.
+    /// </summary>
+    private static List<AvisoDto> MontarAvisos(Parada parada, List<Linha> consultadas, StatusPrevisao status, List<PrevisaoChegada> previsoes, List<ReferenciaLinhaDto> semPrevisao, bool dadosSimulados)
     {
         var avisos = new List<AvisoDto>();
+        bool indisponivel = status == StatusPrevisao.ProvedorIndisponivel;
+        if (indisponivel)
+        {
+            avisos.Add(CatalogoAvisos.ProvedorIndisponivel);
+        }
+
         if (dadosSimulados)
         {
             avisos.Add(CatalogoAvisos.DadosSimulados);
@@ -113,6 +136,10 @@ public sealed class PrevisoesService(
         if (consultadas.Count == 0)
         {
             avisos.Add(CatalogoAvisos.ParadaSemLinhas);
+        }
+        else if (indisponivel)
+        {
+            // A indisponibilidade já foi avisada; sem SemPrevisoes nem PrevisaoParcial.
         }
         else if (previsoes.Count == 0)
         {

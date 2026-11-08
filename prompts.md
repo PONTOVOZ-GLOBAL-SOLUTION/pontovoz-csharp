@@ -10,7 +10,7 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Integrante responsável | Pendente (nome e RM) |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 29 |
+| Prompts registrados | 32 |
 
 ## Como a IA foi usada
 
@@ -102,6 +102,9 @@ reescrito.
 | [27](#prompt-27) | 08/11/2026 | Bloco B8: previsões de chegada, provedor simulado, adaptador Olho Vivo e testes | Implementação, testes e documentação | — |
 | [28](#prompt-28) | 08/11/2026 | Bloco B8.1: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
 | [29](#prompt-29) | 08/11/2026 | Bloco B8.2: validação final e publicação do B8 | Validação e publicação | `feat: implement simulated arrival predictions and Olho Vivo adapter` |
+| [30](#prompt-30) | 08/11/2026 | Bloco B9: alternativas de deslocamento, ranking e resumo agregado do totem | Implementação, testes e documentação | — |
+| [31](#prompt-31) | 08/11/2026 | Bloco B9.1: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
+| [32](#prompt-32) | 08/11/2026 | Bloco B9.2: correções documentais, validação final e publicação do B9 | Correção, validação e publicação | `feat: implement travel alternatives and stop summary` |
 
 ---
 
@@ -6682,3 +6685,1151 @@ um banco isolado, conferiu as previsões simuladas (todas futuras), as respostas
 e 503 com `Retry-After: 30`, a ausência de gravação, nenhuma chamada à SPTrans, as 12 operações do
 OpenAPI iguais ao arquivo exportado e o Scalar. O adaptador Olho Vivo continua desligado e não
 validado contra a API real. Publicou o B8 com o commit `feat: implement simulated arrival predictions and Olho Vivo adapter`, sem trailer, e push normal.
+
+## Bloco B9 — alternativas e resumo
+
+<a id="prompt-30"></a>
+
+### Prompt 30 — Bloco B9: alternativas de deslocamento, ranking e resumo agregado do totem
+
+**Data:** 08/11/2026 · **Tipo:** Implementação, testes e documentação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 11 — BLOCO B9: ALTERNATIVAS DE DESLOCAMENTO, RANKING E RESUMO AGREGADO DO TOTEM
+Atue como engenheiro de software sênior especializado em C#, ASP.NET Core 10, Entity Framework Core, arquitetura de aplicações, APIs REST e testes automatizados.
+Você é responsável por executar integralmente o desenvolvimento técnico do backend C# do PontoVoz.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit esperado:
+`f35d1a2cee1823f380587de3eec761b26a7bddbe`
+Os blocos B0 a B8 foram concluídos e publicados.
+Sua tarefa é implementar exclusivamente o Bloco B9 — Alternativas de Deslocamento e Resumo do Totem.
+Este bloco deverá completar as 13 rotas de negócio previstas no contrato, mantendo também `/health`.
+Não implemente B10. Não faça commit nem push antes da auditoria.
+1. EXIGÊNCIAS OFICIAIS DA FIAP
+A entrega C# Software Development deve atender:
+
+* POO: 3,0 pontos.
+* Web API: 2,5 pontos.
+* EF Core + LINQ: 1,5 ponto.
+* Async/Await: 1,0 ponto.
+* Qualidade de código: 2,0 pontos.
+
+Também devem estar presentes:
+
+* Interfaces.
+* Injeção de dependência.
+* Organização de camadas.
+* API REST.
+* Testes unitários.
+* Persistência com EF Core.
+* Consultas LINQ.
+* Documentação OpenAPI/Scalar.
+* README.
+* Evidências de funcionamento.
+* Alinhamento ao tema CitizenTech.
+
+Não amplie o escopo nem remova requisitos.
+A referência funcional obrigatória é `contracts/api-v1.md`, especialmente as seções 1, 2, 3, 4.7, 4.8, 7, 8, 9 e 11.
+Os exemplos JSON existentes são parte do contrato aprovado.
+2. INSPEÇÃO INICIAL OBRIGATÓRIA
+Antes de editar qualquer arquivo:
+
+1. Confirme o diretório correto.
+2. Confirme a branch main.
+3. Confirme HEAD no commit esperado.
+4. Confirme main sincronizada com origin/main.
+5. Confirme a árvore de trabalho limpa.
+6. Leia integralmente as seções 4.7 e 4.8 do contrato.
+7. Examine os quatro exemplos JSON:
+   * `alternativas.json`.
+   * `alternativas-sem-comparacao.json`.
+   * `resumo.json`.
+   * `resumo-provedor-indisponivel.json`.
+8. Examine o catálogo de erros e avisos.
+9. Examine os enums `SituacaoAlternativas`, `SituacaoAlternativa`, `CriterioAlternativas` e `SituacaoResumo`.
+10. Examine a entidade `PercursoEstimado`.
+11. Examine `IDestinoRepository` e `DestinoRepository`.
+12. Examine o seed de percursos diretos.
+13. Examine `IProvedorPrevisaoChegada`, `ResultadoProvedor` e o seletor de provedores do B8.
+14. Examine `PrevisoesService`, `UltimasPassagensService`, `ParadaService` e seus DTOs.
+15. Examine Controllers, ProblemDetails, DI e OpenAPI.
+16. Examine a infraestrutura de testes e os exemplos de comparação contratual.
+
+Aproveite as implementações existentes.
+Não recrie `PercursoEstimado` ou seu repositório se já atenderem às necessidades.
+Não presuma IDs internos fixos.
+3. ESCOPO EXATO DO B9
+Implemente exclusivamente:
+Endpoint 1
+`GET /api/v1/paradas/{id}/alternativas?destinoId={destinoId}`
+Finalidade: comparar linhas diretas cadastradas da parada até determinado destino.
+Endpoint 2
+`GET /api/v1/paradas/{id}/resumo`
+Finalidade: retornar, em uma única resposta, os dados da parada, as previsões de chegada e as últimas passagens.
+Inclua:
+
+* Services e interfaces necessários.
+* DTOs do contrato.
+* Validações.
+* Mapeamentos.
+* Avisos estruturados.
+* Controllers públicos.
+* Tratamento de indisponibilidade.
+* Testes unitários e HTTP.
+* Integração com SQLite.
+* OpenAPI, Scalar e evidências.
+
+Não implemente:
+
+* Baldeações.
+* Rotas por outros modais.
+* Trajetos inventados.
+* Mapas ou geolocalização em tempo real.
+* Trânsito em tempo real.
+* Interface visual do totem.
+* Síntese de voz.
+* Integração com IA generativa.
+* Novas operações administrativas.
+* Novas previsões ou registros fictícios persistidos.
+* Integração real com SPTrans sem autorização.
+
+4. ALTERNATIVAS — VALIDAÇÃO DE ENTRADA
+Endpoint:
+`GET /api/v1/paradas/{id}/alternativas`
+Parâmetro obrigatório:
+`destinoId`
+Regras:
+
+* `destinoId` ausente: 400 `RequisicaoInvalida`.
+* `destinoId` com formato inválido: 400.
+* `destinoId` menor que 1: 400.
+* Parada inexistente ou inativa: 404 `ParadaNaoEncontrada`.
+* Destino inexistente ou inativo: 404 `DestinoNaoEncontrado`.
+* `id` inválido na rota: 404 `RotaNaoEncontrada`, conforme a restrição de rota já existente.
+
+A validação deve ocorrer antes da consulta ao provedor.
+Preserve a ordem contratual:
+400 → 404 → consulta dos dados válidos.
+Não retorne 422 simplesmente porque não existe uma linha direta até o destino.
+Nesse caso, a resposta correta é 200 com `SemLinhaDireta`.
+5. ALTERNATIVAS — IDENTIFICAÇÃO DAS LINHAS DIRETAS
+Considere apenas linhas que:
+
+1. Estejam ativas.
+2. Atendam à parada solicitada.
+3. Possuam um `PercursoEstimado` cadastrado para o destino.
+4. Tenham o percurso associado à parada e à linha corretas.
+
+Use `IDestinoRepository.ListarPercursosDiretosAsync` ou equivalente já implementado.
+O cadastro dos percursos vem do seed existente.
+Não calcule percursos novos a partir de distância geográfica.
+Não infira que uma linha vai a um destino apenas por possuir nome de terminal parecido.
+Não crie rotas que não estejam cadastradas.
+No MVP:
+
+* Somente linhas diretas.
+* Nenhuma baldeação.
+* `baldeacoes: 0`.
+* Percurso estimado entre 1 e 240 minutos.
+* `origemPercurso: "Simulado"`.
+
+O percurso estimado deve continuar sendo apresentado como simulado, sem trânsito em tempo real.
+6. ALTERNATIVAS — CÁLCULO DO RANKING
+Para cada linha direta com previsão disponível, utilize a próxima chegada válida da linha.
+Fórmulas obrigatórias:
+`tempoTotalEstimadoMinutos = esperaMinutos + percursoEstimadoMinutos`
+`chegadaEstimadaAoDestino = previstaPara + percursoEstimadoMinutos`
+A espera deve utilizar o mesmo instante de referência da consulta.
+Não utilize previsões vencidas.
+Não confunda a hora de chegada do ônibus à parada com a hora de chegada do passageiro ao destino.
+Ordenação das linhas comparáveis
+
+1. Menor `tempoTotalEstimadoMinutos`.
+2. Em empate, menor `esperaMinutos`.
+3. Em novo empate, menor `codigoLinha`.
+
+Atribua:
+`posicao: 1, 2, 3...`
+somente às linhas comparáveis.
+Linhas sem previsão
+Devem aparecer depois das comparáveis.
+Campos obrigatoriamente nulos:
+
+* `posicao`.
+* `previstaPara`.
+* `esperaMinutos`.
+* `tempoTotalEstimadoMinutos`.
+* `chegadaEstimadaAoDestino`.
+
+O campo `percursoEstimadoMinutos` continua presente.
+Ordenação:
+
+1. Menor percurso estimado.
+2. Menor codigoLinha.
+
+Uma linha sem previsão nunca recebe posição e nunca é apresentada como a mais rápida.
+Regra de comparação incompleta
+Quando existir ao menos uma linha direta sem previsão:
+
+* `comparacaoCompleta: false`.
+* Incluir aviso `ComparacaoIncompleta`, quando houver alguma linha comparável.
+* A posição 1 significa apenas a mais rápida entre as linhas com previsão.
+
+A resposta não pode afirmar que encontrou a melhor opção absoluta quando faltam previsões.
+7. EXEMPLO OBRIGATÓRIO DO RANKING
+O exemplo `contracts/exemplos/alternativas.json` determina que, com o relógio controlado em 10/11/2026 às 14h32 de São Paulo:
+SIM-L004
+
+* Espera: 8 minutos.
+* Percurso: 20 minutos.
+* Total: 28 minutos.
+* Posição: 1.
+
+SIM-L002
+
+* Espera: 1 minuto.
+* Percurso: 40 minutos.
+* Total: 41 minutos.
+* Posição: 2.
+
+SIM-L001
+
+* Sem previsão.
+* Percurso: 30 minutos.
+* Posição: null.
+
+O resultado deve ser exatamente essa ordem:
+SIM-L004 → SIM-L002 → SIM-L001.
+A comparação deverá ser incompleta.
+Este exemplo comprova que a melhor alternativa considera o tempo total, e não somente qual ônibus chega primeiro.
+Reproduza o exemplo com testes determinísticos e banco isolado.
+Não codifique os valores exclusivamente para essa data.
+8. ALTERNATIVAS — SITUAÇÕES GERAIS
+Implemente os três estados previstos no contrato.
+A. Comparadas
+Quando existe pelo menos uma linha comparável:
+
+* HTTP 200.
+* `situacao: "Comparadas"`.
+* `comparacaoCompleta: true` somente se todas as linhas forem comparáveis.
+* Linhas sem previsão permanecem na lista, com posição null.
+* `statusPrevisao` representa o resultado efetivo do provedor.
+
+B. SemComparacao
+Quando existem linhas diretas, mas nenhuma possui previsão utilizável:
+
+* HTTP 200.
+* `situacao: "SemComparacao"`.
+* `comparacaoCompleta: false`.
+* Todas as linhas com `posicao: null`.
+* Nenhuma linha indicada como mais rápida.
+* Aviso `SemComparacao`.
+
+Se o provedor respondeu sem previsões:
+
+* `statusPrevisao: "SemPrevisoes"`.
+* Aviso `SemPrevisoes`.
+
+Se o provedor estava indisponível:
+
+* `statusPrevisao: "ProvedorIndisponivel"`.
+* Aviso `ProvedorIndisponivel`.
+
+Importante: a indisponibilidade do provedor não deve produzir HTTP 503 no endpoint de alternativas.
+A resposta correta é 200 com informações parciais e avisos.
+C. SemLinhaDireta
+Quando não existe linha direta cadastrada até o destino:
+
+* HTTP 200.
+* `situacao: "SemLinhaDireta"`.
+* `alternativas: []`.
+* `comparacaoCompleta: false`.
+* `statusPrevisao: null`.
+* `origemPrevisao: null`.
+* Aviso `SemLinhaDireta`.
+* Não consultar o provedor de previsões.
+
+Preserve também `LimitacaoLinhasDiretas`.
+Se a parada não tiver linhas associadas, respeite a regra do aviso `ParadaSemLinhas`.
+9. DTO ALTERNATIVASDESLOCAMENTO
+Implemente os campos exatos da seção 4.7:
+
+* `paradaId`.
+* `codigoExternoParada`.
+* `nomeParada`.
+* `destino`: objeto `{ id, nome, tipo }`.
+* `criterio`.
+* `situacao`.
+* `comparacaoCompleta`.
+* `statusPrevisao`.
+* `origemPrevisao`.
+* `dadosSimulados`.
+* `consultadoEm`.
+* `alternativas`.
+* `avisos`.
+
+O critério do MVP deve ser:
+`MenorTempoTotalEstimado`
+Cada objeto `Alternativa` deve conter:
+
+* `posicao`.
+* `linhaId`.
+* `codigoLinha`.
+* `letreiro`.
+* `situacao`.
+* `previstaPara`.
+* `esperaMinutos`.
+* `percursoEstimadoMinutos`.
+* `tempoTotalEstimadoMinutos`.
+* `chegadaEstimadaAoDestino`.
+* `baldeacoes`.
+* `origemPercurso`.
+
+Preserve enums como texto, campos null presentes e datas no horário de São Paulo.
+Não crie propriedades adicionais fora do contrato.
+10. AVISOS DE ALTERNATIVAS
+Utilize o `CatalogoAvisos` existente e amplie-o apenas com os códigos previstos que ainda faltam.
+Códigos relevantes:
+
+* `DadosSimulados`.
+* `CadastroNaoVerificado`.
+* `LimitacaoLinhasDiretas`.
+* `PercursoEstimado`.
+* `ComparacaoIncompleta`.
+* `SemComparacao`.
+* `SemPrevisoes`.
+* `ProvedorIndisponivel`.
+* `SemLinhaDireta`.
+* `ParadaSemLinhas`.
+
+Preserve as mensagens e a ordem dos exemplos JSON.
+O aviso `LimitacaoLinhasDiretas` deve sempre aparecer na resposta de alternativas.
+Quando existir percurso, incluir `PercursoEstimado`.
+O aviso `CadastroNaoVerificado` deve aparecer uma única vez quando a parada ou alguma linha incluída na resposta tiver origem `CadastroAdministrativo`.
+Não confunda `CadastroNaoVerificado` com `DadosSimulados`.
+Nenhum resultado deve ser apresentado como uma rota oficial validada pela SPTrans.
+11. RESUMO — OBJETIVO
+Implemente:
+`GET /api/v1/paradas/{id}/resumo`
+Essa rota deve reunir, numa única resposta:
+
+1. Detalhe da parada.
+2. Previsões de chegada.
+3. Últimas passagens registradas.
+
+O endpoint é público e não exige chave administrativa.
+A resposta deverá ter formato `ResumoParada`.
+Não inclua a lista de alternativas no resumo, pois ela depende de um destino e não faz parte do DTO da seção 4.8.
+Não crie novas funcionalidades de previsão ou passagem.
+Reutilize os services e regras já implementados.
+12. DTO RESUMOPARADA
+Implemente exatamente:
+
+* `consultadoEm`.
+* `dadosSimulados`.
+* `situacao`.
+* `partesIndisponiveis`.
+* `parada`.
+* `previsoes`.
+* `ultimasPassagens`.
+* `avisos`.
+
+Os campos internos deverão manter o mesmo formato das respectivas respostas individuais:
+
+* `parada`: mesmo formato do GET /paradas/{id}.
+* `previsoes`: mesmo formato de GET /previsoes.
+* `ultimasPassagens`: mesmo formato de GET /ultimas-passagens.
+
+A interface do totem deverá conseguir reutilizar os mesmos componentes de leitura dos dados.
+Não renomeie propriedades de DTOs existentes.
+13. RESUMO — INSTANTE ÚNICO
+Essa é uma regra essencial:
+Toda a resposta de resumo deve usar um único instante de referência do TimeProvider.
+Leia o relógio uma vez por requisição.
+O mesmo instante deve valer para:
+
+* `resumo.consultadoEm`.
+* `previsoes.consultadoEm`.
+* `ultimasPassagens.consultadoEm`.
+* Esperas de previsões.
+* Minutos desde observações.
+* Desatualização de passagens.
+* Cálculos temporais internos.
+
+Se os services B5 e B8 atualmente consultarem o próprio relógio, faça o menor ajuste seguro necessário para permitir reutilizar a mesma referência temporal dentro do resumo.
+Preserve o comportamento público anterior dos services.
+Evite copiar e colar toda a lógica de previsões e passagens para criar o resumo.
+Utilize interfaces ou métodos internos adequados, mantendo a separação das camadas.
+Teste com relógio controlado e verifique explicitamente que o TimeProvider é lido uma única vez para o resumo.
+14. RESUMO — CONSULTAS ASSÍNCRONAS
+O contrato prevê paralelismo entre provedor de previsões e consultas ao banco quando for seguro.
+Atenção: o mesmo DbContext do EF Core não permite operações simultâneas.
+Implemente o paralelismo de forma segura:
+
+* Consultas que compartilham o mesmo DbContext devem ser executadas em sequência.
+* A chamada assíncrona independente ao provedor pode executar em paralelo com operações de banco quando não houver dependência e quando isso for seguro.
+* Utilize `Task.WhenAll` onde o contrato pede paralelismo e as dependências permitirem.
+* Não compartilhe o mesmo DbContext entre operações EF simultâneas.
+* Não use Task.Run para disfarçar operações assíncronas.
+* Não crie novos DbContexts desnecessariamente.
+* Não consulte o provedor duas vezes para a mesma parte do resumo.
+
+Documente brevemente essa decisão técnica.
+Propague CancellationToken a todas as dependências.
+15. RESUMO — SITUAÇÃO COMPLETA
+Quando todas as partes forem obtidas:
+
+* HTTP 200.
+* `situacao: "Completo"`.
+* `partesIndisponiveis: []`.
+* `avisos: []`, quando não houver aviso geral adicional previsto.
+
+Cada parte mantém seus próprios avisos.
+Uma previsão parcial para algumas linhas não torna automaticamente o resumo inteiro parcial se o provedor respondeu normalmente.
+A ausência legítima de previsões não é o mesmo que indisponibilidade do provedor.
+Compare com:
+`contracts/exemplos/resumo.json`
+16. RESUMO — PROVEDOR INDISPONÍVEL
+Quando o provedor de previsões estiver indisponível:
+O resumo deve continuar respondendo HTTP 200.
+Campos obrigatórios:
+
+* `situacao: "Parcial"`.
+* `partesIndisponiveis: ["previsoes"]`.
+* Aviso geral `ResumoParcial`.
+
+A parte `previsoes` deve existir com:
+
+* `status: "ProvedorIndisponivel"`.
+* `previsoes: []`.
+* `linhasSemPrevisao` contendo as linhas aplicáveis.
+* Aviso interno `ProvedorIndisponivel`.
+* Campos de origem e simulação coerentes com o contrato.
+
+As partes `parada` e `ultimasPassagens` devem continuar disponíveis e corretas.
+Não transforme a indisponibilidade de previsão em HTTP 503 no resumo.
+O 503 continua reservado ao endpoint específico `/previsoes`.
+Compare a resposta com:
+`contracts/exemplos/resumo-provedor-indisponivel.json`
+Não invente informações ausentes.
+Não transforme falhas inesperadas do banco em uma resposta parcial de sucesso. Erros internos reais devem continuar sendo tratados como erros internos.
+17. RESUMO — AUSÊNCIA DE LINHAS E CADASTROS
+Teste e preserve:
+
+* Parada sem linhas associadas.
+* Parada inexistente ou inativa.
+* Linhas sem registro de passagem.
+* Passagens desatualizadas.
+* Registros manuais não verificados.
+* Dados simulados.
+* Paradas cadastradas administrativamente.
+* Linhas cadastradas administrativamente.
+
+Para parada inexistente ou inativa:
+404 `ParadaNaoEncontrada`.
+Para parada sem linhas:
+200, com as listas vazias e os avisos adequados.
+Não consultar o provedor se nenhuma linha precisar de previsão.
+O resumo deve respeitar a natureza dos dados:
+
+* Previsão não é passagem observada.
+* Passagem registrada não é previsão.
+* Cadastro administrativo não é dado oficial verificado.
+* Dado fictício deve ser identificado como simulado.
+
+18. REUTILIZAÇÃO DO PROVEDOR DO B8
+Reutilize `IProvedorPrevisaoChegada` e o seletor existente.
+Preserve:
+
+* Provedor simulado como padrão.
+* Olho Vivo desativado por padrão.
+* Nenhum token real no repositório.
+* Nenhuma chamada real não autorizada.
+* Bloqueio de dados SIM- para chamadas externas.
+* Regras de timeout e cancelamento.
+* Ausência de previsões vencidas.
+
+Quando houver indisponibilidade:
+
+* `/previsoes`: 503.
+* `/alternativas`: 200 com `SemComparacao`.
+* `/resumo`: 200 com `Parcial`.
+
+Teste explicitamente os três comportamentos com a mesma configuração de indisponibilidade.
+Não altere o tratamento do endpoint B8 para fazê-lo parecer disponível.
+19. TESTES UNITÁRIOS — ALTERNATIVAS
+Preserve todos os 756 testes existentes.
+Crie testes que cubram:
+
+1. destinoId ausente.
+2. destinoId inválido.
+3. Parada inexistente.
+4. Parada inativa.
+5. Destino inexistente.
+6. Destino inativo.
+7. Parada sem linhas.
+8. Parada com linhas, mas sem percurso direto.
+9. Uma linha comparável.
+10. Várias linhas comparáveis.
+11. Ranking por menor tempo total.
+12. Desempate por espera.
+13. Desempate por código.
+14. Escolha apenas da próxima previsão válida.
+15. Linha sem previsão.
+16. Comparação incompleta.
+17. Comparação completa.
+18. Sem comparação por ausência de previsões.
+19. Sem comparação por indisponibilidade.
+20. Sem linha direta.
+21. Ordenação das linhas sem previsão.
+22. Posições numéricas consecutivas.
+23. Nenhuma posição atribuída a linha sem previsão.
+24. Comparação vazia nunca completa.
+25. Cálculo de chegada estimada ao destino.
+26. Dados simulados e origem.
+27. Cadastro não verificado.
+28. Avisos e mensagens do contrato.
+29. TimeProvider.
+30. CancellationToken.
+31. Ausência de consulta ao provedor quando não há linha direta.
+
+Use relógio controlado.
+Não codifique a data de novembro de 2026 nas regras de negócio.
+20. TESTES UNITÁRIOS — RESUMO
+Teste:
+
+1. Parada válida.
+2. Parada inexistente.
+3. Parada inativa.
+4. Resumo completo.
+5. Provedor indisponível.
+6. Resumo parcial.
+7. Previsões ausentes mas provedor disponível.
+8. Previsão parcial sem transformar todo o resumo em Parcial.
+9. Parada sem linhas.
+10. Últimas passagens preservadas.
+11. Passagens antigas.
+12. Registros futuros excluídos.
+13. Mesmo consultadoEm nas três partes.
+14. Uma única leitura de TimeProvider.
+15. Avisos gerais versus avisos internos.
+16. Campos null.
+17. Dados simulados.
+18. Cadastro administrativo.
+19. CancellationToken.
+20. Falha real de banco não mascarada como sucesso parcial.
+21. Nenhuma operação simultânea indevida no mesmo DbContext.
+22. Nenhuma duplicação de chamadas ao provedor.
+
+Preserve o comportamento dos services anteriores.
+21. TESTES DE INTEGRAÇÃO HTTP E SQLITE
+Utilize WebApplicationFactory e SQLite real isolado.
+Implemente testes HTTP para os dois endpoints.
+Alternativas
+
+* 200 Comparadas.
+* 200 SemComparacao.
+* 200 SemLinhaDireta.
+* 400 destinoId ausente.
+* 400 destinoId inválido.
+* 404 parada inexistente.
+* 404 destino inexistente.
+* Ranking e desempates.
+* Campos nulos.
+* Ordenação.
+* Avisos.
+* 200 com provedor indisponível.
+* Compatibilidade com exemplos JSON.
+* Sem autenticação administrativa.
+
+Resumo
+
+* 200 Completo.
+* 200 Parcial.
+* 404 parada inexistente.
+* Parada sem linhas.
+* Instante único.
+* Previsões e passagens corretas.
+* Provedor indisponível sem perda das outras partes.
+* JSON idêntico ao contrato, ressalvados IDs legitimamente dinâmicos.
+* Sem acesso administrativo obrigatório.
+* Ausência de escrita no banco.
+* Cancelamento.
+
+Não altere o banco de desenvolvimento para esses testes.
+Não use IDs internos fixos.
+22. COMPARAÇÃO OBRIGATÓRIA COM O CONTRATO
+Compare campo a campo as respostas HTTP com:
+
+* `alternativas.json`.
+* `alternativas-sem-comparacao.json`.
+* `resumo.json`.
+* `resumo-provedor-indisponivel.json`.
+
+Use o relógio e o banco de testes adequados para reproduzir as situações.
+O exemplo de resumo possui um registro manual e observações históricas.
+Prepare o cenário de teste reproduzindo esses fatos de maneira legítima, sem alterar o domínio nem codificar IDs internos fixos.
+Normalize somente campos realmente dinâmicos, documentando cada normalização.
+Não altere os exemplos apenas para obter testes aprovados.
+Se houver divergência legítima entre a fixture atual e os exemplos históricos, explique e resolva o cenário de teste sem mudar silenciosamente o contrato.
+23. OPENAPI E SCALAR
+Acrescente os endpoints:
+
+* `GET /api/v1/paradas/{id}/alternativas`.
+* `GET /api/v1/paradas/{id}/resumo`.
+
+Documente:
+
+* Query destinoId obrigatório.
+* DTOs.
+* Enums.
+* Códigos HTTP.
+* ProblemDetails.
+* Ordenação das alternativas.
+* Situações Comparadas, SemComparacao e SemLinhaDireta.
+* Situações Completo e Parcial.
+* Comportamento diante da indisponibilidade.
+* Avisos estruturados.
+* Natureza simulada dos percursos.
+
+Após B9, devem existir:
+
+* 8 endpoints públicos de negócio.
+* 5 endpoints administrativos.
+* 1 endpoint de health.
+
+Total: 14 operações implementadas.
+Exportar novamente:
+`pwsh ./scripts/exportar-openapi.ps1`
+Confirme que o documento exportado corresponde exatamente à API real.
+Preserve Scalar e a segurança aplicada somente às operações administrativas.
+24. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize o necessário:
+
+* README.md da raiz.
+* backend/README.md.
+* READMEs das camadas envolvidas.
+* contracts/api-v1.md.
+* contracts/README.md.
+* contracts/openapi/pontovoz-v1.json.
+* docs/dados.md, apenas se necessário.
+* prompts.md.
+
+Atualize a tabela de rotas para marcar alternativas e resumo como implementados.
+Não altere regras já aprovadas.
+Crie:
+`backend/docs/evidencias/B9-alternativas-resumo.md`
+Registre evidências reais:
+
+* Ranking com SIM-L004 na frente da SIM-L002.
+* Linha sem previsão sem posição.
+* Comparação incompleta.
+* Sem comparação.
+* Sem linha direta.
+* Resumo completo.
+* Resumo parcial.
+* Provedor indisponível com HTTP 200 nas duas novas rotas.
+* Endpoint individual de previsões ainda retornando 503.
+* Testes de uma única referência temporal.
+* Integração real com SQLite.
+* OpenAPI e Scalar.
+* Total de testes e build.
+
+Não invente capturas ou resultados.
+Registre o prompt no prompts.md com as atribuições reais das ferramentas.
+Não oculte o uso do ChatGPT ou Claude Code.
+25. VALIDAÇÃO FINAL OBRIGATÓRIA
+Execute:
+
+* dotnet restore.
+* dotnet build --no-incremental.
+* dotnet test.
+* dotnet ef migrations list.
+* dotnet ef database update.
+* dotnet ef migrations has-pending-model-changes.
+
+Execute também:
+
+* Verificador do contrato.
+* Testes unitários.
+* Testes de integração SQLite.
+* Testes HTTP.
+* Testes do provedor.
+* Teste de igualdade do OpenAPI exportado.
+* Teste real da API.
+* Verificação de Scalar.
+
+Confirme:
+
+* Todos os testes antigos preservados.
+* Testes B9 aprovados.
+* Zero erros e zero avisos no build.
+* 14 operações da API.
+* Nenhum endpoint pendente do contrato.
+* Nenhum segredo exposto.
+* Nenhuma chamada externa indevida.
+* Nenhum dado fictício apresentado como oficial.
+* Nenhum percurso inventado.
+* Nenhuma gravação desnecessária no banco.
+* Nenhum problema de concorrência do DbContext.
+* Nenhuma alteração indevida no banco de desenvolvimento.
+
+Se um processo antigo do PontoVoz estiver bloqueando a compilação, você está autorizado a verificar e encerrar exclusivamente esse processo, desde que confirme sua origem e não afete outras aplicações.
+Não considere válidos testes executados apenas sobre binários antigos.
+26. RUBRICA E ORGANIZAÇÃO
+Faça uma conferência técnica dos requisitos da FIAP:
+
+* POO.
+* Web API.
+* EF Core.
+* LINQ.
+* Async/Await.
+* Interfaces.
+* Injeção de dependência.
+* Testes unitários.
+* Qualidade do código.
+* Documentação.
+* Evidências.
+
+Não afirme garantia de nota.
+O B10 ainda ficará responsável pela revisão final da entrega, documentação acadêmica e testes globais.
+27. CONTROLE DO GIT
+Não faça commit.
+Não faça push.
+Não utilize force push.
+Não reescreva histórico.
+Não descarte alterações existentes.
+Não implemente funcionalidades fora do B9.
+Deixe o projeto localmente concluído para auditoria independente.
+28. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo simples do B9.
+B. Arquivos criados e modificados.
+C. Endpoint de alternativas.
+D. Regras do ranking.
+E. Tratamento de linhas sem previsão.
+F. Estados Comparadas, SemComparacao e SemLinhaDireta.
+G. Endpoint de resumo.
+H. Instante único do TimeProvider.
+I. Estratégia de Task.WhenAll e segurança do DbContext.
+J. Resumo completo e parcial.
+K. Reutilização dos serviços e do provedor B8.
+L. Testes por grupo.
+M. Total real de testes aprovados, falhos e ignorados.
+N. Build e EF Core.
+O. Resultados do verificador do contrato.
+P. Comparação com os quatro exemplos JSON.
+Q. OpenAPI e Scalar.
+R. Evidências.
+S. Confirmação da ausência de segredos, rotas inventadas e chamadas externas indevidas.
+T. Requisitos FIAP implementados e pendentes.
+U. Estado do Git.
+V. Problemas encontrados e soluções.
+W. Pendências para B10.
+Inclua também uma explicação didática breve para apresentação:
+
+* Por que o primeiro ônibus a chegar nem sempre é o mais rápido até o destino.
+* Como funciona o ranking.
+* O que significa comparação incompleta.
+* Por que a resposta de alternativas não falha completamente quando o provedor está indisponível.
+* Como o resumo reúne as partes e identifica informações indisponíveis.
+
+Execute exclusivamente B9. Não faça commit, não faça push e não inicie B10.
+Ao concluir, aguarde a auditoria independente.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a ferramenta implementou
+`GET /api/v1/paradas/{id}/alternativas?destinoId=` e `GET /api/v1/paradas/{id}/resumo`:
+
+- **Alternativas:** validação 400 (`destinoId` obrigatório) → 404 (parada, destino) → percursos
+  diretos cadastrados → provedor de previsões. O ranking usa o tempo total estimado (espera da
+  próxima chegada + percurso), com desempate pela espera e pelo código da linha; linhas sem previsão
+  aparecem por último, sem posição, e a comparação fica incompleta. Sem percurso direto, a resposta é
+  `SemLinhaDireta`, sem consultar o provedor; com o provedor indisponível, a resposta é 200
+  `SemComparacao`, não 503.
+- **Resumo:** parada, previsões e últimas passagens num único instante (o relógio é lido uma vez),
+  reaproveitando a montagem das rotas individuais (métodos `Montar` extraídos sem mudar o
+  comportamento). O provedor roda em paralelo com a consulta de passagens (`Task.WhenAll`), sem duas
+  operações no mesmo `DbContext`. Com o provedor indisponível, o resumo é 200 `Parcial`, com
+  `partesIndisponiveis: ["previsoes"]`.
+- **Testes:** 51 novos (service e HTTP); as respostas ficaram iguais aos quatro exemplos do
+  contrato. No total, 805 testes passaram.
+- **Correção:** o transformador do OpenAPI do B7 retirava `null` também de enums das respostas
+  (`statusPrevisao`, `origemPrevisao`); passou a valer só para os corpos de entrada.
+- **Documentação:** OpenAPI com 14 operações, contrato (4.7, 4.8 e tabela de rotas), READMEs,
+  `docs/dados.md` e `backend/docs/evidencias/B9-alternativas-resumo.md`, com respostas reais em
+  banco isolado e a imagem do Scalar. O adaptador Olho Vivo continua desligado e não foi testado
+  contra a API real.
+- **Git:** não houve commit.
+
+<a id="prompt-31"></a>
+
+### Prompt 31 — Bloco B9.1: pacote ZIP para auditoria independente do código
+
+**Data:** 08/11/2026 · **Tipo:** Preparação para auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B9.1 — PREPARAÇÃO DO ZIP PARA AUDITORIA INDEPENDENTE
+O relatório final do B9 foi recebido.
+Segundo o relatório, as rotas de alternativas e resumo foram concluídas, os 805 testes passaram, o OpenAPI contém 14 operações e o B9 ainda não foi publicado.
+Antes do commit e push, precisamos auditar o código real.
+Sua tarefa é preparar um ZIP completo do projeto no estado atual, sem modificar sua implementação.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Commit-base esperado:
+`f35d1a2cee1823f380587de3eec761b26a7bddbe`
+1. CONFIRMAÇÃO INICIAL
+Verifique:
+
+* Diretório correto.
+* Branch main.
+* HEAD e origin/main no commit esperado.
+* Estado do git status.
+* Arquivos modificados e ainda não versionados.
+* Presença integral das alterações locais do B9.
+
+O relatório anterior informou 19 arquivos modificados e 7 novos.
+Não descarte nenhuma alteração.
+Não faça commit nem push.
+Não implemente B10.
+2. GERAÇÃO DO ZIP
+Crie o arquivo:
+`PontoVoz-B9-Auditoria.zip`
+Salve fora do repositório, preferencialmente em:
+`C:\Users\paulo\Projetos\`
+Inclua o projeto completo no estado atual, incluindo os arquivos ainda não commitados.
+Inclua obrigatoriamente:
+
+* README.md da raiz.
+* prompts.md.
+* contracts/, com todos os exemplos JSON, OpenAPI e verificador.
+* docs/, incluindo docs/dados.md.
+* backend/src/, com todas as camadas.
+* backend/tests/, incluindo todos os testes do B9.
+* backend/docs/evidencias/, incluindo as evidências e imagens.
+* Scripts, configurações e arquivos de solução .NET.
+* READMEs das camadas.
+
+Confirme especialmente:
+
+* AlternativasService.cs.
+* ResumoParadaService.cs.
+* PrevisoesService.cs.
+* UltimasPassagensService.cs.
+* AlternativasServiceTests.cs.
+* ResumoParadaServiceTests.cs.
+* AlternativasResumoHttpTests.cs.
+* ParadasController.cs.
+* CatalogoAvisos.
+* DocumentacaoOpenApi.
+* B9-alternativas-resumo.md.
+* B9-scalar-alternativas.jpg.
+
+Use os caminhos reais dos arquivos no projeto.
+Não utilize somente git archive HEAD, pois excluiria as alterações locais do B9.
+3. EXCLUSÕES DE SEGURANÇA
+Não inclua:
+
+* .git/
+* bin/
+* obj/
+* .vs/
+* .idea/
+* TestResults/
+* Bancos SQLite.
+* Arquivos -shm e -wal.
+* User-secrets.
+* Chaves e tokens reais.
+* Senhas reais.
+* Arquivos temporários.
+* Logs sensíveis.
+* Backups e executáveis gerados.
+
+Preserve os dados fictícios dos testes e as evidências acadêmicas apropriadas.
+4. AUDITORIA DE INTEGRIDADE DO ZIP
+Depois de gerar o arquivo:
+
+1. Confirme que o ZIP abre corretamente.
+2. Conte os arquivos incluídos.
+3. Confirme que todos os arquivos novos e alterados do B9 estão presentes.
+4. Compare byte a byte cada arquivo do ZIP com o correspondente na pasta de trabalho.
+5. Confirme que o OpenAPI contém 14 operações.
+6. Confirme a presença dos quatro exemplos JSON utilizados no B9.
+7. Confirme que os testes de alternativas e resumo estão presentes.
+8. Confirme a ausência de bancos, binários e segredos.
+9. Calcule o SHA-256 do ZIP.
+10. Informe o caminho completo do arquivo.
+
+Caso encontre dados sensíveis, não os inclua nem os divulgue; relate o problema.
+5. PONTOS QUE SERÃO AUDITADOS
+Não altere o código nesta etapa.
+A revisão independente verificará:
+
+* Validação de destinoId.
+* Consultas de percursos diretos no SQLite.
+* Ranking por espera + percurso.
+* Ordenação e desempates.
+* Linhas sem previsão e campos nulos.
+* Comparação incompleta.
+* Estados Comparadas, SemComparacao e SemLinhaDireta.
+* Resumo completo e parcial.
+* Leitura única do TimeProvider.
+* Segurança das operações concorrentes do EF Core.
+* Reutilização dos services anteriores.
+* Comportamento diante da indisponibilidade do provedor.
+* Compatibilidade com os quatro exemplos JSON.
+* Regressões nos endpoints B5 a B8.
+* OpenAPI, Scalar e evidências.
+* Exigências oficiais da FIAP.
+
+6. RELATÓRIO FINAL
+Apresente:
+A. Caminho completo do ZIP.
+B. Tamanho do ZIP.
+C. Quantidade de arquivos.
+D. SHA-256.
+E. Confirmação de que todas as alterações do B9 estão incluídas.
+F. Confirmação da presença dos testes e evidências.
+G. Resultado da verificação de segurança.
+H. Estado do Git.
+I. Confirmação de ausência de commit e push.
+Não implemente B10. Não faça commit ou push. Apenas gere o ZIP e aguarde a auditoria independente.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code gerou
+`PontoVoz-B9-Auditoria.zip` na pasta acima do repositório, a partir da árvore de trabalho
+(arquivos versionados e os novos do B9 ainda não commitados), sem `.git`, binários, bancos SQLite,
+logs nem segredos. Conferiu a integridade, os 204 arquivos, a igualdade byte a byte com a pasta de
+trabalho, os 26 arquivos alterados ou novos do B9, as 14 operações nos controllers e no OpenAPI
+exportado, os quatro exemplos JSON e os testes novos, e informou o SHA-256. Ao adaptar o script do
+B8.1, uma substituição falhou e o script antigo sobrescreveu por engano o
+`PontoVoz-B8-Auditoria.zip` com o estado atual; a ferramenta o reconstruiu a partir do commit
+publicado do B8 (197 arquivos, com outro SHA-256) e relatou o erro. Nenhum código foi alterado e
+não houve commit.
+
+<a id="prompt-32"></a>
+
+### Prompt 32 — Bloco B9.2: correções documentais, validação final e publicação do B9
+
+**Data:** 08/11/2026 · **Tipo:** Correção, validação e publicação · **Commit:** `feat: implement travel alternatives and stop summary`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B9.2 — CORREÇÕES DOCUMENTAIS, VALIDAÇÃO FINAL E PUBLICAÇÃO
+O arquivo PontoVoz-B9-Auditoria.zip foi auditado independentemente.
+A auditoria confirmou:
+
+* 204 arquivos e integridade do ZIP.
+* SHA-256: 2e770e93582fe3541925f46061ed5c9121b6a833d061888398e4085d50a99145.
+* 19 arquivos modificados e 7 novos em relação ao B8.
+* Implementação coerente dos serviços de alternativas e resumo.
+* Ranking correto no código.
+* Linhas sem previsão sem posição.
+* Resumo com instante único.
+* Paralelismo sem operações simultâneas no mesmo DbContext.
+* Comportamento de indisponibilidade coerente.
+* 14 operações presentes no OpenAPI.
+* Testes e exemplos contratuais presentes.
+
+Não foram identificados defeitos funcionais impeditivos na revisão estática.
+O B9 está aprovado para publicação, condicionado às correções documentais abaixo e à validação automática final.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`f35d1a2cee1823f380587de3eec761b26a7bddbe`
+1. Confirme o estado inicial
+Verifique:
+
+* Diretório correto.
+* Branch main.
+* HEAD e origin/main no commit esperado.
+* Alterações B9 preservadas.
+* Árvore contendo os mesmos arquivos auditados.
+
+Não descarte trabalho.
+Não recomece B9.
+Não implemente B10.
+2. Correção obrigatória — descrição do OpenAPI
+Arquivo:
+`backend/src/PontoVoz.Api/Documentacao/DocumentacaoOpenApi.cs`
+O método `DescreverDocumento` ainda informa:
+"Alternativas e resumo estão planejados em contracts/api-v1.md."
+Essa informação está desatualizada.
+Atualize a descrição para refletir que:
+
+* B6 implementou consultas públicas.
+* B7 implementou operações administrativas.
+* B8 implementou previsões simuladas.
+* B9 implementou alternativas e resumo.
+* A API tem 13 operações de negócio e o endpoint /health.
+
+Preserve a explicação sobre dados simulados e sobre a integração Olho Vivo não validada contra a API real.
+Não altere a estrutura ou a segurança dos endpoints.
+Após a correção, regenere o OpenAPI exportado.
+3. Correção obrigatória — contrato 4.7
+Arquivo:
+`contracts/api-v1.md`
+Na seção 4.7, a tabela de dependências afirma que as consultas ao provedor e ao banco acontecem em paralelo com `Task.WhenAll`.
+Entretanto, a implementação B9 consulta primeiro os percursos diretos e depois o provedor, porque precisa identificar as linhas aplicáveis.
+A própria seção 4.7 explica corretamente esse comportamento mais adiante.
+Corrija somente a informação contraditória da tabela, mantendo:
+
+* A dependência do provedor.
+* A dependência do repositório de percursos.
+* A ordem de validação.
+* A regra de não consultar o provedor com `SemLinhaDireta`.
+
+O uso de `Task.WhenAll` no resumo continua correto e deve ser preservado.
+Não mude a implementação para introduzir paralelismo artificial.
+4. Correção obrigatória — textos históricos desatualizados
+No mesmo `api-v1.md`:
+
+* Na seção 7, atualize a afirmação de que as rotas B7 a B9 ainda não estão implementadas.
+* Na seção 11, atualize a introdução que ainda identifica o estado como B8, embora a nota final já descreva B9.
+
+Preserve o histórico verdadeiro das decisões anteriores.
+Não reescreva os registros históricos para parecer que funcionalidades existiam antes de sua implementação.
+Caso encontre outra descrição de estado atual desatualizada, corrija apenas a inconsistência comprovada.
+Não amplie o escopo.
+5. Validação final completa
+Depois dessas correções, execute a partir de backend/:
+
+* dotnet restore
+* dotnet build --no-incremental
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Execute também o verificador do contrato.
+O último relatório informou:
+
+* 805 testes aprovados.
+* 0 falhas.
+* 0 ignorados.
+* 0 avisos e 0 erros no build.
+
+Confirme os resultados atuais em binários recém-compilados.
+Não utilize resultados antigos como validação final.
+6. Verificações técnicas do B9
+Confirme novamente:
+
+* O ranking utiliza espera + percurso.
+* A SIM-L004 ocupa a primeira posição no exemplo contratado.
+* Linhas sem previsão têm posição null.
+* A comparação incompleta produz os avisos corretos.
+* SemLinhaDireta não consulta o provedor.
+* O resumo utiliza um instante único.
+* O resumo não executa duas operações simultâneas no mesmo DbContext.
+* Os services de B5 e B8 continuam funcionando.
+* Os quatro exemplos JSON do B9 continuam compatíveis.
+* O provedor indisponível gera 503 em /previsoes.
+* O provedor indisponível gera 200 em /alternativas.
+* O provedor indisponível gera 200 Parcial em /resumo.
+* As consultas não gravam dados.
+* Nenhum dado fictício é apresentado como oficial.
+* A Olho Vivo permanece desligada por padrão.
+
+7. OpenAPI e Scalar
+Execute novamente:
+`pwsh ./scripts/exportar-openapi.ps1`
+Confirme:
+
+* 14 operações implementadas.
+* Oito rotas públicas de negócio.
+* Cinco rotas administrativas.
+* GET /health.
+* Chave administrativa exigida somente nas cinco rotas administrativas.
+* destinoId obrigatório.
+* Enums e campos anuláveis corretos.
+* Descrição do documento atualizada.
+* OpenAPI exportado idêntico ao documento da API real.
+* Scalar funcionando.
+
+8. Documentação e prompts.md
+Atualize a evidência B9 somente se as verificações reais tiverem mudado.
+Registre este prompt no prompts.md, mantendo a organização cronológica e o histórico fiel.
+Preserve a identificação correta da participação do ChatGPT e do Claude Code.
+Não invente trabalho manual humano.
+Não modifique contratos JSON ou regras de negócio sem necessidade.
+9. Auditoria de segurança
+Revise o diff e os arquivos staged.
+Não publique:
+
+* Bancos SQLite.
+* Arquivos de segredos.
+* Tokens.
+* Binários.
+* Logs.
+* ZIPs de auditoria.
+* Arquivos temporários.
+
+Não inclua caminhos pessoais desnecessários.
+10. Commit autorizado
+Se todas as verificações passarem, faça o commit:
+`feat: implement travel alternatives and stop summary`
+Confirme:
+
+* Mensagem gravada exatamente como autorizada.
+* Autoria legítima com e-mail noreply.
+* Nenhum trailer automático de ferramenta.
+* Nenhuma reescrita de histórico.
+* Nenhum arquivo indevido no stage.
+
+11. Push autorizado
+Execute push normal para origin/main.
+Não utilize force push.
+Confirme:
+
+* main e origin/main no mesmo commit.
+* Árvore de trabalho limpa.
+* Alterações publicadas corretamente.
+
+Se encontrar uma falha importante que não consiga corrigir com segurança, interrompa a publicação e apresente o impedimento.
+12. Relatório final
+Apresente:
+A. Resumo da publicação.
+B. Quatro ajustes documentais realizados.
+C. Quantidade total de testes aprovados, falhos e ignorados.
+D. Resultado do build e EF Core.
+E. Resultado do verificador do contrato.
+F. Confirmação dos quatro exemplos JSON do B9.
+G. Funcionamento do ranking e resumo parcial.
+H. Confirmação das 14 operações e Scalar.
+I. Confirmação da ausência de segredos.
+J. Hash completo do commit.
+K. Mensagem gravada.
+L. Resultado do push.
+M. Estado final do Git.
+N. Pendências específicas para B10.
+Não implemente B10. Corrija, valide e publique somente o B9. Depois pare para a próxima auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code fez as
+correções documentais pedidas: a descrição do documento OpenAPI (`DescreverDocumento`) passou a
+listar os blocos B6 a B9, as 13 operações de negócio e o `/health`, e a informar que o adaptador
+Olho Vivo está desligado e não validado; a tabela da seção 4.7 do contrato deixou de citar
+`Task.WhenAll` e descreve a ordem real (percursos e depois provedor); a seção 7 diz que as rotas
+B7 a B9 respondiam `RotaNaoEncontrada` no B6 e que hoje todas existem; a seção 11 e o título do
+quadro de estado deixaram de indicar o B8 e um planejamento já concluído. O OpenAPI foi exportado de
+novo (só a descrição mudou). Um processo da API PontoVoz deste repositório ocupava a porta 5080 e
+bloqueava o build; foi encerrado com base na autorização já dada para esses bloqueios. Com os
+binários recompilados do zero: build com 0 avisos e 0 erros, 805 testes aprovados, comandos
+`dotnet ef` e verificador do contrato sem falhas, banco de desenvolvimento inalterado. Na API real,
+sobre um banco isolado, conferiu o ranking, as linhas sem previsão, `SemLinhaDireta`, o resumo
+completo e parcial, a indisponibilidade (503, 200, 200 `Parcial`), a ausência de gravação, nenhuma
+chamada à SPTrans, o Scalar e o OpenAPI igual ao exportado. Publicou o B9 com o commit
+`feat: implement travel alternatives and stop summary`, sem trailer, e push normal.

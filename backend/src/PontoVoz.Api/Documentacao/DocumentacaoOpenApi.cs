@@ -20,6 +20,12 @@ public static class DocumentacaoOpenApi
 
     private const string PrefixoAdministrativo = "api/v1/admin/";
 
+    /// <summary>Nomes dos esquemas dos corpos de entrada: os tipos de DTO com algum <see cref="CampoObrigatorioAttribute"/>.</summary>
+    private static readonly HashSet<string> CorposDeEntrada = [.. typeof(CampoObrigatorioAttribute).Assembly.GetTypes()
+        .Where(tipo => tipo.Namespace == typeof(CampoObrigatorioAttribute).Namespace
+            && tipo.GetProperties().Any(propriedade => propriedade.IsDefined(typeof(CampoObrigatorioAttribute))))
+        .Select(tipo => tipo.Name)];
+
     public static IServiceCollection AddDocumentacaoPontoVoz(this IServiceCollection services) =>
         services.AddOpenApi(opcoes =>
         {
@@ -27,6 +33,7 @@ public static class DocumentacaoOpenApi
             opcoes.AddDocumentTransformer(RetirarNuloDosEnumsObrigatorios);
             opcoes.AddOperationTransformer(ExigirChaveNasRotasAdministrativas);
             opcoes.AddOperationTransformer(DocumentarRetryAfter);
+            opcoes.AddOperationTransformer(MarcarParametrosObrigatorios);
             opcoes.AddSchemaTransformer(MarcarCamposObrigatorios);
         });
 
@@ -35,10 +42,11 @@ public static class DocumentacaoOpenApi
         documento.Info.Title = "PontoVoz API";
         documento.Info.Version = "v1";
         documento.Info.Description =
-            "API do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados: consultas públicas (B6), "
-            + "operações administrativas do operador (B7) e previsões de chegada (B8, provedor simulado por padrão). "
-            + "Alternativas e resumo estão planejados em contracts/api-v1.md. "
-            + "Todos os dados de demonstração são simulados e marcados com dadosSimulados.";
+            "API do totem PontoVoz (CitizenTech FIAP). São 13 operações de negócio e o GET /health: consultas públicas (B6), "
+            + "operações administrativas do operador (B7), previsões de chegada (B8, provedor simulado por padrão) "
+            + "e alternativas de deslocamento e resumo da parada (B9). "
+            + "Todos os dados de demonstração são simulados e marcados com dadosSimulados. "
+            + "O adaptador da API Olho Vivo (SPTrans) vem desligado e não foi validado contra a API real.";
 
         documento.Components ??= new OpenApiComponents();
         documento.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
@@ -61,9 +69,10 @@ public static class DocumentacaoOpenApi
     /// </summary>
     private static Task RetirarNuloDosEnumsObrigatorios(OpenApiDocument documento, OpenApiDocumentTransformerContext contexto, CancellationToken cancellationToken)
     {
-        foreach (OpenApiSchema esquema in documento.Components?.Schemas?.Values.OfType<OpenApiSchema>() ?? [])
+        // Só os corpos de entrada: nas respostas, um enum anulável (como statusPrevisao) pode mesmo ser null.
+        foreach (var (nomeEsquema, item) in documento.Components?.Schemas ?? new Dictionary<string, IOpenApiSchema>())
         {
-            if (esquema.Required is not { Count: > 0 } || esquema.Properties is null)
+            if (!CorposDeEntrada.Contains(nomeEsquema) || item is not OpenApiSchema esquema || esquema.Required is not { Count: > 0 } || esquema.Properties is null)
             {
                 continue;
             }
@@ -76,6 +85,25 @@ public static class DocumentacaoOpenApi
                     esquema.Properties[nome] = alternativas.Single(a => a.Type != JsonSchemaType.Null);
                 }
             }
+        }
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Parâmetros de query anuláveis no C# para o service responder 400 com mensagem clara, mas
+    /// obrigatórios no contrato (como <c>destinoId</c>): marcados com <see cref="CampoObrigatorioAttribute"/>.
+    /// </summary>
+    private static Task MarcarParametrosObrigatorios(OpenApiOperation operacao, OpenApiOperationTransformerContext contexto, CancellationToken cancellationToken)
+    {
+        var obrigatorios = contexto.Description.ParameterDescriptions
+            .Where(p => p.ParameterDescriptor is Microsoft.AspNetCore.Mvc.Controllers.ControllerParameterDescriptor { ParameterInfo: var info }
+                && info.IsDefined(typeof(CampoObrigatorioAttribute), inherit: false))
+            .Select(p => p.Name)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+        foreach (OpenApiParameter parametro in (operacao.Parameters ?? []).OfType<OpenApiParameter>().Where(p => obrigatorios.Contains(p.Name ?? string.Empty)))
+        {
+            parametro.Required = true;
         }
 
         return Task.CompletedTask;

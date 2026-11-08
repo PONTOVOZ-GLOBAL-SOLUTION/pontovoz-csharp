@@ -30,3 +30,15 @@ public interface IPrevisoesService
 {
     Task<PrevisoesParadaDto> ObterAsync(int paradaId, int? linhaId, CancellationToken cancellationToken);
 }
+
+/// <summary><c>GET /api/v1/paradas/{id}/alternativas?destinoId=</c> (seção 4.7).</summary>
+public interface IAlternativasService
+{
+    Task<AlternativasDeslocamentoDto> ObterAsync(int paradaId, int? destinoId, CancellationToken cancellationToken);
+}
+
+/// <summary><c>GET /api/v1/paradas/{id}/resumo</c> (seção 4.8).</summary>
+public interface IResumoParadaService
+{
+    Task<ResumoParadaDto> ObterAsync(int paradaId, CancellationToken cancellationToken);
+}

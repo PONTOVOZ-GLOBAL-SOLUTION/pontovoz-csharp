@@ -5,7 +5,7 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B8 — previsões de chegada com provedor simulado.** Hoje o backend:
+**Bloco B9 — alternativas de deslocamento e resumo do totem.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -28,11 +28,14 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - responde às **previsões de chegada do B8** com um provedor **simulado** (horários fictícios
   calculados no instante da consulta) e tem um adaptador para a API Olho Vivo da SPTrans,
   **desligado** e nunca testado contra a API real (veja [Previsões](#previsões-de-chegada-b8));
-- tem **756 testes**: 278 de domínio, 112 da camada de aplicação, 172 de integração e de
-  provedores e 194 pela API em execução (94 acrescentados no B8).
+- compara as **alternativas de deslocamento** (linhas diretas até um destino, pelo menor tempo
+  total) e monta o **resumo do totem** (parada, previsões e últimas passagens numa só resposta),
+  completando as 13 rotas de negócio do contrato (veja [Alternativas e resumo](#alternativas-e-resumo-b9));
+- tem **805 testes**: 278 de domínio, 144 da camada de aplicação, 172 de integração e de
+  provedores e 211 pela API em execução (51 acrescentados no B9).
 
-Alternativas e resumo (B9) **ainda não existem** e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
-seção 9.
+Todas as rotas do contrato estão implementadas. O estado de cada uma está em
+[`../contracts/api-v1.md`](../contracts/api-v1.md), seção 9.
 
 ## Requisitos de ambiente
 
@@ -883,12 +886,14 @@ repetem validações. Evidências reais em
 | GET | `/api/v1/destinos` | `termo`, `pagina`, `tamanhoPagina` | 200, 400 |
 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | `id` na rota, `linhaId` opcional | 200, 400, 404, 422 |
 | GET | `/api/v1/paradas/{id}/previsoes` (B8) | `id` na rota, `linhaId` opcional | 200, 400, 404, 422, 503 |
+| GET | `/api/v1/paradas/{id}/alternativas` (B9) | `id` na rota, `destinoId` **obrigatório** | 200, 400, 404 |
+| GET | `/api/v1/paradas/{id}/resumo` (B9) | `id` na rota | 200, 404 |
 
 Todas podem devolver 500 `ErroInterno`. Paginação: `pagina` ≥ 1 (padrão 1) e `tamanhoPagina` de
 1 a 50 (padrão 20). `termo` tem de 2 a 60 caracteres e não diferencia maiúsculas nem acentos.
 
-**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/alternativas` e `/resumo` (B9).
-As previsões estão em [Previsões de chegada](#previsões-de-chegada-b8).
+As previsões estão em [Previsões de chegada](#previsões-de-chegada-b8), e as alternativas e o
+resumo, em [Alternativas e resumo](#alternativas-e-resumo-b9).
 As rotas administrativas estão em [Rotas administrativas](#rotas-administrativas-b7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
 a rota só será criada com todas as partes.
 
@@ -1255,6 +1260,100 @@ dotnet test --filter-class "*ProvedorOlhoVivoTests"
 Nenhum teste acessa a SPTrans, e nenhum depende do relógio real: o instante é sempre controlado
 (`FakeTimeProvider`) ou informado pelo teste.
 
+## Alternativas e resumo (B9)
+
+Evidências reais em [`docs/evidencias/B9-alternativas-resumo.md`](docs/evidencias/B9-alternativas-resumo.md).
+
+### Alternativas de deslocamento
+
+`GET /api/v1/paradas/{id}/alternativas?destinoId={destinoId}` compara as **linhas diretas** da
+parada até um destino (contrato, seção 4.7). Uma linha entra quando está ativa, atende a parada e
+tem um **percurso estimado cadastrado** até o destino (seed). Nada é calculado por distância nem
+inferido pelo nome do terminal; não há baldeação (`baldeacoes: 0`).
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/alternativas?destinoId=3"
+```
+
+(Troque `1` e `3` pelos ids recebidos de `/api/v1/paradas?codigoExterno=SIM-P001` e de
+`/api/v1/destinos?termo=norte`.)
+
+Para cada linha, com a próxima chegada válida do provedor:
+
+```
+tempoTotalEstimadoMinutos = esperaMinutos + percursoEstimadoMinutos
+chegadaEstimadaAoDestino  = previstaPara + percursoEstimadoMinutos
+```
+
+- **Ranking:** primeiro as linhas com previsão (`Comparavel`), pelo menor tempo total; em empate,
+  a menor espera e, depois, o código da linha. Recebem `posicao` 1, 2, 3...
+- **Sem previsão:** vêm depois, por percurso e código, com `posicao`, `previstaPara`,
+  `esperaMinutos`, `tempoTotalEstimadoMinutos` e `chegadaEstimadaAoDestino` nulos. Nunca são
+  chamadas de mais rápidas.
+- **`comparacaoCompleta`:** só é `true` quando todas as linhas foram comparadas. Se faltar alguma,
+  a posição 1 é a mais rápida **entre as linhas com previsão** (aviso `ComparacaoIncompleta`).
+
+| `situacao` | Quando | HTTP |
+|---|---|---|
+| `Comparadas` | Ao menos uma linha com previsão | 200 |
+| `SemComparacao` | Linhas diretas sem nenhuma previsão, inclusive com o **provedor indisponível** (`statusPrevisao: "ProvedorIndisponivel"`) | 200 |
+| `SemLinhaDireta` | Nenhum percurso cadastrado até o destino; o provedor **não** é consultado | 200 |
+
+Erros: 400 `RequisicaoInvalida` (`destinoId` ausente, não numérico ou menor que 1), 404
+`ParadaNaoEncontrada` e `DestinoNaoEncontrado`. Os percursos do MVP são **simulados**
+(`origemPercurso: "Simulado"`, aviso `PercursoEstimado`), e o aviso `LimitacaoLinhasDiretas`
+aparece sempre.
+
+Exemplo do contrato (10/11/2026, 14h32): a SIM-L002 chega em 1 minuto, mas leva 40 até o
+Terminal Norte (41 no total); a SIM-L004 chega em 8 e leva 20 (28 no total). A SIM-L004 fica em
+1º lugar. A SIM-L001 não tem previsão e aparece por último, sem posição.
+
+### Resumo do totem
+
+`GET /api/v1/paradas/{id}/resumo` reúne a parada (mesmo formato de `GET /paradas/{id}`), as
+previsões (mesmo formato de `GET /previsoes`) e as últimas passagens (mesmo formato de
+`GET /ultimas-passagens`) numa só resposta (seção 4.8). As partes são montadas pelos mesmos
+métodos das rotas individuais.
+
+- **Instante único:** o relógio (`TimeProvider`) é lido uma vez por requisição; o mesmo instante
+  vale para os três `consultadoEm`, as esperas, os minutos desde a observação e a desatualização.
+- **Paralelismo seguro:** a parada e as linhas são lidas primeiro. Depois, o provedor de previsões
+  e a consulta de últimas passagens rodam juntos com `Task.WhenAll`. A consulta de passagens é a
+  única operação no `DbContext` nesse momento e o provedor não usa o banco, então nenhuma operação
+  do EF Core roda em paralelo com outra. O provedor é consultado uma vez.
+- **Completo ou parcial:** previsão parcial ou provedor sem previsões continuam `Completo`. Com o
+  provedor **indisponível**, a resposta continua 200: `situacao: "Parcial"`,
+  `partesIndisponiveis: ["previsoes"]`, aviso `ResumoParcial` e, dentro de `previsoes`,
+  `status: "ProvedorIndisponivel"`. A parada e as últimas passagens continuam completas.
+- Parada sem linhas: 200, sem consultar o provedor. Parada inexistente ou inativa: 404. Uma falha
+  do banco continua sendo 500, nunca um resumo "parcial".
+
+### A mesma indisponibilidade nas três rotas
+
+Com `Previsoes:SimularIndisponibilidade = true` (seção [Previsões](#previsões-de-chegada-b8)):
+
+| Rota | Resposta |
+|---|---|
+| `GET /previsoes` | **503** `ProvedorPrevisoesIndisponivel`, `Retry-After: 30` |
+| `GET /alternativas` | **200**, `situacao: "SemComparacao"`, `statusPrevisao: "ProvedorIndisponivel"` |
+| `GET /resumo` | **200**, `situacao: "Parcial"`, `partesIndisponiveis: ["previsoes"]` |
+
+### Testes do B9
+
+| Classe | Testes | O que cobre |
+|---|---|---|
+| `AlternativasServiceTests` | 20 | Validação, 404, exemplo do contrato, próxima previsão válida, comparação completa e incompleta, desempates por espera e código, linhas sem previsão, posições, `SemComparacao` (sem previsões e indisponível), `SemLinhaDireta` sem consultar o provedor, parada sem linhas, cadastro administrativo, instante e `CancellationToken` |
+| `ResumoParadaServiceTests` | 12 | Instante único (uma leitura do relógio), partes iguais às rotas individuais, `Parcial`, previsão parcial ainda `Completo`, parada sem linhas, 404, cadastro administrativo, falha do banco não mascarada, paralelismo sem duas operações de banco ao mesmo tempo, cancelamento |
+| `AlternativasResumoHttpTests` | 19 | Igualdade com os quatro exemplos do contrato, campos nulos, `SemLinhaDireta`, 400 e 404, a mesma indisponibilidade nas três rotas, parada sem linhas, registro futuro, nada gravado, acesso público, provedor assíncrono real sem concorrência no `DbContext`, cancelamento |
+
+```bash
+dotnet test --filter-class "*Alternativas*"
+```
+
+```bash
+dotnet test --filter-class "*Resumo*"
+```
+
 ## Próximas etapas
 
 | Bloco | Conteúdo |
@@ -1266,6 +1365,6 @@ Nenhum teste acessa a SPTrans, e nenhum depende do relógio real: o instante é 
 | B5 | Services, DTOs e injeção de dependência, com testes (concluído) |
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído) |
 | B7 | Endpoints administrativos com chave de acesso (concluído) |
-| B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo desligado) (concluído, aguardando auditoria) |
-| B9 | Alternativas de deslocamento e resumo da parada |
+| B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo desligado) (concluído) |
+| B9 | Alternativas de deslocamento e resumo da parada (concluído, aguardando auditoria) |
 | B10 | Documentação final, evidências e entrega |
