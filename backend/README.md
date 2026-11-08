@@ -3,9 +3,11 @@
 Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 **C# Software Development**. Visão geral do projeto: [../README.md](../README.md).
 
-## Estágio atual
+## Estado atual
 
-**Bloco B9 — alternativas de deslocamento e resumo do totem.** Hoje o backend:
+**Bloco B10 — revisão final da entrega.** Todas as rotas do contrato estão implementadas
+(B0 a B9). O B10 não acrescentou funcionalidades: reproduziu a execução num clone novo, revisou a
+documentação e passou por auditoria independente do pacote do projeto. Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -13,9 +15,9 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - tem o **modelo de domínio** em `src/PontoVoz.Api/Domain/` (veja [Domínio](#domínio-b2));
 - **persiste** o domínio em SQLite com EF Core 10, com migrations e seed idempotente de dados
   fictícios (veja [Persistência](#persistência-b3));
-- tem **repositórios com interfaces** e consultas LINQ assíncronas, executadas no SQLite, para os
-  futuros endpoints de paradas, linhas, destinos, percursos e últimas passagens, incluindo a busca
-  sem acentos (veja [Consultas](#consultas-linq-b4));
+- tem **repositórios com interfaces** e consultas LINQ assíncronas, executadas no SQLite, para
+  paradas, linhas, destinos, percursos e últimas passagens, incluindo a busca sem acentos (veja
+  [Consultas](#consultas-linq-b4));
 - tem **services de aplicação** que validam os parâmetros, aplicam as regras do contrato e montam
   as respostas (DTOs) de paradas, linhas, destinos e últimas passagens (veja
   [Services](#services-de-aplicação-b5));
@@ -36,6 +38,18 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 Todas as rotas do contrato estão implementadas. O estado de cada uma está em
 [`../contracts/api-v1.md`](../contracts/api-v1.md), seção 9.
+
+As seções abaixo seguem a ordem dos blocos (B2 a B9). Os quadros "funciona e pendente" de cada
+bloco são **retratos históricos** daquele momento e estão marcados como tal; o estado atual é o
+desta seção.
+
+| Para | Veja |
+|---|---|
+| Executar do zero | [Executar a partir do GitHub](#executar-a-partir-do-github) |
+| Demonstrar a API | [Roteiro de demonstração](#roteiro-de-demonstração) |
+| Evidências por critério da disciplina | [`docs/evidencias/INDICE-ENTREGA.md`](docs/evidencias/INDICE-ENTREGA.md) |
+| Validação final (B10) | [`docs/evidencias/B10-validacao-final.md`](docs/evidencias/B10-validacao-final.md) |
+| Explicar o código | [`docs/GUIA-APRESENTACAO-CSHARP.md`](docs/GUIA-APRESENTACAO-CSHARP.md) |
 
 ## Requisitos de ambiente
 
@@ -101,14 +115,77 @@ dotnet run --project src/PontoVoz.Api --launch-profile http
 ```
 
 Com a API em execução, abra http://localhost:5080/scalar (documentação interativa) e
-http://localhost:5080/health. Os testes rodam com `dotnet test`, sem precisar do banco local.
+http://localhost:5080/health. Os testes rodam com `dotnet test`, sem precisar do banco local:
+
+```bash
+dotnet test
+```
+
+Esse passo a passo foi repetido no B10 num clone novo do GitHub, sem banco nem binários
+anteriores: todos os comandos terminaram com código 0 e os 805 testes passaram (veja
+[`docs/evidencias/B10-validacao-final.md`](docs/evidencias/B10-validacao-final.md)).
 Sem o `dotnet ef database update`, a API inicia, mas o `/health` responde **503**, porque o banco
 não existe.
 
 Os dados são **fictícios**: paradas, linhas, destinos, percursos e passagens de demonstração com
 o prefixo `SIM-`. Eles não representam a operação real da SPTrans (veja
-[Dados de demonstração](#dados-de-demonstração)). No estágio atual, só o `/health` está
-disponível como endpoint.
+[Dados de demonstração](#dados-de-demonstração)). As 13 rotas de negócio e o `/health` ficam
+disponíveis; o [Roteiro de demonstração](#roteiro-de-demonstração) mostra a ordem de uso.
+
+## Roteiro de demonstração
+
+Com a API em execução (porta 5080) e o banco criado pelo `dotnet ef database update`. Os ids
+internos podem mudar quando o banco é recriado: os comandos abaixo usam os de um banco novo
+(parada `SIM-P001` = 1, Terminal Norte = 3). Confira-os nas respostas do primeiro e do quinto
+comando.
+
+**Jornada do passageiro** (rotas públicas, sem chave):
+
+```bash
+curl "http://localhost:5080/api/v1/paradas?codigoExterno=SIM-P001"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/previsoes"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/ultimas-passagens"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/destinos?termo=norte"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/alternativas?destinoId=3"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/resumo"
+```
+
+1. A parada do totem é encontrada pelo código; o detalhe lista as linhas que a atendem.
+2. As previsões mostram as próximas chegadas **simuladas** (`origem: "Simulado"`, aviso
+   `DadosSimulados`).
+3. As últimas passagens mostram quando uma linha foi vista pela última vez, com o nível de
+   confirmação (nunca oficial).
+4. O passageiro escolhe um destino; as alternativas ordenam as linhas diretas pelo menor tempo
+   total (espera + percurso). Uma linha sem previsão fica sem posição, com o aviso
+   `ComparacaoIncompleta`.
+5. O resumo reúne parada, previsões e últimas passagens num só instante.
+
+**Operador** (rotas administrativas): siga [Testar no Scalar](#testar-no-scalar), de preferência
+com um banco de teste e uma chave em `Admin:Chave`, para ver o 401 sem a chave e o 201 com ela.
+
+**Falha controlada:** inicie a API com `Previsoes__SimularIndisponibilidade=true` (veja
+[Configuração](#configuração-previsoes)): `/previsoes` responde 503 com `Retry-After: 30`,
+`/alternativas` responde 200 `SemComparacao` e `/resumo` responde 200 `Parcial`; parada, linhas e
+últimas passagens continuam disponíveis.
 
 ## Como executar
 
@@ -174,8 +251,8 @@ O projeto usa xUnit v3 sobre a Microsoft.Testing.Platform, declarada em
 `global.json` (`"test": { "runner": "Microsoft.Testing.Platform" }`), como o
 .NET 10 SDK exige para essa plataforma.
 
-`dotnet test` executa os testes de domínio (B2), os de integração com SQLite (B3) e os do
-`/health` pela API em execução, e termina com código de saída **0** quando todos passam. Os testes de integração usam um banco SQLite
+`dotnet test` executa os 805 testes (domínio, aplicação, integração com SQLite e provedores, e
+HTTP pela API em execução) e termina com código de saída **0** quando todos passam. Os testes de integração usam um banco SQLite
 **real** e isolado por teste, em memória ou em arquivo temporário, com o esquema criado pela
 migration. Eles não usam o provedor InMemory e não tocam no `pontovoz.db`. Para ver cada teste:
 
@@ -201,8 +278,8 @@ Para rodar só os testes pela API em execução (HTTP):
 dotnet test --filter-namespace "PontoVoz.Tests.Api"
 ```
 
-As evidências estão em [Domínio](#evidências-dos-testes) e em
-[`docs/evidencias/B3-persistencia.md`](docs/evidencias/B3-persistencia.md).
+As evidências de cada bloco estão em [`docs/evidencias/`](docs/evidencias/), com o índice por
+critério da disciplina em [`INDICE-ENTREGA.md`](docs/evidencias/INDICE-ENTREGA.md).
 
 ### HTTPS (opcional)
 
@@ -248,11 +325,12 @@ backend/
 ├─ global.json                   versão mínima do SDK e plataforma de testes
 ├─ .config/dotnet-tools.json     ferramenta local dotnet-ef
 ├─ .editorconfig                 padrão de estilo do código
-├─ docs/evidencias/              evidências de funcionamento por bloco
+├─ docs/GUIA-APRESENTACAO-CSHARP.md  guia para explicar o código (B10)
+├─ docs/evidencias/              evidências por bloco e índice da entrega (B10)
 ├─ scripts/exportar-openapi.ps1  exporta o OpenAPI da API em execução (B6)
 ├─ src/PontoVoz.Api/
 │  ├─ Program.cs                 composição da aplicação e injeção de dependência
-│  ├─ Controllers/               controllers REST: Health, Paradas, Linhas e Destinos (B6)
+│  ├─ Controllers/               controllers REST: Health, Paradas, Linhas e Destinos (B6, B8 e B9)
 │  │  └─ Administracao/          rotas /api/v1/admin (B7)
 │  ├─ Documentacao/              documento OpenAPI: descrição, chave e campos obrigatórios (B7)
 │  ├─ Domain/                    modelo de domínio (B2)
@@ -268,7 +346,7 @@ backend/
 │  │  ├─ Erros/                  erros de aplicação com os códigos do contrato
 │  │  ├─ Interfaces/             interfaces dos repositórios e dos services
 │  │  ├─ Mapeamentos/            entidades → DTOs e horário de São Paulo
-│  │  ├─ Services/               services de consulta (B5) e administrativos (B7)
+│  │  ├─ Services/               services de consulta (B5), administrativos (B7), previsões (B8), alternativas e resumo (B9)
 │  │  └─ Validacao/              validação dos parâmetros e dos corpos
 │  ├─ Infrastructure/            EF Core, repositórios e provedores de previsão (B3, B4, B7, B8)
 │  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
@@ -278,9 +356,9 @@ backend/
 │  └─ Middleware/                ProblemDetails, tratamento global de erros, JSON e CORS (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
    ├─ Domain/                    testes de domínio (B2)
-   ├─ Application/               testes dos services e da paginação (B4, B5 e B7)
-   ├─ Infrastructure/            testes de integração com SQLite real (B3, B4 e B7)
-   └─ Api/                       testes pela API em execução (B3.1, B5, B6 e B7)
+   ├─ Application/               testes dos services e da paginação (B4, B5, B7, B8 e B9)
+   ├─ Infrastructure/            testes de integração com SQLite real e dos provedores (B3, B4, B7 e B8)
+   └─ Api/                       testes pela API em execução (B3.1 e B5 a B9)
 ```
 
 ## Domínio (B2)
@@ -437,8 +515,8 @@ classDiagram
 | Métodos de fábrica | `CriarSimulada`, `CadastrarAdministrativa`, `CriarNoProvisionamento` e `Registrar` deixam explícitas a origem e a natureza de cada dado. Não há construtor público. |
 | Responsabilidade única | As regras temporais ficam em `RegraTemporalPassagem`, e as validações de cadastro em `RegrasCadastro`. As entidades as usam sem duplicá-las. |
 
-Interfaces de repositório e de serviço entram nos blocos em que suas operações forem
-implementadas (B4, B5 e B8).
+As interfaces de repositório e de serviço foram criadas nos blocos em que suas operações foram
+implementadas (B4, B5, B7, B8 e B9) e estão em `Application/Interfaces/`.
 
 ### Evidências dos testes
 
@@ -577,9 +655,12 @@ simuladas.
   do seed. O teste `Provisionamento_ComIdsDiferentesDosExemplos_RelacionaTudoPeloCodigo` confirma
   que tudo continua correto quando os ids são outros.
 
-### O que funciona e o que está planejado
+### Retrato histórico do B3: o que funcionava e o que estava planejado
 
-| Funciona (B3) | Planejado |
+> Quadro do fim do B3 (07/11/2026), mantido como registro. Tudo o que aparece como planejado foi
+> implementado depois (B4 a B9); o estado atual está em [Estado atual](#estado-atual).
+
+| Funcionava (B3) | Planejado no B3 |
 |---|---|
 | Esquema SQLite criado pela migration | Services e DTOs (B5) |
 | Persistência e leitura de todas as entidades | Endpoints REST (B6 e B7) |
@@ -616,7 +697,7 @@ Os repositórios e a busca sem acentos, previstos aqui para o B4, estão em
 
 ## Consultas LINQ (B4)
 
-As consultas que os futuros services e endpoints vão usar ficam atrás de interfaces em
+As consultas que os services e endpoints usam ficam atrás de interfaces em
 `Application/Interfaces/`, implementadas com EF Core e LINQ em `Infrastructure/Repositories/`.
 Elas devolvem entidades do domínio ou `Pagina<T>`, nunca `IQueryable`, e são registradas na
 injeção de dependência como *scoped*, junto com o `PontoVozDbContext`
@@ -753,9 +834,11 @@ dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
 | `UltimasPassagensTests` | 9 | Última por linha, desempates, horário futuro, filtro por linha, tipos e natureza, SQL em um comando |
 | `MigracaoBuscaTests` | 4 | `AddSearchColumns` em banco com dados do B3, reaplicação, renomeação e curingas |
 
-### Implementado e pendente
+### Retrato histórico do B4: implementado e pendente
 
-| Implementado (B4) | Pendente |
+> Quadro do fim do B4, mantido como registro. Os itens pendentes foram implementados do B5 ao B9.
+
+| Implementado (B4) | Pendente no B4 |
 |---|---|
 | 4 interfaces de repositório e suas implementações com EF Core e LINQ | Services, DTOs e validação de parâmetros com 400 (B5) |
 | Busca sem acentos com coluna normalizada e migration `AddSearchColumns` | Endpoints REST (B6 e B7) |
@@ -775,7 +858,7 @@ construtor, e não conhece o `DbContext` nem o SQLite. O fluxo de cada consulta 
 3. aplica as regras que não são de consulta (minutos, desatualização, avisos);
 4. devolve um DTO no formato do contrato.
 
-| Interface (`Application/Interfaces`) | Service | Método | Endpoint futuro (B6) |
+| Interface (`Application/Interfaces`) | Service | Método | Endpoint (B6) |
 |---|---|---|---|
 | `IParadaService` | `ParadaService` | `BuscarAsync(ConsultaParadas)` · `ObterDetalheAsync(id)` | `GET /paradas` · `GET /paradas/{id}` |
 | `ILinhaService` | `LinhaService` | `BuscarAsync(ConsultaPaginada)` | `GET /linhas` |
@@ -894,8 +977,8 @@ Todas podem devolver 500 `ErroInterno`. Paginação: `pagina` ≥ 1 (padrão 1) 
 
 As previsões estão em [Previsões de chegada](#previsões-de-chegada-b8), e as alternativas e o
 resumo, em [Alternativas e resumo](#alternativas-e-resumo-b9).
-As rotas administrativas estão em [Rotas administrativas](#rotas-administrativas-b7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
-a rota só será criada com todas as partes.
+As rotas administrativas estão em [Rotas administrativas](#rotas-administrativas-b7). O resumo
+estava previsto em parte para o B6, mas não foi antecipado: foi criado no B9, com todas as partes.
 
 ### Executar e consultar
 
@@ -1017,9 +1100,12 @@ desenvolvimento não é usado.
 dotnet test --filter-namespace "PontoVoz.Tests.Api"
 ```
 
-### O que funciona e o que está pendente
+### Retrato histórico do B6: o que funcionava e o que estava pendente
 
-| Funciona (B6) | Pendente |
+> Quadro do fim do B6, mantido como registro. As rotas pendentes foram implementadas no B7, no B8
+> e no B9; a URL do frontend em `Cors:OrigensPermitidas` continua dependendo da equipe.
+
+| Funcionava (B6) | Pendente no B6 |
 |---|---|
 | Cinco consultas públicas e `/health` | Rotas administrativas com chave (feitas no B7) |
 | ProblemDetails 400, 404, 422 e 500 | Previsões e o 503 `ProvedorPrevisoesIndisponivel` (feitos no B8) |
@@ -1354,7 +1440,7 @@ dotnet test --filter-class "*Alternativas*"
 dotnet test --filter-class "*Resumo*"
 ```
 
-## Próximas etapas
+## Etapas do desenvolvimento
 
 | Bloco | Conteúdo |
 |---|---|
@@ -1366,5 +1452,5 @@ dotnet test --filter-class "*Resumo*"
 | B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído) |
 | B7 | Endpoints administrativos com chave de acesso (concluído) |
 | B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo desligado) (concluído) |
-| B9 | Alternativas de deslocamento e resumo da parada (concluído, aguardando auditoria) |
-| B10 | Documentação final, evidências e entrega |
+| B9 | Alternativas de deslocamento e resumo da parada (concluído) |
+| B10 | Revisão final: reprodução num clone novo, documentação, evidências e guia de apresentação (auditoria do pacote concluída; ajustes finais da documentação) |

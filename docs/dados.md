@@ -4,12 +4,13 @@ Este documento registra a origem de cada dado usado pelo PontoVoz. A regra é
 simples: **nenhum dado é apresentado como real ou oficial sem que a fonte tenha
 sido verificada.**
 
-> **Estado atual (Bloco B9, 08/11/2026):** todos os dados que o backend usa são **fictícios**,
-> criados para a demonstração: o seed do SQLite (B3), os cadastros feitos pelas rotas
-> administrativas (B7), as previsões de chegada do provedor simulado (B8) e os percursos estimados
-> usados nas alternativas de deslocamento (B9). O adaptador para a API
-> Olho Vivo da SPTrans existe no código, mas está **desligado** e **nunca foi testado contra a API
-> real**. Portanto, o PontoVoz **não tem nenhum dado oficial de chegada** de ônibus.
+> **Estado atual (08/11/2026):** os dados da demonstração são **fictícios**: o seed do SQLite
+> (B3), as previsões de chegada do provedor simulado (B8) e os percursos estimados usados nas
+> alternativas (B9). Os registros do seed têm o prefixo `SIM-` e são identificados como simulados.
+> As rotas administrativas (B7) aceitam cadastros enviados pelo operador, que declara em
+> `dadosSimulados` se o cadastro é fictício; esses cadastros não são verificados. O adaptador para
+> a API Olho Vivo da SPTrans existe no código, mas está **desligado** e **nunca foi testado contra a
+> API real**. Portanto, o ambiente demonstrado **não tem nenhum dado oficial de chegada** de ônibus.
 
 ## Categorias
 
@@ -17,8 +18,9 @@ sido verificada.**
 |---|---|---|
 | **Dados reais** | Obtidos de uma fonte verificável sobre a operação real do transporte | Nenhum |
 | **Dados públicos** | Publicados oficialmente por órgãos ou empresas, com acesso permitido | Nenhum integrado (ver Olho Vivo abaixo) |
-| **Dados simulados** | Criados pela equipe só para demonstração | Em uso: seed do SQLite (B3) e previsões do provedor simulado (B8) |
-| **Dados pessoais** | Informações que identificam pessoas | **Não são coletados** |
+| **Dados simulados** | Criados só para demonstração | Em uso: seed do SQLite (B3), previsões do provedor simulado (B8) e percursos estimados (B9) |
+| **Cadastros administrativos** | Enviados pelo operador, com a natureza declarada em `dadosSimulados` | Possíveis; nunca verificados |
+| **Dados pessoais** | Informações que identificam pessoas | **Não são solicitados** pela API; ver [Dados pessoais](#dados-pessoais) |
 
 ## Dados simulados
 
@@ -128,9 +130,14 @@ registrando aqui a data e o resultado.
 
 ## Dados pessoais
 
-O PontoVoz não precisa identificar passageiros e não coleta nomes, documentos, e-mails,
-telefones, imagens ou gravações de voz no backend. Registros manuais usam apenas um rótulo
-técnico e impessoal do operador (por exemplo, `operador-local`), nunca um nome, telefone ou
-e-mail. O formato do campo recusa nomes com espaço ou maiúscula, e-mails e telefones formatados,
-mas não impede toda informação pessoal (uma sequência só de dígitos passa); cabe ao operador usar
-apenas identificadores técnicos.
+O PontoVoz não precisa identificar passageiros: nenhuma rota do backend pede nomes, documentos,
+e-mails, telefones, imagens ou gravações de voz, e a demonstração não deve receber dados pessoais
+reais. Os registros manuais devem usar apenas um rótulo técnico e impessoal do operador (por
+exemplo, `operador-local`), nunca um nome, telefone ou e-mail. O formato de `origemRegistro`
+recusa nomes com espaço ou maiúscula, e-mails e telefones formatados, mas essa validação não
+garante, sozinha, a exclusão de toda informação pessoal (uma sequência só de dígitos passa); cabe
+ao operador usar apenas identificadores técnicos. Os campos de texto dos cadastros
+administrativos (nome e endereço da parada, por exemplo) também não devem receber dados pessoais.
+
+Estas regras reduzem a exposição de dados pessoais na demonstração, mas não constituem, sozinhas,
+uma avaliação de conformidade com a LGPD.

@@ -8,9 +8,10 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 |---|---|
 | Disciplina | C# Software Development — backend (`backend/` e `contracts/`) |
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
-| Integrante responsável | Pendente (nome e RM) |
+| Equipe | Albert Katri (RM556544), Bruno Biletsky (RM554739) e Paulo Akira (RM556840), informados pelo integrante no prompt 35 |
+| Integrante responsável | Pendente (a equipe ainda não indicou o componente de cada integrante) |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 32 |
+| Prompts registrados | 35 |
 
 ## Como a IA foi usada
 
@@ -105,6 +106,9 @@ reescrito.
 | [30](#prompt-30) | 08/11/2026 | Bloco B9: alternativas de deslocamento, ranking e resumo agregado do totem | Implementação, testes e documentação | — |
 | [31](#prompt-31) | 08/11/2026 | Bloco B9.1: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
 | [32](#prompt-32) | 08/11/2026 | Bloco B9.2: correções documentais, validação final e publicação do B9 | Correção, validação e publicação | `feat: implement travel alternatives and stop summary` |
+| [33](#prompt-33) | 08/11/2026 | Bloco B10: auditoria final, reprodutibilidade, documentação e preparação da entrega | Revisão, validação e documentação | — |
+| [34](#prompt-34) | 08/11/2026 | Bloco B10.1: pacote ZIP final para auditoria independente | Preparação para auditoria | — |
+| [35](#prompt-35) | 08/11/2026 | Bloco B10.2: ajustes finais de apresentação, validação e publicação | Correção, validação e publicação | `docs: finalize C# Global Solution delivery` |
 
 ---
 
@@ -7833,3 +7837,1149 @@ sobre um banco isolado, conferiu o ranking, as linhas sem previsão, `SemLinhaDi
 completo e parcial, a indisponibilidade (503, 200, 200 `Parcial`), a ausência de gravação, nenhuma
 chamada à SPTrans, o Scalar e o OpenAPI igual ao exportado. Publicou o B9 com o commit
 `feat: implement travel alternatives and stop summary`, sem trailer, e push normal.
+
+## Bloco B10 — revisão final da entrega
+
+<a id="prompt-33"></a>
+
+### Prompt 33 — Bloco B10: auditoria final, reprodutibilidade, documentação e preparação da entrega
+
+**Data:** 08/11/2026 · **Tipo:** Revisão, validação e documentação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+# PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+## PROMPT 12 — BLOCO B10: AUDITORIA FINAL, REPRODUTIBILIDADE, DOCUMENTAÇÃO E PREPARAÇÃO DA ENTREGA
+
+Atue como engenheiro de software sênior, auditor técnico e revisor de entregas acadêmicas de C#/.NET.
+
+Você é responsável por executar a revisão final do backend C# da Global Solution CitizenTech PontoVoz, com máximo rigor técnico e fidelidade ao enunciado oficial da FIAP.
+
+**Repositório:**
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+
+**Diretório local:**
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+
+**Commit-base esperado:**
+`096f0512345819024bdb1d500a67196041e6c129`
+
+**Prazo da Global Solution:** 19/11/2026 às 23h55, conforme documento geral da FIAP.
+
+Os blocos B0 a B9 foram concluídos e publicados.
+
+Todas as 13 rotas de negócio do contrato e o endpoint /health já foram implementados.
+
+O B10 é o último bloco do planejamento.
+
+**NÃO É UM BLOCO DE NOVAS FUNCIONALIDADES.**
+
+O objetivo é assegurar que a entrega esteja completa, reproduzível, documentada, consistente, segura e demonstrável por outra pessoa.
+
+**Não faça commit nem push antes da auditoria independente do B10.**
+
+---
+
+## 1. PRIORIDADE ABSOLUTA — ENUNCIADO OFICIAL
+
+A página 30 do documento "GS CitizenTech - 3ES Fev - FIAP 2026" estabelece os seguintes critérios da disciplina C# Software Development:
+
+| Critério | Pontuação |
+|---|---:|
+| Programação Orientada a Objetos | 3,0 |
+| Web API | 2,5 |
+| Entity Framework Core + LINQ | 1,5 |
+| Async/Await | 1,0 |
+| Qualidade do código | 2,0 |
+
+Também exige:
+
+- Projeto C#/.NET integrado à CitizenTech.
+- Interfaces.
+- Injeção de Dependência.
+- Entity Framework Core.
+- LINQ.
+- APIs REST.
+- Programação assíncrona.
+- Testes unitários.
+- Repositório GitHub.
+- README com descrição da solução.
+- README com instruções de execução.
+- Documentação de endpoints por Swagger, Scalar ou equivalente.
+- Evidências da aplicação.
+- Organização e boas práticas.
+
+Use exclusivamente o enunciado oficial para afirmar o que é obrigatório.
+
+Não confunda os critérios de C# Software Development com os de SOA, ML, IoT ou outras disciplinas.
+
+A página 21 também determina que a IA seja utilizada como apoio para aprender e revisar, que os prompts sejam registrados em prompts.md e que cada integrante consiga explicar o projeto.
+
+Preserve o histórico verdadeiro do uso das ferramentas. Não atribua implementação manual a quem não a realizou.
+
+## 2. INSPEÇÃO INICIAL
+
+Antes de alterar qualquer arquivo:
+
+1. Confirme o diretório correto.
+2. Confirme branch main.
+3. Confirme HEAD no commit esperado.
+4. Confirme sincronização com origin/main.
+5. Confirme árvore de trabalho limpa.
+6. Leia o README da raiz.
+7. Leia o README do backend.
+8. Leia contracts/api-v1.md.
+9. Leia os documentos de dados, arquitetura e evidências.
+10. Examine a estrutura completa da solução .NET.
+11. Examine as dependências e configurações.
+12. Examine os testes e o OpenAPI exportado.
+13. Examine prompts.md.
+14. Compare a estrutura encontrada com os entregáveis oficiais.
+
+Não refaça o projeto.
+
+Não altere regras de negócio já aprovadas sem identificar um defeito concreto.
+
+## 3. AUDITORIA DOS CRITÉRIOS — NOTA 10,0
+
+Produza uma matriz de conformidade com os cinco critérios oficiais.
+
+Para cada critério, registre:
+
+- O requisito.
+- As classes, arquivos ou métodos que o demonstram.
+- Um exemplo concreto no PontoVoz.
+- Os testes correspondentes.
+- A evidência disponível.
+- O estado: atendido, parcialmente atendido ou pendente.
+- Eventuais lacunas ou riscos.
+
+### POO — 3,0
+
+Verifique e demonstre:
+
+- Encapsulamento.
+- Herança.
+- Polimorfismo.
+- Abstração.
+- Interfaces.
+- Objetos de valor.
+- Entidades de domínio.
+- Responsabilidade das classes.
+- Regras de negócio no domínio.
+
+Identifique exemplos reais existentes no código.
+
+Não invente padrões de projeto que não foram implementados.
+
+### Web API — 2,5
+
+Verifique:
+
+- Controllers REST.
+- 13 operações de negócio.
+- GET /health.
+- Status HTTP corretos.
+- Validação de parâmetros e corpos JSON.
+- ProblemDetails.
+- Autorização administrativa.
+- Serialização do contrato.
+- OpenAPI.
+- Scalar.
+
+### EF Core + LINQ — 1,5
+
+Verifique:
+
+- DbContext.
+- Entidades e mapeamentos.
+- Relacionamentos.
+- Migrations.
+- Seed.
+- Consultas LINQ.
+- Repositórios.
+- Índices e restrições.
+- Banco SQLite.
+- Persistência administrativa.
+- Consultas públicas.
+- Busca normalizada.
+
+### Async/Await — 1,0
+
+Verifique:
+
+- Métodos assíncronos.
+- Chamadas EF Core.
+- CancellationToken.
+- Uso correto de Task.WhenAll.
+- Ausência de operações simultâneas indevidas no mesmo DbContext.
+- Tratamento de cancelamento.
+
+### Qualidade — 2,0
+
+Verifique:
+
+- Organização em camadas.
+- Nomenclatura.
+- Tratamento de erros.
+- Segurança.
+- Testes.
+- README.
+- Documentação.
+- Evidências.
+- Ausência de segredos.
+- Ausência de código temporário.
+- Reprodutibilidade.
+
+Não atribua uma nota estimada sem fundamentação e não prometa nota máxima.
+
+## 4. TESTE DE REPRODUTIBILIDADE — AMBIENTE LIMPO
+
+Este é um dos testes mais importantes do B10.
+
+Verifique se uma pessoa que nunca executou o PontoVoz consegue reproduzir a entrega usando apenas o GitHub e o README.
+
+Faça um teste em diretório temporário e isolado, preferencialmente clonando o repositório público do GitHub.
+
+Não utilize o banco SQLite existente na máquina do desenvolvedor.
+
+Não utilize arquivos binários pré-compilados.
+
+Não dependa de variáveis locais não documentadas.
+
+Execute a sequência necessária, conforme a estrutura real da solução:
+
+1. Clonar o repositório.
+2. Conferir o SDK .NET necessário.
+3. Restaurar as ferramentas locais do .NET, quando necessário.
+4. Executar dotnet restore.
+5. Criar um novo banco SQLite aplicando migrations.
+6. Confirmar a execução do seed.
+7. Compilar do zero.
+8. Executar os testes.
+9. Iniciar a API.
+10. Consultar /health.
+11. Abrir o Scalar.
+12. Consultar as operações públicas.
+13. Demonstrar um fluxo administrativo local seguro.
+
+Se alguma etapa depender de configuração específica, documente-a no README.
+
+Não utilize credenciais reais da SPTrans.
+
+A demonstração deve funcionar com dados simulados.
+
+Registre o resultado efetivo e qualquer dificuldade encontrada.
+
+Se o procedimento descrito no README não funcionar, corrija as instruções ou o problema técnico comprovado.
+
+## 5. VALIDAÇÃO FINAL DOS TESTES
+
+O último relatório do B9 apontou:
+
+- 805 testes aprovados.
+- 0 falhas.
+- 0 ignorados.
+- Build sem erros nem avisos.
+
+Confirme novamente em compilação limpa.
+
+Execute:
+
+- dotnet restore.
+- dotnet build --no-incremental.
+- dotnet test.
+- dotnet ef migrations list.
+- dotnet ef database update.
+- dotnet ef migrations has-pending-model-changes.
+
+Execute também:
+
+- Verificador de contrato.
+- Verificação dos exemplos JSON.
+- Teste de igualdade do OpenAPI exportado com o documento da API em execução.
+- Testes de integração SQLite.
+- Testes HTTP.
+- Testes de segurança administrativa.
+- Testes do provedor simulado.
+- Testes de ranking.
+- Testes de resumo completo e parcial.
+
+Confirme:
+
+- Total real dos testes.
+- Aprovados.
+- Falhos.
+- Ignorados.
+- Código de saída.
+- Avisos e erros do build.
+
+Não trate resultados executados sobre binários antigos como validação final.
+
+Se encontrar falha, identifique a causa e aplique apenas a correção estritamente necessária.
+
+## 6. TESTE FUNCIONAL COMPLETO DA API
+
+Confirme as 14 operações:
+
+### Consultas públicas
+
+1. GET /api/v1/paradas
+2. GET /api/v1/paradas/{id}
+3. GET /api/v1/linhas
+4. GET /api/v1/destinos
+5. GET /api/v1/paradas/{id}/previsoes
+6. GET /api/v1/paradas/{id}/ultimas-passagens
+7. GET /api/v1/paradas/{id}/alternativas
+8. GET /api/v1/paradas/{id}/resumo
+
+### Operações administrativas
+
+9. POST /api/v1/admin/paradas
+10. PUT /api/v1/admin/paradas/{id}
+11. POST /api/v1/admin/linhas
+12. PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}
+13. POST /api/v1/admin/observacoes-passagem
+
+### Saúde
+
+14. GET /health
+
+Confirme:
+
+- Rotas e métodos.
+- Status HTTP.
+- Corpos JSON.
+- Mensagens de erro.
+- Códigos estáveis.
+- Documentação.
+- Autorização onde obrigatória.
+- Nenhuma chave exigida nas operações públicas.
+
+Não adicione endpoints fora do contrato.
+
+## 7. TESTE DA JORNADA DO CIDADÃO
+
+Demonstre uma jornada completa do PontoVoz:
+
+1. O passageiro consulta uma parada de ônibus.
+2. Visualiza as linhas que atendem a parada.
+3. Consulta as próximas chegadas simuladas.
+4. Visualiza quando ocorreram as últimas passagens registradas.
+5. Escolhe um destino.
+6. Compara as linhas diretas.
+7. Identifica a opção mais rápida entre aquelas com previsão.
+8. Recebe avisos quando a comparação está incompleta.
+9. Consulta o resumo geral da parada.
+
+Explique o valor dessa jornada para o cidadão de São Paulo.
+
+A demonstração não precisa de frontend, interface de voz ou aplicativo móvel para comprovar o funcionamento do backend C#.
+
+Não alegue que o backend inclui esses outros componentes.
+
+Confirme que todos os dados simulados estão identificados.
+
+## 8. TESTE DE FALHA CONTROLADA
+
+Usando ambiente e banco isolados, demonstre:
+
+- Indisponibilidade do provedor de previsões.
+- /previsoes retornando 503 e Retry-After: 30.
+- /alternativas retornando 200 SemComparacao.
+- /resumo retornando 200 Parcial.
+- Paradas e linhas continuando acessíveis.
+- Últimas passagens continuando acessíveis.
+
+Confirme que nenhuma operação cria dados fictícios para esconder a indisponibilidade.
+
+Confirme que nenhuma requisição precisa acessar a API real da SPTrans.
+
+## 9. SEGURANÇA E PRIVACIDADE
+
+Audite:
+
+- Admin:Chave.
+- X-PontoVoz-Admin-Key.
+- Matriz Development/Production.
+- Respostas 401 e 403.
+- Resposta 409 para duplicidade.
+- Segredos fora do Git.
+- CORS.
+- SQL e validação de entrada.
+- Logs sem tokens.
+- Mensagens 500 sem dados internos.
+- Ausência de informações pessoais reais no seed.
+- Integridade das relações no banco.
+- Dados simulados e cadastros não verificados.
+
+Confirme que a API Olho Vivo continua desativada por padrão.
+
+A integração real não foi validada com credenciais oficiais. Preserve essa informação.
+
+Quanto à limitação de origemRegistro:
+
+- Verifique se ela continua documentada.
+- Não altere o contrato unilateralmente.
+- Não afirme que a validação impede toda entrada de PII.
+- Registre o risco e a mitigação de não inserir dados pessoais reais.
+
+Se identificar uma vulnerabilidade relevante, apresente a gravidade e corrija somente quando necessário para uma entrega segura e coerente com o contrato.
+
+## 10. README PRINCIPAL — REVISÃO FINAL
+
+O README da raiz deve ser o ponto de entrada para o professor.
+
+Verifique se ele apresenta claramente:
+
+- Nome PontoVoz.
+- Problema urbano enfrentado.
+- Proposta CitizenTech.
+- Objetivo da solução.
+- Como o sistema funciona.
+- Tecnologias utilizadas.
+- Arquitetura em camadas.
+- Estrutura de pastas.
+- Requisitos de instalação.
+- Instruções de execução.
+- Instruções para preparar o SQLite.
+- Como rodar os testes.
+- Como acessar OpenAPI e Scalar.
+- Exemplos de consultas.
+- Natureza simulada dos dados.
+- Situação do adaptador Olho Vivo.
+- Link ou localização das evidências.
+- Identificação dos integrantes, quando fornecida.
+- Estado final da entrega.
+
+Organize o texto para leitura acadêmica e técnica.
+
+Evite excesso de texto repetido.
+
+Não invente integrantes ou RMs.
+
+Se a identificação da equipe ainda estiver pendente, mantenha um campo claramente identificado como pendente e informe que precisa ser preenchido antes da entrega.
+
+## 11. README DO BACKEND
+
+Revise as instruções técnicas.
+
+Confirme que os comandos são executáveis e utilizam caminhos reais.
+
+Verifique especialmente:
+
+- SDK .NET.
+- Dependências.
+- Ferramentas dotnet.
+- Migrations.
+- Seed.
+- SQLite.
+- Inicialização da API.
+- URL local.
+- Scalar.
+- Exemplos de requisições GET.
+- Configuração administrativa.
+- Dados simulados.
+- Modo de indisponibilidade.
+- OpenAPI exportado.
+- Testes automatizados.
+
+O relatório anterior identificou um quadro histórico do B3 que ainda dizia "O que funciona e o que está planejado".
+
+Preserve o valor histórico desse quadro, se necessário, mas identifique claramente que representa o estado do B3.
+
+O leitor não pode interpretar esse retrato antigo como sendo o estado atual da API.
+
+Garanta que o estado atual esteja evidente.
+
+## 12. DOCUMENTAÇÃO DOS ENDPOINTS
+
+Confira:
+
+- contracts/api-v1.md.
+- contracts/README.md.
+- contracts/openapi/pontovoz-v1.json.
+- Exemplos JSON.
+- Scalar.
+- Documentação gerada automaticamente.
+
+Certifique-se de que:
+
+- As 13 operações de negócio estão implementadas.
+- O /health está presente.
+- Os campos obrigatórios são documentados.
+- As respostas HTTP são descritas.
+- Os DTOs correspondem ao código.
+- Os enums estão corretos.
+- Os campos anuláveis são corretos.
+- Os avisos estão documentados.
+- As cinco operações administrativas exigem a chave quando aplicável.
+- Não existem descrições desatualizadas afirmando que B7 a B9 ainda estão pendentes.
+
+O OpenAPI exportado deve continuar idêntico ao gerado pela aplicação.
+
+## 13. EVIDÊNCIAS ACADÊMICAS
+
+Revise as evidências já produzidas nos blocos B0 a B9.
+
+Não gere capturas repetidas sem necessidade.
+
+Crie um documento final de índice, por exemplo:
+
+`backend/docs/evidencias/INDICE-ENTREGA.md`
+
+Esse documento deve indicar:
+
+- Evidência de POO.
+- Evidência de Web API.
+- Evidência de EF Core + LINQ.
+- Evidência de Async/Await.
+- Evidência de testes unitários.
+- Evidência de Scalar/OpenAPI.
+- Evidência da jornada do cidadão.
+- Evidência do fluxo administrativo.
+- Evidência de tratamento de falhas.
+- Evidência de segurança.
+
+Para cada evidência, indique o caminho real do arquivo e o critério da disciplina que ela demonstra.
+
+Crie também uma evidência final:
+
+`backend/docs/evidencias/B10-validacao-final.md`
+
+Inclua resultados realmente executados:
+
+- Compilação.
+- Testes.
+- Reprodutibilidade.
+- Banco novo.
+- Migrations.
+- Operações HTTP.
+- Scalar.
+- OpenAPI.
+- Verificador de contrato.
+- Segurança.
+- Ausência de segredos.
+
+Não invente resultados nem capturas.
+
+Não inclua credenciais ou informações pessoais sensíveis.
+
+## 14. PREPARAÇÃO PARA APRESENTAÇÃO E EXPLICAÇÃO DO CÓDIGO
+
+A orientação geral da FIAP exige que os integrantes consigam explicar o projeto.
+
+Crie um guia didático e objetivo:
+
+`backend/docs/GUIA-APRESENTACAO-CSHARP.md`
+
+Ele deve ensinar, usando os arquivos reais:
+
+1. Qual problema o PontoVoz resolve.
+2. Como o backend funciona.
+3. O papel de Domain.
+4. O papel de Application.
+5. O papel de Infrastructure.
+6. O papel da API.
+7. O que é uma interface no projeto.
+8. Como funciona a injeção de dependência.
+9. Onde existe herança e polimorfismo.
+10. Como EF Core se conecta ao SQLite.
+11. Onde LINQ aparece.
+12. Onde Async/Await aparece.
+13. O que é CancellationToken.
+14. Como o TimeProvider funciona.
+15. Como são geradas as previsões simuladas.
+16. Como funciona o ranking das alternativas.
+17. Como é montado o resumo.
+18. Como funciona a chave administrativa.
+19. Como os testes comprovam as regras.
+20. Por que os dados não podem ser chamados de oficiais.
+
+Para cada conceito, indique ao menos um arquivo e um método ou classe reais.
+
+Inclua uma explicação curta, adequada a uma apresentação de aproximadamente cinco minutos, sem inventar funcionalidades.
+
+Inclua também perguntas técnicas que o professor pode fazer, com respostas sustentadas pelo código.
+
+O objetivo é ajudar o integrante a compreender e conseguir demonstrar o que está entregando.
+
+Não escreva afirmações falsas sobre quem programou o projeto.
+
+## 15. PROMPTS.MD E IDENTIFICAÇÃO ACADÊMICA
+
+Revise o prompts.md.
+
+Preserve:
+
+- Cronologia.
+- Prompts originais.
+- Resumos das ferramentas.
+- Atribuições corretas.
+- Registro das decisões.
+- Histórico real de uso de IA.
+
+Não apague, invente ou reescreva registros para esconder a participação das ferramentas.
+
+Registre também o prompt B10.
+
+Verifique os campos de identificação do integrante e da equipe.
+
+**Não invente nomes, RMs ou participação individual.**
+
+Se estiverem ausentes, informe claramente quais dados devem ser preenchidos pelo usuário antes da entrega.
+
+Não tente descobrir ou deduzir RMs.
+
+## 16. HIGIENE DO REPOSITÓRIO
+
+Confirme a ausência de:
+
+- Bancos SQLite versionados.
+- Arquivos bin/ e obj/.
+- Logs temporários.
+- Segredos.
+- Tokens.
+- Chaves privadas.
+- Arquivos .env com credenciais.
+- ZIPs de auditoria.
+- Backups.
+- Arquivos de scripts temporários.
+- Referências a caminhos pessoais de desenvolvimento.
+
+Não remova evidências legítimas.
+
+Não reescreva o histórico do Git.
+
+Não acrescente assinaturas promocionais de ferramentas.
+
+Se uma configuração demonstrativa insegura estiver presente, avalie seu impacto e documente a forma segura de utilizá-la.
+
+## 17. CORREÇÕES PERMITIDAS
+
+O B10 não autoriza novas funcionalidades.
+
+São permitidos somente:
+
+- Correções de erros comprovados.
+- Correções de instruções de execução.
+- Correções documentais.
+- Atualização de exemplos desatualizados.
+- Ajustes pequenos de qualidade necessários.
+- Correções de segurança.
+- Testes necessários para validar um defeito identificado.
+
+Se alguma correção alterar uma regra funcional do contrato, apresente justificativa, impacto e testes correspondentes.
+
+Evite refatorações amplas.
+
+Não adicione integrações, serviços ou dependências sem necessidade.
+
+Não modifique o banco de desenvolvimento para gerar dados de demonstração.
+
+## 18. CONFERÊNCIA FINAL DE ENTREGA
+
+Faça uma lista objetiva dos itens realmente prontos para entregar ao professor:
+
+- GitHub público.
+- Projeto .NET completo.
+- README.
+- Instruções reproduzíveis.
+- Migrations.
+- Seed.
+- Web API funcional.
+- Scalar/OpenAPI.
+- Testes.
+- Evidências.
+- Documentação.
+- Identificação da equipe.
+- Histórico de prompts.
+- Links necessários.
+
+Informe claramente o que ainda depende do integrante, especialmente:
+
+- Nome e RM, se não estiverem cadastrados.
+- Conferência dos dados da equipe.
+- Acesso à tarefa correta da disciplina no Teams ou Portal do Aluno.
+- Envio do link do repositório antes do prazo.
+- Conhecimento suficiente para apresentar o projeto.
+
+Não afirme que o trabalho foi entregue oficialmente na FIAP se não houver comprovação.
+
+Não invente uma entrega ou envio.
+
+## 19. VALIDAÇÃO FINAL APÓS QUALQUER MODIFICAÇÃO
+
+Se você corrigir qualquer arquivo de código ou configuração, execute novamente todos os testes relevantes.
+
+Em qualquer caso, execute a validação global final:
+
+- dotnet restore.
+- dotnet build --no-incremental.
+- dotnet test.
+- dotnet ef migrations list.
+- dotnet ef database update, em ambiente controlado.
+- dotnet ef migrations has-pending-model-changes.
+- Verificador do contrato.
+- Verificação do OpenAPI exportado.
+- Health check.
+- Scalar.
+- Jornada funcional.
+- Fluxo administrativo seguro.
+- Indisponibilidade simulada.
+
+Documente os resultados de forma auditável.
+
+## 20. CONTROLE DO GIT
+
+**Não faça commit.**
+
+**Não faça push.**
+
+Não execute force push.
+
+Não altere commits antigos.
+
+Não descarte o trabalho aprovado.
+
+Deixe as alterações locais do B10 preparadas para revisão independente.
+
+A publicação final será autorizada separadamente, depois da auditoria.
+
+## 21. RELATÓRIO FINAL OBRIGATÓRIO
+
+Apresente:
+
+A. Resumo executivo da entrega C#.
+
+B. Matriz dos cinco critérios oficiais da FIAP.
+
+C. Diagnóstico da organização e arquitetura.
+
+D. Resultado da reprodução em ambiente limpo.
+
+E. Instruções de instalação e inicialização verificadas.
+
+F. Total de testes aprovados, falhos e ignorados.
+
+G. Resultado do build e EF Core.
+
+H. Resultado do verificador do contrato.
+
+I. Resultado do teste das 14 operações.
+
+J. Funcionamento do Scalar e OpenAPI.
+
+K. Jornada do cidadão.
+
+L. Fluxo administrativo.
+
+M. Comportamento diante da indisponibilidade.
+
+N. Auditoria de segurança.
+
+O. Documentação atualizada.
+
+P. Índice de evidências.
+
+Q. Guia de apresentação.
+
+R. Situação do prompts.md.
+
+S. Arquivos modificados ou criados.
+
+T. Pendências que dependem do integrante.
+
+U. Estado do Git.
+
+V. Riscos técnicos ainda existentes.
+
+W. Checklist objetivo da entrega final.
+
+X. Sua avaliação técnica fundamentada, sem prometer nota.
+
+**Execute exclusivamente o B10. Não faça commit nem push e não adicione novas funcionalidades. Aguarde a auditoria independente antes da publicação final.**
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code fez a revisão
+final sem acrescentar funcionalidades nem mudar código ou configuração:
+
+- **Reprodução:** clonou o repositório público numa pasta vazia e seguiu só o README: `dotnet tool
+  restore`, `restore`, `build` (0 avisos e 0 erros), `dotnet ef database update` (banco novo com o
+  seed) e `dotnet test` (805 aprovados), todos com código 0.
+- **API do clone:** chamou as 14 operações, a jornada do cidadão, o fluxo administrativo com a
+  chave (401, 201, 409, 400, 200, 204, 201), o 403 em Production sem chave e a falha controlada
+  (503, 200 `SemComparacao`, 200 `Parcial`), sem gravação indevida, sem chamadas à SPTrans e sem a
+  chave nos logs. O OpenAPI servido era igual ao exportado.
+- **Validação na pasta de trabalho:** build completo, 805 testes, comandos `dotnet ef`, verificador
+  do contrato e os grupos de testes pedidos, todos sem falhas; banco de desenvolvimento inalterado.
+- **Documentação:** README da raiz reorganizado como ponto de entrada; no `backend/README.md`,
+  frases de estado desatualizadas corrigidas, os quadros do B3, do B4 e do B6 marcados como
+  retratos históricos e um roteiro de demonstração; criados `INDICE-ENTREGA.md`,
+  `B10-validacao-final.md` e `GUIA-APRESENTACAO-CSHARP.md`.
+- **Pendências do integrante:** nomes e RMs da equipe, conferência dos dados e envio do link na
+  tarefa da disciplina dentro do prazo.
+- **Git:** não houve commit.
+
+<a id="prompt-34"></a>
+
+### Prompt 34 — Bloco B10.1: pacote ZIP final para auditoria independente
+
+**Data:** 08/11/2026 · **Tipo:** Preparação para auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B10.1 — PREPARAÇÃO DO ZIP FINAL PARA AUDITORIA INDEPENDENTE
+O relatório do B10 foi recebido.
+Segundo o relatório:
+
+* O backend está funcional.
+* Um clone limpo do GitHub passou nas verificações.
+* Os 805 testes estão aprovados.
+* As 14 operações foram testadas.
+* A documentação acadêmica foi revisada.
+* Nenhum código de produção foi alterado.
+* O B10 ainda não foi publicado.
+
+Antes de autorizar o commit final, faremos uma auditoria independente de todos os arquivos da entrega.
+Sua tarefa é exclusivamente preparar o ZIP completo do projeto, sem alterar o código, documentação ou Git.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Commit-base esperado:
+`096f0512345819024bdb1d500a67196041e6c129`
+1. Inspeção inicial
+Verifique:
+
+* Diretório correto.
+* Branch main.
+* HEAD e origin/main no commit esperado.
+* Arquivos modificados.
+* Arquivos novos.
+* Ausência de alterações inesperadas.
+
+O relatório do B10 informou:
+Modificados:
+
+* README.md.
+* backend/README.md.
+* prompts.md.
+
+Novos:
+
+* backend/docs/evidencias/INDICE-ENTREGA.md.
+* backend/docs/evidencias/B10-validacao-final.md.
+* backend/docs/GUIA-APRESENTACAO-CSHARP.md.
+
+Confirme que os seis arquivos estão presentes e preservados.
+Não faça modificações.
+2. Gere o ZIP
+Nome:
+`PontoVoz-B10-Auditoria-Final.zip`
+Diretório de destino:
+`C:\Users\paulo\Projetos\`
+ATENÇÃO: no B9 houve um erro operacional que sobrescreveu o ZIP antigo do B8. Isso não pode se repetir.
+Antes de criar o arquivo:
+
+* Confira o nome exato do destino.
+* Não execute scripts antigos de geração sem verificar seu conteúdo.
+* Não sobrescreva ZIPs anteriores.
+* Se o nome já existir, interrompa e escolha um novo nome exclusivo.
+* Não exclua arquivos de auditorias anteriores.
+* Não modifique o repositório.
+
+Crie o ZIP a partir da pasta de trabalho atual, incluindo os arquivos B10 ainda não commitados.
+Não utilize somente git archive HEAD.
+3. Conteúdo obrigatório
+Inclua:
+
+* README.md principal.
+* prompts.md.
+* contracts/ completo.
+* docs/ completo.
+* backend/src/ completo.
+* backend/tests/ completo.
+* backend/docs/evidencias/ completo.
+* Arquivos de solução e projetos .NET.
+* Scripts e ferramentas de execução.
+* Configurações versionáveis.
+* READMEs das camadas.
+* Todos os arquivos de código dos blocos B0 a B9.
+* Os seis arquivos modificados ou criados no B10.
+
+Confirme especialmente os três documentos finais:
+
+1. INDICE-ENTREGA.md.
+2. B10-validacao-final.md.
+3. GUIA-APRESENTACAO-CSHARP.md.
+
+4. Exclusões obrigatórias
+Não inclua:
+
+* .git/.
+* bin/.
+* obj/.
+* .vs/.
+* .idea/.
+* TestResults/.
+* Bancos SQLite e arquivos auxiliares.
+* User-secrets.
+* Chaves e tokens reais.
+* Senhas reais.
+* Logs privados.
+* Executáveis compilados.
+* Arquivos temporários.
+* ZIPs de auditorias anteriores.
+
+Preserve exemplos fictícios dos testes e evidências legítimas.
+5. Conferência da integridade
+Após gerar o ZIP:
+
+1. Abra o arquivo e verifique sua integridade.
+2. Conte os arquivos.
+3. Compare byte a byte o conteúdo com a pasta local.
+4. Verifique que os seis arquivos B10 estão incluídos.
+5. Confirme a presença de todos os testes.
+6. Confirme a presença dos contratos e exemplos JSON.
+7. Confirme a presença do OpenAPI com 14 operações.
+8. Confirme a presença das evidências.
+9. Verifique que não há segredos ou bancos.
+10. Calcule o SHA-256 do ZIP.
+11. Informe o tamanho.
+12. Informe o caminho completo.
+13. Confirme o estado do Git.
+
+6. Pontos da próxima auditoria
+A auditoria independente verificará:
+
+* Conformidade com a página 30 do enunciado oficial da FIAP.
+* Clareza do README.
+* Reprodutibilidade das instruções.
+* Evidências de POO, Web API, EF Core, LINQ e Async/Await.
+* Organização do código.
+* Testes e segurança.
+* Guia de apresentação.
+* Fidedignidade do prompts.md.
+* Ausência de dados oficiais falsamente atribuídos à SPTrans.
+* Pendências acadêmicas da equipe.
+* Preparação para a entrega.
+
+Não altere nenhum desses itens nesta etapa.
+7. Relatório final
+Apresente:
+A. Caminho do ZIP.
+B. Tamanho.
+C. Quantidade de arquivos.
+D. SHA-256.
+E. Confirmação da presença dos seis arquivos B10.
+F. Confirmação da integridade byte a byte.
+G. Confirmação de ausência de segredos.
+H. Confirmação de que nenhum ZIP anterior foi sobrescrito.
+I. Estado do Git.
+J. Confirmação de que não houve commit nem push.
+Não implemente novas funcionalidades, não modifique arquivos e não publique. Apenas gere o ZIP final e aguarde a auditoria independente.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code gerou
+`PontoVoz-B10-Auditoria-Final.zip` com um script novo, que cria o arquivo em modo exclusivo e
+interromperia se o nome já existisse. O pacote tem 207 arquivos, iguais byte a byte aos da pasta de
+trabalho, inclusive os seis arquivos do B10, sem `.git`, binários, bancos SQLite, logs nem
+segredos. O `PontoVoz-B9-Auditoria.zip` ficou intacto; a ferramenta informou que o
+`PontoVoz-B8-Auditoria.zip` reconstruído no B9.1 não estava mais na pasta. Nenhum arquivo do
+repositório foi alterado e não houve commit.
+
+<a id="prompt-35"></a>
+
+### Prompt 35 — Bloco B10.2: ajustes finais de apresentação, validação e publicação
+
+**Data:** 08/11/2026 · **Tipo:** Correção, validação e publicação · **Commit:** `docs: finalize C# Global Solution delivery`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+B10.2 — AJUSTES FINAIS DE APRESENTAÇÃO, VALIDAÇÃO E PUBLICAÇÃO
+A auditoria independente do ZIP `PontoVoz-B10-Auditoria-Final.zip` foi concluída.
+Resultado: aprovado tecnicamente, com pequenos ajustes documentais antes da publicação.
+SHA-256 auditado:
+`6bb1f5f3340b70983a234d220151ac2c9d30cd1ee81f3821ca4791142e17a028`
+Commit-base esperado:
+`096f0512345819024bdb1d500a67196041e6c129`
+Objetivo: finalizar uma entrega profissional, natural, precisa e rigorosamente alinhada ao enunciado da FIAP.
+Não desenvolver novas funcionalidades.
+1. Preservação
+Confirme branch, HEAD, origin/main e os seis arquivos pendentes do B10.
+Preserve o conteúdo auditado e a integridade do backend.
+Não descarte alterações.
+2. Revisão editorial
+Revise os documentos destinados à apresentação acadêmica com estes critérios:
+
+* Linguagem profissional, clara e natural.
+* Explicações diretas, sem adjetivos promocionais ou elogios ao próprio projeto.
+* Sem frases genéricas repetitivas.
+* Sem alegações de excelência ou nota máxima.
+* Sem detalhamento excessivo do processo de desenvolvimento quando não for necessário ao entendimento técnico.
+* Sem afirmações sobre testes, integrações, pesquisa de campo ou resultados que não estejam comprovadas.
+* Sem informações pessoais ou credenciais desnecessárias.
+* Sem remover explicações técnicas que sustentam os critérios de avaliação.
+
+Não faça alterações cosméticas extensas apenas por estilo.
+Preserve as evidências técnicas legítimas e a rastreabilidade dos resultados.
+O README principal deve apresentar prioritariamente:
+
+1. Problema e proposta CitizenTech.
+2. Funcionalidades efetivamente implementadas.
+3. Tecnologias e arquitetura.
+4. Como executar.
+5. Como testar.
+6. Documentação dos endpoints.
+7. Evidências dos requisitos da disciplina.
+8. Limitações reais.
+9. Integrantes.
+
+Os detalhes aprofundados devem permanecer nos documentos técnicos, não se repetindo desnecessariamente no README principal.
+3. Transparência e uso de IA
+A FIAP solicitou registro dos prompts.
+Por isso:
+
+* Preserve `prompts.md`.
+* Preserve a cronologia real.
+* Preserve a atribuição verdadeira do desenvolvimento e das ferramentas.
+* Não invente autoria manual.
+* Não falsifique resultados, commits ou evidências.
+* Não elimine registros para ocultar a participação de ferramentas.
+* Não acrescente assinaturas promocionais ou trailers automáticos.
+
+Revise apenas redação redundante ou informações que não contribuam para a apresentação, sem comprometer a transparência exigida.
+4. Corrigir precisão sobre os dados
+No README principal, encontramos duas afirmações excessivamente abrangentes:
+
+* Todos os dados utilizados pelo backend são fictícios.
+* Nenhum dado pessoal é coletado.
+
+Ajuste para distinguir corretamente:
+
+* O seed e as previsões utilizados na demonstração são fictícios.
+* Os dados SIM- são identificados como simulados.
+* Cadastros administrativos podem ser enviados pelo operador, com declaração da natureza dos dados.
+* Não há dados oficiais de chegada da SPTrans integrados ao ambiente demonstrado.
+* O projeto não deve receber dados pessoais reais para sua demonstração.
+* A validação atual de `origemRegistro` não garante, sozinha, a exclusão de toda informação pessoal.
+
+Revise a mesma precisão em `docs/dados.md`, se necessário.
+Não afirme que o projeto cumpre integralmente a LGPD apenas por possuir validação e dados de demonstração.
+Não altere a regra funcional de `origemRegistro` nesta etapa.
+5. Estado atual da documentação
+O final de `backend/README.md` ainda descreve o B10 como aguardando auditoria.
+Atualize o estado para refletir que a auditoria do ZIP foi concluída e que o B10 está sendo finalizado.
+Não declare entrega oficial à FIAP.
+Preserve os quadros históricos dos blocos anteriores, desde que estejam claramente identificados como históricos e não como o estado atual.
+Confirme que o README principal e o README técnico não se contradizem.
+6. Integrantes e RMs
+Não invente nomes, RMs nem responsabilidades.
+Se esses dados ainda não foram fornecidos, mantenha campos claramente pendentes e registre a necessidade de preenchimento antes do envio à FIAP.
+Não preencha automaticamente a identidade da equipe a partir do autor dos commits.
+7. Revisão de aderência à FIAP
+Confira novamente os cinco critérios da disciplina C# Software Development:
+
+* POO — 3,0.
+* Web API — 2,5.
+* EF Core + LINQ — 1,5.
+* Async/Await — 1,0.
+* Qualidade do código — 2,0.
+
+Para cada critério, confirme que o professor consegue encontrar rapidamente:
+
+* O código correspondente.
+* Uma explicação objetiva.
+* Testes relevantes.
+* Evidências verificáveis.
+
+Preserve os documentos do índice de evidências e do guia de apresentação.
+Não acrescente exigências de outras disciplinas ao repositório C#.
+8. Conferência de segurança
+Verifique novamente:
+
+* Segredos.
+* Tokens.
+* Chaves.
+* Caminhos pessoais desnecessários.
+* Bancos SQLite.
+* Arquivos temporários.
+* Logs.
+* Dados pessoais.
+* Configuração administrativa.
+* Olho Vivo desativado.
+
+A integração real Olho Vivo continua não validada. Essa informação deve permanecer clara.
+Não altere prompts originais apenas para esconder referências às ferramentas. Caso seja realmente necessário ocultar algum dado pessoal em um registro público, identifique a anonimização de forma transparente, sem apresentar o texto alterado como uma transcrição literal.
+9. Validação final
+Execute novamente:
+
+* dotnet restore.
+* dotnet build --no-incremental.
+* dotnet test.
+* dotnet ef migrations list.
+* dotnet ef database update em ambiente controlado.
+* dotnet ef migrations has-pending-model-changes.
+* Verificador do contrato.
+* Igualdade entre OpenAPI exportado e API real.
+* Verificação do Scalar.
+
+Confirme que as 14 operações continuam disponíveis e que os 805 testes existentes continuam aprovados.
+Não altere código de produção, salvo se identificar um defeito objetivo e relevante. Nesse caso, apresente o problema antes da publicação.
+10. Registro e publicação
+Registre este prompt no `prompts.md` com atribuição verdadeira.
+Revise o diff e os arquivos staged.
+Se todos os resultados permanecerem corretos, fica autorizado o commit:
+`docs: finalize C# Global Solution delivery`
+Use a autoria legítima configurada e não acrescente trailer de ferramenta.
+Faça push normal para origin/main, sem force push.
+Confirme que a árvore está limpa e main está sincronizada com origin/main.
+11. Relatório final
+Informe:
+A. Quais ajustes foram feitos e por quê.
+B. Arquivos modificados.
+C. Resultado dos testes.
+D. Resultado da compilação.
+E. Resultado do verificador do contrato.
+F. Confirmação dos requisitos FIAP.
+G. Verificação de segurança.
+H. Hash do commit.
+I. Resultado do push.
+J. Estado final do Git.
+K. Pendências que dependem da equipe, particularmente nomes, RMs e envio à FIAP.
+Não acrescente funcionalidades. Não faça alterações para ocultar o uso de IA. Conclua somente a revisão final e a publicação autorizada.
+````
+
+Na mesma mensagem, fora do bloco acima, o integrante acrescentou (texto integral):
+
+````text
+nomes e rms dos integrantes:
+Albert Katri · RM556544
+Bruno Biletsky · RM554739
+Paulo Akira · RM556840
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code fez os ajustes
+documentais sem mudar código nem configuração:
+
+- **README da raiz:** reorganizado na ordem pedida (problema e proposta, funcionalidades,
+  tecnologias e arquitetura, execução, testes, endpoints, evidências por critério, limitações e
+  integrantes); as afirmações sobre os dados ficaram precisas (seed e previsões fictícios,
+  cadastros administrativos com natureza declarada, nenhum dado oficial da SPTrans, dados pessoais
+  reais não devem ser enviados e a validação de `origemRegistro` não basta sozinha).
+- **Integrantes:** nomes e RMs informados pelo integrante (Albert Katri, Bruno Biletsky e Paulo
+  Akira); o componente de cada um continua pendente.
+- **Outros documentos:** `docs/dados.md` com a mesma precisão e sem alegar conformidade com a LGPD;
+  estado do B10 atualizado no `backend/README.md`; dois ajustes de redação no guia.
+- **Validação:** build completo com 0 avisos, 805 testes aprovados, comandos `dotnet ef` (o
+  `database update` num banco isolado novo), verificador do contrato, a API real com as 14
+  operações, o OpenAPI servido igual ao exportado e o Scalar respondendo; banco de desenvolvimento
+  inalterado e nenhuma chamada à SPTrans.
+- **Git:** publicado com o commit `docs: finalize C# Global Solution delivery`, sem trailer, e
+  push normal.
