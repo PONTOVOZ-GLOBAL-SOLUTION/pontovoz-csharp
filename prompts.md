@@ -10,7 +10,7 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Integrante responsável | Pendente (nome e RM) |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 20 |
+| Prompts registrados | 22 |
 
 ## Como a IA foi usada
 
@@ -32,7 +32,7 @@ diferentes.
 - diagnosticou o ambiente e propôs a arquitetura (prompts 01 a 04);
 - escreveu o contrato REST, os exemplos JSON e o verificador do contrato (prompts 08 a 11);
 - escreveu todo o código C# do backend: domínio, persistência com EF Core, migrations, seed,
-  repositórios, consultas LINQ e services;
+  repositórios, consultas LINQ, services, controllers e tratamento de erros;
 - escreveu os testes automatizados, executou-os e fez testes de mutação para conferir se eles
   detectam regressões;
 - preparou a documentação técnica (READMEs e evidências) e este registro;
@@ -92,6 +92,8 @@ reescrito.
 | [18](#prompt-18) | 07/11/2026 | Bloco B4.1: auditoria final e publicação das consultas LINQ | Auditoria, correção e publicação | `38d2dae` |
 | [19](#prompt-19) | 07/11/2026 | Bloco B5: serviços de negócio, DTOs, validações e testes | Implementação, testes e documentação (inclui diretriz do prompts.md) | — |
 | [20](#prompt-20) | 07/11/2026 | Bloco B5.1: auditoria final, correção documental e publicação | Auditoria, correção documental e publicação | `feat: implement application services and DTO validation` |
+| [21](#prompt-21) | 07/11/2026 | Bloco B6: controllers REST públicos, ProblemDetails, OpenAPI e testes HTTP | Implementação, testes e documentação | — |
+| [22](#prompt-22) | 07/11/2026 | Bloco B6.1: auditoria final e publicação da Web API pública | Auditoria, correção e publicação | `feat: implement public REST API and OpenAPI documentation` |
 
 ---
 
@@ -4023,3 +4025,630 @@ autorizações), sem alterar os prompts nem os resumos. Repetiu `dotnet restore`
 `dotnet test` e os comandos `dotnet ef`, verificou `/health`, OpenAPI, Scalar e um endpoint de
 negócio ainda inexistente, e publicou o B5 com o commit
 `feat: implement application services and DTO validation`, sem trailer, e push normal.
+
+---
+
+## Bloco B6 — Web API pública
+
+<a id="prompt-21"></a>
+
+### Prompt 21 — Bloco B6: controllers REST públicos, ProblemDetails, OpenAPI e testes HTTP
+
+**Data:** 07/11/2026 · **Tipo:** Implementação, testes e documentação · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 08 — BLOCO B6: CONTROLLERS REST PÚBLICOS, PROBLEMDETAILS, OPENAPI E TESTES HTTP
+Atue como engenheiro de software sênior especializado em C#, ASP.NET Core 10, APIs REST, testes de integração, documentação OpenAPI e boas práticas de arquitetura.
+Você é responsável pela execução técnica do backend C# do PontoVoz, incluindo implementação, correção de problemas, testes e documentação.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit esperado:
+`314cb27523bf22c26e5b0184f05c04b071efc4eb`
+Os blocos B0 a B5 foram concluídos e publicados.
+Execute exclusivamente o Bloco B6. Não avance para B7, B8 ou B9. Não faça commit nem push antes da auditoria.
+1. PRIORIDADE ABSOLUTA — ENUNCIADO OFICIAL DA FIAP
+A disciplina C# Software Development exige:
+
+* Programação Orientada a Objetos — 3,0 pontos.
+* Web API — 2,5 pontos.
+* Entity Framework Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade de código — 2,0 pontos.
+
+Também são obrigatórios, conforme o enunciado, interfaces, injeção de dependência, APIs REST, testes unitários, organização do código, README, documentação dos endpoints e evidências de funcionamento.
+O backend deve estar claramente integrado à CitizenTech PontoVoz.
+Não invente funcionalidades, não retire requisitos e não amplie a arquitetura sem necessidade.
+O arquivo `contracts/api-v1.md` determina os contratos funcionais.
+Os arquivos existentes em Domain, Application e Infrastructure determinam a arquitetura técnica já implementada.
+2. INSPEÇÃO INICIAL
+Antes de editar:
+
+1. Confirme a pasta correta do projeto.
+2. Confirme main sincronizada com origin/main.
+3. Confirme o commit esperado e a árvore de trabalho limpa.
+4. Leia o contrato REST, especialmente as seções 1, 2, 3, 4, 6, 7 e 9.
+5. Examine os DTOs implementados no B5.
+6. Examine as interfaces e os quatro services do B5.
+7. Examine `ErroAplicacaoException`.
+8. Examine `JsonContrato`.
+9. Examine `Program.cs` e `HealthController`.
+10. Examine os testes existentes e a configuração de WebApplicationFactory.
+
+Não duplique funcionalidades já existentes.
+Não modifique as regras dos services para adaptá-las arbitrariamente aos controllers.
+3. ESCOPO EXATO DO B6
+Implemente somente os cinco endpoints públicos cujos services já estão prontos:
+
+1. GET /api/v1/paradas
+2. GET /api/v1/paradas/{id}
+3. GET /api/v1/linhas
+4. GET /api/v1/destinos
+5. GET /api/v1/paradas/{id}/ultimas-passagens
+
+Preserve também o endpoint existente:
+GET /health
+Os endpoints restantes do contrato continuam planejados:
+
+* Previsões: B8.
+* Alternativas: B9.
+* Resumo agregado: B9, com atenção à referência de implementação parcial no planejamento B6. Não crie um endpoint fictício ou incompleto apenas para antecipar a rota. Documente a pendência.
+* Operações administrativas: B7.
+
+Não declare implementadas funcionalidades que ainda não existem.
+4. CONTROLLERS REST
+Implemente Controllers ASP.NET Core, utilizando a infraestrutura já existente.
+Organize os Controllers de maneira objetiva, por exemplo:
+
+* ParadasController.
+* LinhasController.
+* DestinosController.
+
+O endpoint de últimas passagens pode pertencer ao ParadasController, caso essa seja a organização mais coerente.
+Requisitos:
+
+* Usar controllers e atributos apropriados do ASP.NET Core.
+* Utilizar rotas e métodos HTTP exatamente como documentados.
+* Injetar as interfaces dos services pelo construtor.
+* Não acessar DbContext diretamente nos controllers.
+* Não colocar consultas LINQ nos controllers.
+* Não duplicar regras de validação que já pertencem aos services.
+* Receber CancellationToken e propagá-lo aos services.
+* Retornar os DTOs efetivamente calculados.
+* Usar HTTP 200 nas consultas bem-sucedidas.
+* Respeitar os comportamentos de listas vazias e paginação.
+
+Os controllers devem permanecer pequenos e fáceis de explicar ao professor.
+5. ROTAS E PARÂMETROS
+Siga os contratos reais:
+GET /api/v1/paradas
+Query parameters:
+
+* termo.
+* codigoExterno.
+* pagina.
+* tamanhoPagina.
+
+GET /api/v1/paradas/{id}
+Parâmetro:
+
+* id.
+
+GET /api/v1/linhas
+Query parameters:
+
+* termo.
+* pagina.
+* tamanhoPagina.
+
+GET /api/v1/destinos
+Query parameters:
+
+* termo.
+* pagina.
+* tamanhoPagina.
+
+GET /api/v1/paradas/{id}/ultimas-passagens
+Parâmetros:
+
+* id na rota.
+* linhaId opcional na query.
+
+Preserve os valores padrão e limites especificados no contrato.
+Respeite a distinção entre identificadores internos e códigos externos.
+Use restrições de rota para identificadores inteiros positivos, conforme a seção 9 do contrato.
+Verifique as respostas esperadas para valores inválidos em rota e em query.
+6. SERIALIZAÇÃO JSON
+Utilize o `JsonContrato` já implementado no B5.
+Configure a serialização do ASP.NET Core MVC para respeitar:
+
+* Campos em camelCase.
+* Enums como texto.
+* Inclusão explícita dos campos com valor null.
+* Listas vazias como [].
+* Datas no formato previsto.
+* Avisos estruturados.
+* Identificação de dados simulados.
+
+Não crie um segundo padrão incompatível de serialização.
+Teste o JSON efetivamente devolvido por HTTP, não apenas a serialização isolada dos DTOs.
+7. PROBLEMDETAILS E TRATAMENTO DE ERROS
+Implemente o tratamento HTTP das exceções de aplicação e de domínio, utilizando os recursos apropriados do ASP.NET Core.
+Converta os erros esperados em ProblemDetails conforme o catálogo do contrato.
+400 — RequisicaoInvalida
+
+* Entradas com formato ou faixa inválidos.
+* Campos de validação agrupados no objeto `errors`.
+* Mensagens coerentes com o contrato.
+
+404 — Não encontrado
+
+* Parada inexistente ou inativa.
+* Linha inexistente ou inativa, quando aplicável.
+* Rota inválida que não corresponde ao padrão estabelecido.
+
+422 — LinhaNaoAtendeParada
+
+* Linha existente que não atende à parada solicitada.
+
+500 — ErroInterno
+
+* Exceções inesperadas.
+* Mensagem genérica para o consumidor.
+* Nenhuma stack trace, connection string ou dado sensível na resposta.
+
+O ProblemDetails deve contemplar, conforme o contrato:
+
+* type.
+* title.
+* status.
+* detail.
+* instance.
+* codigo.
+* traceId.
+* errors apenas quando aplicável à validação.
+
+Utilize o Content-Type adequado a ProblemDetails.
+A política de tratamento deve funcionar também para erros de model binding, incluindo valores inválidos nos parâmetros de query.
+Não dependa exclusivamente do comportamento padrão do ASP.NET Core se ele gerar respostas incompatíveis com o contrato.
+O tratamento deve centralizar a conversão de erros, evitando duplicações nos controllers.
+Não converta exceções inesperadas em erros 400.
+Cancelamento
+Se a requisição for cancelada pelo cliente, propague o CancellationToken e não trate esse cancelamento como erro interno 500.
+8. DOCUMENTAÇÃO OPENAPI E SCALAR
+O professor exige documentação dos endpoints por Swagger, Scalar ou equivalente.
+O projeto já utiliza OpenAPI nativo e Scalar.
+Preserve essas ferramentas.
+Ao concluir B6, a documentação gerada deverá listar:
+
+* GET /health.
+* GET /api/v1/paradas.
+* GET /api/v1/paradas/{id}.
+* GET /api/v1/linhas.
+* GET /api/v1/destinos.
+* GET /api/v1/paradas/{id}/ultimas-passagens.
+
+Documente corretamente:
+
+* Métodos.
+* Rotas.
+* Parâmetros.
+* Respostas 200.
+* Respostas 400, 404 e 422 quando previstas.
+* Tipos de DTO.
+* Padrões de erro.
+
+Utilize anotações ou recursos nativos de documentação quando necessário.
+Evite instalar pacotes adicionais sem justificativa.
+O Scalar deve permitir visualizar e testar os endpoints implementados.
+Não apresente os 13 endpoints planejados como se já estivessem funcionando.
+9. EXPORTAÇÃO DO OPENAPI
+O contrato prevê a exportação do documento OpenAPI gerado pela API para:
+`contracts/openapi/pontovoz-v1.json`
+Implemente uma maneira simples e reproduzível de exportar o documento real.
+A exportação deve:
+
+* Ser gerada a partir da API em execução.
+* Conter somente os endpoints efetivamente implementados.
+* Produzir JSON válido.
+* Não conter segredos ou informações locais indevidas.
+* Ser reproduzível por outro integrante.
+* Estar documentada no README.
+
+Não fabrique manualmente operações inexistentes para completar o documento.
+O arquivo representa o estado implementado até B6 e será atualizado quando os endpoints B7 a B9 estiverem prontos.
+10. CORS
+O contrato prevê origens permitidas configuráveis em:
+`Cors:OrigensPermitidas`
+Prepare a configuração de CORS necessária à integração futura com o frontend do totem.
+Regras:
+
+* Usar uma lista explícita de origens permitidas.
+* Não liberar arbitrariamente todas as origens.
+* Não inventar qual será a URL definitiva do frontend.
+* Manter o comportamento seguro quando nenhuma origem estiver configurada.
+* Documentar como a equipe deverá informar as origens.
+* Não adicionar autenticação às rotas públicas.
+
+Teste uma origem permitida e uma não permitida em ambiente isolado.
+Não habilite credenciais de forma indiscriminada.
+11. TESTES HTTP OBRIGATÓRIOS
+Preserve todos os 463 testes existentes.
+Crie testes de integração HTTP usando WebApplicationFactory e SQLite isolado.
+Testes mínimos:
+
+1. GET /health com banco saudável.
+2. GET /api/v1/paradas retorna 200.
+3. Busca de parada pelo codigoExterno.
+4. Busca de parada sem acentos.
+5. Paginação padrão.
+6. Paginação inválida retorna 400.
+7. Página além do total retorna 200 com lista vazia.
+8. GET /api/v1/paradas/{id} existente.
+9. GET /api/v1/paradas/{id} inexistente retorna 404.
+10. ID inválido na rota não provoca 500.
+11. GET /api/v1/linhas retorna 200.
+12. Filtro de linhas funcionando.
+13. GET /api/v1/destinos retorna 200.
+14. Filtro de destinos funcionando.
+15. GET /api/v1/paradas/{id}/ultimas-passagens retorna 200.
+16. Linha sem registro.
+17. Passagem simulada.
+18. Passagem manual.
+19. Registro desatualizado.
+20. Filtro linhaId válido.
+21. Filtro linhaId inválido retorna 400.
+22. Linha inexistente retorna 404.
+23. Linha existente que não atende a parada retorna 422.
+24. Enums serializados como texto.
+25. Campos null presentes na resposta.
+26. Content-Type do JSON de sucesso.
+27. Content-Type do ProblemDetails.
+28. Campo codigo nos erros.
+29. Campo traceId nos erros.
+30. Agrupamento de erros de validação.
+31. Erro inesperado convertido em 500 sem dados sensíveis.
+32. Cancelamento não transformado em 500.
+33. OpenAPI lista somente as operações implementadas.
+34. Scalar carrega corretamente.
+35. CORS de origem permitida e não permitida.
+36. Nenhum endpoint administrativo ou de previsão aparece como implementado antecipadamente.
+
+Os testes devem consultar a API de verdade.
+Não substitua os testes HTTP por chamadas diretas aos services.
+Utilize bancos de teste isolados e não altere o banco local de desenvolvimento.
+Não crie testes apenas para aumentar a contagem.
+12. VALIDAÇÃO DO FORMATO DAS RESPOSTAS
+Compare as respostas HTTP com os exemplos do contrato.
+Utilize como referência:
+
+* paradas-listagem.json.
+* paradas-busca-codigo.json.
+* parada-detalhe.json.
+* destinos-busca.json.
+* ultimas-passagens.json.
+* erro-validacao.json.
+* erro-parada-nao-encontrada.json.
+* Exemplo de GET /linhas no api-v1.md.
+
+Considere que IDs internos podem variar entre bancos.
+Não altere silenciosamente o contrato para fazer o código passar.
+Se houver diferenças legítimas de IDs ou horários dinâmicos, normalize apenas esses campos nas comparações de teste, documentando a justificativa.
+Verifique especialmente se os nomes e tipos das propriedades permanecem idênticos.
+13. VALIDAÇÕES FINAIS
+Execute:
+
+* dotnet restore.
+* dotnet build.
+* dotnet test.
+* dotnet ef migrations list.
+* dotnet ef migrations has-pending-model-changes.
+
+Confirme:
+
+* Quantidade real de testes.
+* Testes aprovados.
+* Testes falhos.
+* Testes ignorados.
+* Código de saída.
+* Avisos e erros da compilação.
+* Banco de dados preservado.
+* Compatibilidade com o contrato.
+* Funcionamento da API real.
+
+Teste via HTTP:
+
+* GET /health.
+* GET /api/v1/paradas.
+* GET /api/v1/linhas.
+* GET /api/v1/destinos.
+* GET /api/v1/paradas/{id}.
+* GET /api/v1/paradas/{id}/ultimas-passagens.
+* GET /openapi/v1.json.
+* /scalar/.
+
+Utilize IDs obtidos do próprio banco ou da resposta da API, sem supor IDs numéricos fixos.
+Teste também ao menos um cenário de erro HTTP.
+Se alguma verificação falhar, investigue e corrija antes de declarar a etapa concluída.
+14. DOCUMENTAÇÃO E EVIDÊNCIAS
+Atualize backend/README.md com:
+
+* Lista dos endpoints B6.
+* Comandos para rodar a API.
+* URL base local.
+* URL do Scalar.
+* Exemplos de requisições.
+* Como identificar a parada pelo codigoExterno.
+* Como configurar CORS.
+* Como reproduzir a exportação OpenAPI.
+* Como executar os testes.
+* O que já funciona e o que ainda está pendente.
+
+Crie:
+`backend/docs/evidencias/B6-web-api.md`
+Inclua somente evidências reais:
+
+* Respostas HTTP.
+* Erros tratados.
+* OpenAPI gerado.
+* Interface Scalar funcionando.
+* Testes automatizados.
+* Resultados de build.
+
+Registre este prompt em prompts.md.
+Preserve o registro fiel do uso de IA exigido pelo documento geral da Global Solution.
+Não altere o histórico para atribuir implementação humana inexistente.
+Não insira banners promocionais ou assinaturas automáticas de ferramentas no código.
+15. CONTROLE DO GIT
+Não faça commit.
+Não execute git push.
+Não reescreva histórico.
+Não utilize force push.
+Não modifique arquivos que não sejam necessários ao B6.
+Deixe todas as alterações locais aguardando auditoria.
+16. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo simples do que foi implementado.
+B. Arquivos criados e alterados.
+C. Controllers e rotas implementadas.
+D. Mapeamento dos erros HTTP e ProblemDetails.
+E. Configuração de JSON e CORS.
+F. Resultado dos testes HTTP, incluindo a contagem total.
+G. Resultado do build.
+H. Evidências do OpenAPI e Scalar.
+I. Resultado da comparação com os exemplos do contrato.
+J. Comandos utilizados para executar a API.
+K. Estado do Git.
+L. Critérios da FIAP implementados e ainda pendentes.
+M. Problemas identificados e soluções.
+N. Pendências para B7.
+Não implemente operações administrativas, provedores de previsão ou alternativas.
+Não faça commit nem push.
+Execute somente o B6 e pare aguardando a próxima auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a ferramenta criou a camada
+HTTP pública do B6:
+- **Controllers:** `ParadasController`, `LinhasController` e `DestinosController`, com as rotas
+  `GET /api/v1/paradas`, `/paradas/{id}`, `/linhas`, `/destinos` e
+  `/paradas/{id}/ultimas-passagens`. Eles recebem as interfaces dos services, repassam o
+  `CancellationToken` e não têm LINQ, `DbContext` nem validação repetida; os ids da rota usam
+  `int:min(1)`.
+- **Erros:** tratamento central em `Middleware/` (`IExceptionHandler` e uma tabela única de
+  conversão), com ProblemDetails 400, 404, 422 e 500 em `application/problem+json`, `codigo` e
+  `traceId`; erros de model binding também saem como 400 `RequisicaoInvalida`; o 500 não expõe
+  detalhes internos; o cancelamento pelo cliente não vira 500.
+- **JSON, CORS e OpenAPI:** o `JsonContrato` do B5 nas respostas; CORS só para as origens de
+  `Cors:OrigensPermitidas` (lista vazia por padrão, só `GET`, sem credenciais); OpenAPI e Scalar
+  com os seis endpoints implementados, e o script `backend/scripts/exportar-openapi.ps1`, que
+  gerou `contracts/openapi/pontovoz-v1.json` a partir da API em execução.
+- **Testes:** 56 testes HTTP com `WebApplicationFactory` e SQLite isolado, que comparam as
+  respostas com os exemplos do contrato (sem os ids internos e o `traceId`). No total, 519 testes
+  passaram. A API também foi verificada pelo `curl` e pelo Scalar no banco de desenvolvimento, sem
+  alterá-lo.
+- **Documentação:** README do backend, `contracts/api-v1.md` e `contracts/README.md` (estado das
+  rotas e conferências do B6) e `backend/docs/evidencias/B6-web-api.md`. O resumo ficou
+  registrado como pendente para o B9, sem rota antecipada.
+- **Git:** não houve commit.
+
+<a id="prompt-22"></a>
+
+### Prompt 22 — Bloco B6.1: auditoria final e publicação da Web API pública
+
+**Data:** 07/11/2026 · **Tipo:** Auditoria, correção e publicação · **Commit:** `feat: implement public REST API and OpenAPI documentation`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B6.1 — AUDITORIA FINAL E PUBLICAÇÃO DA WEB API PÚBLICA
+O relatório do B6 foi analisado.
+A implementação está aprovada em princípio, mas precisamos realizar três verificações finais e publicar o código somente se todas as validações passarem.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`314cb27523bf22c26e5b0184f05c04b071efc4eb`
+Você é responsável por executar as verificações, correções pontuais, testes, documentação e publicação.
+Não inicie B7.
+1. Prioridade absoluta
+Preserve os requisitos oficiais da disciplina C# Software Development:
+
+* POO: 3,0 pontos.
+* Web API: 2,5 pontos.
+* EF Core + LINQ: 1,5 ponto.
+* Async/Await: 1,0 ponto.
+* Qualidade do código: 2,0 pontos.
+
+Também preserve interfaces, injeção de dependência, testes unitários, documentação dos endpoints, README, evidências e integração com CitizenTech.
+Não implemente funcionalidades fora do escopo aprovado.
+2. Conferência inicial
+Verifique:
+
+* Diretório correto.
+* Branch main.
+* Sincronização com origin/main.
+* Alterações locais do B6.
+* Cinco endpoints públicos implementados.
+* HealthController preservado.
+* Tratamento centralizado de erros.
+* JSON e CORS.
+* OpenAPI e Scalar.
+* Testes HTTP.
+* Evidências.
+
+Não sobrescreva arquivos sem necessidade.
+3. Correção do README principal
+O relatório informa que o README da raiz ainda afirma que só existe o endpoint /health.
+Atualize essa informação para refletir o estado real do B6.
+O README deverá distinguir:
+Implementado:
+
+* Paradas.
+* Detalhe de parada.
+* Linhas.
+* Destinos.
+* Últimas passagens.
+* Health check.
+* Documentação OpenAPI/Scalar.
+
+Planejado para os próximos blocos:
+
+* Operações administrativas.
+* Previsões de chegada.
+* Alternativas de deslocamento.
+* Resumo agregado do totem.
+
+Preserve a ficha CitizenTech, as instruções relevantes e a estrutura já existente.
+Não invente nomes, RMs ou informações da equipe.
+4. Auditoria do ProblemDetails e código dos erros
+O relatório informa que rotas inexistentes ou incompatíveis com a restrição de rota devolvem 404 sem o campo `codigo`.
+Leia o contrato completo, o catálogo de erros e o tratamento centralizado existente.
+Confirme se esse comportamento respeita a política global de ProblemDetails aprovada no B1.
+Se o contrato exigir `codigo` em todos os erros, corrija o tratamento das rotas não encontradas, utilizando um código estável e documentado, sem expor informações internas.
+Se o contrato definir expressamente outra política para rotas sem correspondência, preserve-a e justifique a decisão.
+Não altere silenciosamente a semântica do contrato.
+Teste os casos:
+
+* /api/v1/paradas/abc
+* /api/v1/paradas/0
+* /api/v1/rota-inexistente
+* Parada inexistente com ID válido
+* Erro de validação de query
+
+Confirme status, Content-Type e campos efetivamente devolvidos.
+5. Auditoria das alterações contratuais do B6
+Examine todas as modificações realizadas em:
+
+* contracts/api-v1.md
+* contracts/README.md
+* contracts/openapi/pontovoz-v1.json
+
+Compare com a versão publicada no B5.
+Confirme que:
+
+* Nenhuma funcionalidade foi removida.
+* Nenhum endpoint planejado foi apresentado como implementado.
+* Nenhum campo obrigatório foi alterado sem justificativa.
+* As atualizações de CORS e ProblemDetails refletem o comportamento real.
+* O OpenAPI exportado corresponde exatamente à API em execução.
+* As rotas futuras permanecem documentadas como planejadas.
+
+Caso encontre divergência, aplique apenas a correção necessária e registre-a.
+6. Testes e validação
+Execute novamente:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef migrations has-pending-model-changes
+
+O B6 informou 519 testes aprovados. Confirme o total real.
+Execute testes HTTP de:
+
+* GET /health.
+* GET /api/v1/paradas.
+* GET /api/v1/linhas.
+* GET /api/v1/destinos.
+* GET /api/v1/paradas/{id}.
+* GET /api/v1/paradas/{id}/ultimas-passagens.
+* GET /openapi/v1.json.
+* Interface Scalar.
+* Pelo menos um caso de 400, 404, 422 e 500 em ambiente de testes isolado.
+
+Confirme também:
+
+* Nenhum banco de desenvolvimento foi alterado indevidamente.
+* Nenhum endpoint B7, B8 ou B9 foi antecipado.
+* As respostas JSON continuam compatíveis com o contrato.
+* O verificador de contratos continua passando.
+* Nenhum segredo aparece nas respostas de erro.
+
+7. Documentação e registro acadêmico
+Atualize a evidência B6 somente com verificações realmente executadas.
+Registre esta solicitação em prompts.md, preservando o histórico fiel e a organização já aprovada.
+Não atribua implementação manual a integrantes que não a realizaram.
+Não adicione assinaturas promocionais de ferramentas ao código ou aos commits.
+8. Auditoria de segurança
+Inspecione o diff completo.
+Não publique:
+
+* Arquivos de banco SQLite.
+* Senhas ou tokens.
+* Credenciais.
+* Arquivos temporários.
+* Binários.
+* Logs sensíveis.
+* Capturas contendo dados privados.
+
+9. Commit e push autorizados
+Se todas as verificações passarem, crie o commit:
+`feat: implement public REST API and OpenAPI documentation`
+Confirme a mensagem gravada antes do push.
+Preserve a autoria legítima e o e-mail noreply configurado.
+Não acrescente trailer automático de ferramenta.
+Não reescreva commits anteriores.
+Execute push normal para origin/main.
+Não utilize force push.
+Se encontrar uma falha relevante que não possa ser corrigida com segurança, interrompa a publicação e explique o bloqueio.
+10. Relatório final obrigatório
+Apresente objetivamente:
+
+1. Resultado das três conferências finais.
+2. Correções realizadas.
+3. Endpoints efetivamente publicados.
+4. Total real de testes aprovados.
+5. Resultado de build, EF Core e verificador.
+6. Confirmação do funcionamento HTTP e Scalar.
+7. Hash e mensagem do commit.
+8. Resultado do push.
+9. Estado final de main e origin/main.
+10. Requisitos da FIAP já atendidos e pendentes.
+11. Pendências para o B7.
+
+Não implemente o B7. Pare após publicar o B6 e aguarde a próxima revisão.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code fez as três
+conferências pedidas:
+- **README da raiz:** o status, que ainda descrevia o B0, passou a separar o que está
+  implementado (paradas, detalhe, linhas, destinos, últimas passagens, health check e
+  OpenAPI/Scalar) do que está planejado (operações administrativas, previsões, alternativas e
+  resumo). A ficha CitizenTech e os campos de integrantes ficaram como estavam.
+- **`codigo` nos erros:** a seção 7 do contrato define todo erro com `codigo`, e o 404 de rota
+  sem correspondência e o 405 saíam sem ele. Foram acrescentados ao catálogo
+  `RotaNaoEncontrada` (404) e `MetodoNaoPermitido` (405), com teste e registro no histórico do
+  contrato; nenhum código existente mudou.
+- **Contrato e OpenAPI:** a comparação com o B5 não encontrou endpoint removido, campo alterado
+  nem rota planejada apresentada como implementada; os exemplos e o verificador não mudaram. A
+  linha de versão do `api-v1.md` foi corrigida para citar os códigos novos. O OpenAPI gerado pela
+  API é igual ao arquivo exportado.
+
+Repetiu `dotnet restore`, `dotnet build`, `dotnet test` (521 testes aprovados), os comandos
+`dotnet ef` e o verificador do contrato; consultou a API real e o Scalar sem alterar o banco de
+desenvolvimento; atualizou a evidência do B6 e publicou o B6 com o commit `feat: implement public REST API and OpenAPI documentation`, sem trailer,
+e push normal.

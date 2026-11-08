@@ -29,6 +29,9 @@ internal static partial class ExemplosContrato
         throw new DirectoryNotFoundException("Pasta contracts/ não encontrada acima do diretório dos testes.");
     });
 
+    /// <summary>Caminho de um arquivo dentro de <c>contracts/</c> (por exemplo, <c>openapi/pontovoz-v1.json</c>).</summary>
+    public static string CaminhoNoContrato(string relativo) => Path.Combine(PastaContratos.Value, relativo);
+
     public static JsonNode Exemplo(string arquivo) =>
         JsonNode.Parse(File.ReadAllText(Path.Combine(PastaContratos.Value, "exemplos", arquivo)))!;
 
@@ -45,10 +48,14 @@ internal static partial class ExemplosContrato
         JsonSerializer.SerializeToNode(dto, JsonContrato.Opcoes)!;
 
     /// <summary>Compara o DTO serializado com o exemplo, campo a campo, sem os ids internos.</summary>
-    public static void AssertIgualAoExemplo<T>(JsonNode exemplo, T dto)
+    public static void AssertIgualAoExemplo<T>(JsonNode exemplo, T dto) =>
+        AssertJsonIgualAoExemplo(exemplo, Serializar(dto));
+
+    /// <summary>Compara um JSON já pronto (por exemplo, o corpo de uma resposta HTTP) com o exemplo, sem os ids internos.</summary>
+    public static void AssertJsonIgualAoExemplo(JsonNode exemplo, JsonNode json)
     {
         JsonNode esperado = SemIds(exemplo.DeepClone());
-        JsonNode obtido = SemIds(Serializar(dto));
+        JsonNode obtido = SemIds(json.DeepClone());
         Assert.True(JsonNode.DeepEquals(esperado, obtido), $"Diferente do contrato.\nEsperado: {esperado.ToJsonString()}\nObtido:   {obtido.ToJsonString()}");
     }
 

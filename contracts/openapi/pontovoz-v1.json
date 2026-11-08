@@ -1,0 +1,1184 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "PontoVoz API",
+    "description": "Consultas públicas do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados; previsões, alternativas, resumo e rotas administrativas estão planejados em contracts/api-v1.md.",
+    "version": "v1"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5080/"
+    }
+  ],
+  "paths": {
+    "/api/v1/destinos": {
+      "get": {
+        "tags": [
+          "Destinos"
+        ],
+        "summary": "Destinos ativos pelo nome, sem diferenciar maiúsculas e acentos, ordenados pelo nome.",
+        "operationId": "BuscarDestinos",
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "description": "Trecho do nome do destino, de 2 a 60 caracteres (por exemplo, \"norte\").",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Página, a partir de 1. Padrão: 1.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tamanhoPagina",
+            "in": "query",
+            "description": "Itens por página, de 1 a 50. Padrão: 20.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaDtoOfDestinoDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaudeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/linhas": {
+      "get": {
+        "tags": [
+          "Linhas"
+        ],
+        "summary": "Linhas ativas, por código, letreiro ou terminais, ordenadas pelo código.",
+        "operationId": "BuscarLinhas",
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "description": "Trecho do código, do letreiro ou de um terminal, de 2 a 60 caracteres.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Página, a partir de 1. Padrão: 1.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tamanhoPagina",
+            "in": "query",
+            "description": "Itens por página, de 1 a 50. Padrão: 20.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaDtoOfLinhaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paradas": {
+      "get": {
+        "tags": [
+          "Paradas"
+        ],
+        "summary": "Busca paradas ativas por nome ou código, ou identifica a parada do totem pelo `codigoExterno`.",
+        "operationId": "BuscarParadas",
+        "parameters": [
+          {
+            "name": "termo",
+            "in": "query",
+            "description": "Trecho do nome ou do código, de 2 a 60 caracteres, sem diferenciar maiúsculas e acentos.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "codigoExterno",
+            "in": "query",
+            "description": "Código da parada, exato e sem diferenciar maiúsculas (por exemplo, SIM-P001).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pagina",
+            "in": "query",
+            "description": "Página, a partir de 1. Padrão: 1.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "tamanhoPagina",
+            "in": "query",
+            "description": "Itens por página, de 1 a 50. Padrão: 20.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginaDtoOfParadaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paradas/{id}": {
+      "get": {
+        "tags": [
+          "Paradas"
+        ],
+        "summary": "Detalhe de uma parada ativa, com as linhas ativas que a atendem.",
+        "operationId": "ObterParada",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id interno da parada (inteiro ≥ 1).",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParadaDetalheDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paradas/{id}/ultimas-passagens": {
+      "get": {
+        "tags": [
+          "Paradas"
+        ],
+        "summary": "Última passagem registrada de cada linha da parada, com nível de confirmação e desatualização.",
+        "operationId": "ObterUltimasPassagens",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id interno da parada (inteiro ≥ 1).",
+            "required": true,
+            "schema": {
+              "minimum": 1,
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "linhaId",
+            "in": "query",
+            "description": "Opcional: limita a uma linha que atende a parada.",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UltimasPassagensParadaDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpValidationProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AvisoDto": {
+        "required": [
+          "codigo",
+          "mensagem"
+        ],
+        "type": "object",
+        "properties": {
+          "codigo": {
+            "type": "string"
+          },
+          "mensagem": {
+            "type": "string"
+          }
+        },
+        "description": "`Aviso` (seção 3.2)."
+      },
+      "CoordenadaDto": {
+        "required": [
+          "latitude",
+          "longitude"
+        ],
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "longitude": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "`Coordenada` (seção 3.3)."
+      },
+      "DestinoDto": {
+        "required": [
+          "id",
+          "nome",
+          "tipo",
+          "origem",
+          "dadosSimulados"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "tipo": {
+            "$ref": "#/components/schemas/TipoDestino"
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemDado"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          }
+        },
+        "description": "`Destino` (seção 3.5)."
+      },
+      "HttpValidationProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LinhaDto": {
+        "required": [
+          "id",
+          "codigo",
+          "letreiro",
+          "terminalPrincipal",
+          "terminalSecundario",
+          "sentido",
+          "origem",
+          "dadosSimulados"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigo": {
+            "type": "string"
+          },
+          "letreiro": {
+            "type": "string"
+          },
+          "terminalPrincipal": {
+            "type": "string"
+          },
+          "terminalSecundario": {
+            "type": "string"
+          },
+          "sentido": {
+            "$ref": "#/components/schemas/SentidoLinha"
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemDado"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          }
+        },
+        "description": "`Linha` (seção 3.4)."
+      },
+      "NivelConfirmacao": {
+        "enum": [
+          "Previsao",
+          "ObservacaoSimulada",
+          "RegistroManual",
+          "VerificadaFonteConfiavel"
+        ],
+        "description": "Quanto uma informação de chegada ou de passagem foi confirmada."
+      },
+      "OrigemDado": {
+        "enum": [
+          "Simulado",
+          "CadastroAdministrativo",
+          "OlhoVivo"
+        ],
+        "description": "Método pelo qual um dado entrou no sistema. Não indica se ele é fictício nem verificado."
+      },
+      "PaginaDtoOfDestinoDto": {
+        "required": [
+          "itens",
+          "pagina",
+          "tamanhoPagina",
+          "totalItens",
+          "totalPaginas"
+        ],
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DestinoDto"
+            }
+          },
+          "pagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalItens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalPaginas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "Envelope `Pagina&lt;T&gt;` (seção 3.1)."
+      },
+      "PaginaDtoOfLinhaDto": {
+        "required": [
+          "itens",
+          "pagina",
+          "tamanhoPagina",
+          "totalItens",
+          "totalPaginas"
+        ],
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinhaDto"
+            }
+          },
+          "pagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalItens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalPaginas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "Envelope `Pagina&lt;T&gt;` (seção 3.1)."
+      },
+      "PaginaDtoOfParadaDto": {
+        "required": [
+          "itens",
+          "pagina",
+          "tamanhoPagina",
+          "totalItens",
+          "totalPaginas"
+        ],
+        "type": "object",
+        "properties": {
+          "itens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParadaDto"
+            }
+          },
+          "pagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "tamanhoPagina": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalItens": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalPaginas": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "Envelope `Pagina&lt;T&gt;` (seção 3.1)."
+      },
+      "ParadaDetalheDto": {
+        "required": [
+          "id",
+          "codigoExterno",
+          "nome",
+          "endereco",
+          "coordenada",
+          "origem",
+          "dadosSimulados",
+          "linhas"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigoExterno": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordenada": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CoordenadaDto"
+              }
+            ]
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemDado"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          },
+          "linhas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinhaDto"
+            }
+          }
+        },
+        "description": "`ParadaDetalhe`: `Parada` mais as linhas ativas que a atendem (seções 3.3 e 4.2)."
+      },
+      "ParadaDto": {
+        "required": [
+          "id",
+          "codigoExterno",
+          "nome",
+          "endereco",
+          "coordenada",
+          "origem",
+          "dadosSimulados"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigoExterno": {
+            "type": "string"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "endereco": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coordenada": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CoordenadaDto"
+              }
+            ]
+          },
+          "origem": {
+            "$ref": "#/components/schemas/OrigemDado"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          }
+        },
+        "description": "`Parada` (seção 3.3)."
+      },
+      "PassagemDto": {
+        "required": [
+          "id",
+          "linhaId",
+          "codigoLinha",
+          "letreiro",
+          "observadaEm",
+          "registradaEm",
+          "minutosDesdeObservacao",
+          "desatualizada",
+          "prefixoVeiculo",
+          "nivelConfirmacao",
+          "verificada",
+          "oficialSptrans",
+          "origemRegistro",
+          "dadosSimulados",
+          "aviso"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "linhaId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigoLinha": {
+            "type": "string"
+          },
+          "letreiro": {
+            "type": "string"
+          },
+          "observadaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "registradaEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "minutosDesdeObservacao": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "desatualizada": {
+            "type": "boolean"
+          },
+          "prefixoVeiculo": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nivelConfirmacao": {
+            "$ref": "#/components/schemas/NivelConfirmacao"
+          },
+          "verificada": {
+            "type": "boolean"
+          },
+          "oficialSptrans": {
+            "type": "boolean"
+          },
+          "origemRegistro": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          },
+          "aviso": {
+            "$ref": "#/components/schemas/AvisoDto"
+          }
+        },
+        "description": "`Passagem` (seção 4.6). Instantes no horário de São Paulo."
+      },
+      "ProblemDetails": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "title": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "detail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "instance": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ReferenciaLinhaDto": {
+        "required": [
+          "linhaId",
+          "codigoLinha",
+          "letreiro"
+        ],
+        "type": "object",
+        "properties": {
+          "linhaId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigoLinha": {
+            "type": "string"
+          },
+          "letreiro": {
+            "type": "string"
+          }
+        },
+        "description": "`ReferenciaLinha`, a forma curta da linha (seção 3.4)."
+      },
+      "SaudeResponse": {
+        "required": [
+          "status",
+          "escopo",
+          "verificadoEm",
+          "verificacoes"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "escopo": {
+            "type": "string"
+          },
+          "verificadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "verificacoes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VerificacaoSaudeResponse"
+            }
+          }
+        }
+      },
+      "SentidoLinha": {
+        "enum": [
+          "PrincipalParaSecundario",
+          "SecundarioParaPrincipal"
+        ],
+        "description": "Sentido de um cadastro de linha. Cada sentido é um cadastro separado."
+      },
+      "TipoDestino": {
+        "enum": [
+          "Terminal",
+          "Estacao",
+          "PontoReferencia"
+        ]
+      },
+      "UltimasPassagensParadaDto": {
+        "required": [
+          "paradaId",
+          "codigoExternoParada",
+          "nomeParada",
+          "dadosSimulados",
+          "consultadoEm",
+          "limiteDesatualizacaoMinutos",
+          "passagens",
+          "linhasSemRegistro",
+          "avisos"
+        ],
+        "type": "object",
+        "properties": {
+          "paradaId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "codigoExternoParada": {
+            "type": "string"
+          },
+          "nomeParada": {
+            "type": "string"
+          },
+          "dadosSimulados": {
+            "type": "boolean"
+          },
+          "consultadoEm": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "limiteDesatualizacaoMinutos": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passagens": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PassagemDto"
+            }
+          },
+          "linhasSemRegistro": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenciaLinhaDto"
+            }
+          },
+          "avisos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AvisoDto"
+            }
+          }
+        },
+        "description": "`UltimasPassagensParada` (seção 4.6)."
+      },
+      "VerificacaoSaudeResponse": {
+        "required": [
+          "nome",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Destinos"
+    },
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Linhas"
+    },
+    {
+      "name": "Paradas"
+    }
+  ]
+}

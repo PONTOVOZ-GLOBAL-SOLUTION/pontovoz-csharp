@@ -1,15 +1,22 @@
 # Contrato REST v1 do PontoVoz
 
-**Versão do documento:** B1.3, 07/11/2026. Ele será congelado no bloco B6 (12/11/2026).
+**Versão do documento:** B6.1, 07/11/2026. As regras são as do B1.3, com dois códigos de erro
+acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 atualizou o
+estado da implementação e registrou as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
+O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 
 > **O que já existe e o que é planejado**
 >
-> - **Implementado e testado:** apenas `GET /health`.
-> - **Planejado:** todos os endpoints em `/api/v1`. Eles **ainda não existem** na API.
->   Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado,
->   não resultados de execução.
+> - **Implementado e testado (B6):** `GET /health`, `GET /api/v1/paradas`,
+>   `GET /api/v1/paradas/{id}`, `GET /api/v1/linhas`, `GET /api/v1/destinos` e
+>   `GET /api/v1/paradas/{id}/ultimas-passagens`.
+> - **Planejado:** previsões (B8), alternativas (B9), resumo (B9) e as rotas administrativas
+>   (B7). Elas **ainda não existem** na API e respondem 404 `RotaNaoEncontrada`.
+> - Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado. Os das
+>   rotas implementadas são comparados com as respostas HTTP reais nos testes do backend; os
+>   das rotas planejadas ainda não são resultados de execução.
 > - O documento OpenAPI gerado pela API (`/openapi/v1.json`) descreve apenas o que já foi
->   implementado. Hoje ele contém só o `/health`.
+>   implementado. A cópia exportada está em [`openapi/pontovoz-v1.json`](openapi/pontovoz-v1.json).
 > - Os horários de **10/11/2026** que aparecem nos exemplos são **fixos e só ilustrativos**.
 >   A aplicação calcula todos os horários a partir do relógio do servidor (seção [11](#11-requisitos-para-os-próximos-blocos)).
 
@@ -177,8 +184,9 @@ oficialmente confirmada.**
 - **Rotas públicas:** só `GET`, sem autenticação, para o totem e o componente de voz/IA.
 - **Rotas administrativas:** prefixo `/api/v1/admin`, protegidas pelo cabeçalho
   `X-PontoVoz-Admin-Key` (seção [5](#5-operações-administrativas)).
-- **CORS:** as origens do frontend serão configuradas em `Cors:OrigensPermitidas` (B6).
-  A equipe precisa informar a origem que usará em desenvolvimento.
+- **CORS (B6):** as origens do frontend ficam na lista `Cors:OrigensPermitidas`. Só as origens
+  listadas são liberadas, só para `GET` e sem credenciais. Com a lista vazia (o padrão),
+  nenhuma origem externa é liberada. A equipe ainda precisa informar a origem que usará.
 
 ---
 
@@ -193,7 +201,7 @@ quando ainda tem informação útil, com status explícito e avisos estruturados
 | Busca ou listagem sem resultados | **200**, `itens: []` |
 | Página além do total | **200**, `itens: []` |
 | Recurso por `id` inexistente ou **inativo** (rotas públicas) | **404**, ProblemDetails |
-| `id` não numérico ou menor que 1 na rota | **404**, a rota não corresponde |
+| `id` não numérico ou menor que 1 na rota | **404**, a rota não corresponde (`RotaNaoEncontrada`) |
 | Parâmetro com tipo, formato ou faixa inválidos | **400**, ProblemDetails com `errors` |
 | `linhaId` existe, mas não atende a parada | **422**, `LinhaNaoAtendeParada` |
 | Parada sem linhas associadas | **200**, listas vazias e aviso `ParadaSemLinhas`. O provedor não é consultado. |
@@ -680,7 +688,7 @@ estejam cadastradas. Nenhuma rota é inventada.
 | Erros | **404** `ParadaNaoEncontrada` |
 | Acesso | Público |
 | Dependências | Os mesmos serviços de 4.2, 4.5 e 4.6. Provedor e banco são consultados em paralelo com `Task.WhenAll`; as consultas ao banco são feitas em sequência no mesmo `DbContext`. |
-| Bloco | B6 (parcial) e B9 (completo) |
+| Bloco | B9. O planejamento previa uma parte no B6, que não foi antecipada: a rota só será criada com todas as partes (previsões do B8 e alternativas do B9). |
 
 **`ResumoParada`**
 
@@ -919,7 +927,7 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 
 | Campo | Descrição |
 |---|---|
-| `type` | Link padrão do ASP.NET Core para o status, apontando para a seção da RFC 9110. O valor exato será conferido no B6. **Não use para decidir lógica.** |
+| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `https://tools.ietf.org/html/rfc9110#section-15.5.5` (404), `https://tools.ietf.org/html/rfc4918#section-11.2` (422) e `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500). **Não use para decidir lógica.** |
 | `title` | Resumo legível |
 | `status` | Código HTTP |
 | `detail` | Explicação do caso, sem dados internos nem rastros de pilha |
@@ -940,6 +948,8 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 | `LinhaNaoAtendeParada` | 422 | A linha existe, mas não atende a parada |
 | `ParadaInativa` | 422 | Operação administrativa que exige parada ativa |
 | `LinhaInativa` | 422 | Operação administrativa que exige linha ativa |
+| `RotaNaoEncontrada` | 404 | O caminho não corresponde a nenhuma rota, inclusive um `id` não numérico ou menor que 1 (incluído no B6.1) |
+| `MetodoNaoPermitido` | 405 | A rota existe, mas não aceita o método usado; os aceitos vêm no cabeçalho `Allow` (incluído no B6.1) |
 | `ErroInterno` | 500 | Erro inesperado da API |
 | `ProvedorPrevisoesIndisponivel` | 503 | Só em `GET /previsoes`: o provedor falhou, não respondeu no prazo ou está desligado |
 
@@ -950,6 +960,21 @@ O `traceId` dos exemplos é o valor ilustrativo da especificação W3C Trace Con
 
 Diferença entre **400** e **422**: 400 é um valor mal formado ou fora da faixa, verificado sem
 consultar o banco. 422 é uma requisição bem formada que contradiz o estado dos dados.
+
+Conferido no B6:
+
+- O 400 de validação não tem `detail`; as mensagens ficam em `errors`, como no exemplo. Um valor
+  que não é do tipo esperado na query (`pagina=abc`) também devolve 400 `RequisicaoInvalida`,
+  com a mensagem "O valor informado para pagina é inválido." e sem repetir o valor recebido.
+- Todo erro tem `codigo`. Um caminho que não corresponde a nenhuma rota, como
+  `/api/v1/paradas/abc`, `/api/v1/paradas/0` (restrição `int:min(1)`) ou
+  `/api/v1/rota-inexistente`, devolve **404** `RotaNaoEncontrada`, com `title` "Rota não
+  encontrada". Um método não aceito (por exemplo, `POST /api/v1/paradas`) devolve **405**
+  `MetodoNaoPermitido`. Os 404 `ParadaNaoEncontrada` e `LinhaNaoEncontrada` são os de um `id`
+  válido que não existe ou está inativo. As rotas ainda não implementadas (B7 a B9) também
+  respondem `RotaNaoEncontrada`.
+- O 500 tem sempre `title` "Erro interno", `codigo` `ErroInterno` e o `detail` genérico
+  "Ocorreu um erro inesperado. Tente novamente mais tarde."; o erro real fica só no log.
 
 ---
 
@@ -983,14 +1008,14 @@ mostrar a `mensagem` como está.
 
 | # | Método | Rota | Acesso | Estado |
 |---|---|---|---|---|
-| 1 | GET | `/api/v1/paradas` | Público | Planejado (B6) |
-| 2 | GET | `/api/v1/paradas/{id}` | Público | Planejado (B6) |
-| 3 | GET | `/api/v1/linhas` | Público | Planejado (B6) |
-| 4 | GET | `/api/v1/destinos` | Público | Planejado (B6) |
+| 1 | GET | `/api/v1/paradas` | Público | **Implementado (B6)** |
+| 2 | GET | `/api/v1/paradas/{id}` | Público | **Implementado (B6)** |
+| 3 | GET | `/api/v1/linhas` | Público | **Implementado (B6)** |
+| 4 | GET | `/api/v1/destinos` | Público | **Implementado (B6)** |
 | 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | Planejado (B8) |
-| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | Planejado (B6) |
+| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado (B6)** |
 | 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | Planejado (B9) |
-| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | Planejado (B6 parcial, B9 completo) |
+| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | Planejado (B9; a parte prevista para o B6 não foi antecipada) |
 | 9 | POST | `/api/v1/admin/paradas` | Chave | Planejado (B7) |
 | 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | Planejado (B7) |
 | 11 | POST | `/api/v1/admin/linhas` | Chave | Planejado (B7) |
@@ -999,7 +1024,9 @@ mostrar a `mensagem` como está.
 | — | GET | `/health` | Público | **Implementado (B0; verificação do banco no B3)** |
 
 Por que as rotas não entram em conflito:
-- `{id}` e `{linhaId}` terão a restrição `int:min(1)`. Um texto nunca é confundido com um `id`.
+- `{id}` e `{linhaId}` têm a restrição `int:min(1)` (aplicada no B6 às rotas implementadas). Um
+  texto nunca é confundido com um `id`; o que não corresponde ao padrão recebe 404
+  `RotaNaoEncontrada` (seção 7).
 - Os sufixos de `/paradas/{id}/...` (`previsoes`, `ultimas-passagens`, `alternativas`,
   `resumo`) são literais diferentes entre si.
 - `/api/v1/admin/...` começa com o literal `admin`, que não é capturado por nenhuma rota pública.

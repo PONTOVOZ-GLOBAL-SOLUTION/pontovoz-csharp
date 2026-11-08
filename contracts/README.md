@@ -3,10 +3,12 @@
 Esta pasta reúne os contratos que permitem à interface do totem e ao componente de voz e IA
 consumir o backend C# sem depender de detalhes internos dele.
 
-> **Estado atual (Bloco B1.3):** o contrato v1 está **consolidado** e serve de base para a implementação.
-> Só o `GET /health` está implementado. Os endpoints de `/api/v1` são **planejados** e
-> passam a existir a partir do bloco B6. Os JSON de [`exemplos/`](exemplos/) mostram o formato
-> combinado e não são resultados de execução.
+> **Estado atual (Bloco B6):** o contrato v1 está **consolidado** e serve de base para a implementação.
+> Estão implementados o `GET /health` e as cinco consultas públicas do B6 (paradas, detalhe da
+> parada, linhas, destinos e últimas passagens). Previsões, alternativas, resumo e rotas
+> administrativas continuam **planejados** (B7 a B9). Os JSON de [`exemplos/`](exemplos/) mostram o
+> formato combinado; os das rotas implementadas são comparados com as respostas reais nos testes
+> do backend.
 
 ## Conteúdo
 
@@ -15,7 +17,7 @@ consumir o backend C# sem depender de detalhes internos dele.
 | [`api-v1.md`](api-v1.md) | Contrato completo: convenções, endpoints, campos, erros, avisos e divergências |
 | [`exemplos/`](exemplos/) | Corpos JSON de requisição e resposta, coerentes entre si |
 | [`verificador/`](verificador/) | Verificador da sintaxe e da coerência dos exemplos (seção [Verificação dos exemplos](#verificação-dos-exemplos)) |
-| `openapi/pontovoz-v1.json` | **Ainda não existe.** Será exportado da API em execução a partir do B6, com os endpoints já implementados. |
+| [`openapi/pontovoz-v1.json`](openapi/pontovoz-v1.json) | Documento OpenAPI exportado da API em execução, só com os endpoints implementados. Para atualizar, use `backend/scripts/exportar-openapi.ps1` ([README do backend](../backend/README.md)). |
 
 ## Arquitetura de integração
 
@@ -45,14 +47,14 @@ Para iniciar a API, siga [`../backend/README.md`](../backend/README.md).
 |---|---|---|---|
 | — | GET | `/health` | **Implementado** |
 | — | GET | `/openapi/v1.json` e `/scalar` | **Implementados** (só em Development) |
-| 1 | GET | `/api/v1/paradas` | Planejado |
-| 2 | GET | `/api/v1/paradas/{id}` | Planejado |
-| 3 | GET | `/api/v1/linhas` | Planejado |
-| 4 | GET | `/api/v1/destinos` | Planejado |
-| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Planejado |
-| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Planejado |
-| 7 | GET | `/api/v1/paradas/{id}/alternativas?destinoId=` | Planejado |
-| 8 | GET | `/api/v1/paradas/{id}/resumo` | Planejado |
+| 1 | GET | `/api/v1/paradas` | **Implementado (B6)** |
+| 2 | GET | `/api/v1/paradas/{id}` | **Implementado (B6)** |
+| 3 | GET | `/api/v1/linhas` | **Implementado (B6)** |
+| 4 | GET | `/api/v1/destinos` | **Implementado (B6)** |
+| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Planejado (B8) |
+| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | **Implementado (B6)** |
+| 7 | GET | `/api/v1/paradas/{id}/alternativas?destinoId=` | Planejado (B9) |
+| 8 | GET | `/api/v1/paradas/{id}/resumo` | Planejado (B9) |
 | 9 | POST | `/api/v1/admin/paradas` | Planejado, com chave |
 | 10 | PUT | `/api/v1/admin/paradas/{id}` | Planejado, com chave |
 | 11 | POST | `/api/v1/admin/linhas` | Planejado, com chave |
@@ -260,7 +262,8 @@ revisão humana nem os testes da API.
 1. **B1 a B1.3 (concluído):** contrato consolidado e publicado no repositório.
 2. **B6 (12/11/2026):** o contrato é congelado. Depois disso, só mudanças aditivas.
 3. **B6 em diante:** `openapi/pontovoz-v1.json` é exportado da API em execução e atualizado a
-   cada mudança de endpoint.
+   cada mudança de endpoint. Um teste do backend falha se o arquivo ficar diferente do documento
+   gerado pela API.
 
 ## Histórico de mudanças do contrato
 
@@ -272,3 +275,5 @@ revisão humana nem os testes da API.
 | 07/11/2026 | Consolidação B1.2: seed idempotente, sem renovar observações simuladas ao iniciar a API; passagem recente da demonstração pelo registro manual; exemplos de passagem ajustados. Divergência D16 e requisitos R3 a R5 revisados. |
 | 07/11/2026 | Correções B1.3: provisionamento inicial separado da inicialização posterior (R3 e R4); `dadosSimulados` obrigatório nos cadastros administrativos e representação de `CadastroNaoVerificado`; regra temporal para observações no futuro, com casos de teste. Divergências D17 a D19. |
 | 07/11/2026 | B3.1: o `/health` passa a incluir a verificação `banco-de-dados`, com 503 quando o banco está indisponível. O formato do corpo foi mantido (seção 6 de `api-v1.md`). |
+| 07/11/2026 | B6: cinco consultas públicas implementadas (paradas, detalhe, linhas, destinos e últimas passagens), com ProblemDetails, CORS por `Cors:OrigensPermitidas` e `openapi/pontovoz-v1.json` exportado. Conferências registradas em `api-v1.md`: valores de `type`, 400 de model binding, 404 sem `codigo` para rota fora do padrão e 500 genérico. O resumo fica para o B9, sem parte antecipada no B6. Nenhum campo ou regra dos exemplos mudou. |
+| 07/11/2026 | B6.1: todo erro passa a ter `codigo`. Novos códigos no catálogo (seção 7 de `api-v1.md`): `RotaNaoEncontrada` (404, caminho sem rota correspondente, inclusive `id` fora do padrão) e `MetodoNaoPermitido` (405). Mudança aditiva; nenhum código ou campo existente mudou. |

@@ -2,9 +2,12 @@
 
 **Global Solution FIAP 2026.2** · Engenharia de Software · Tema **CitizenTech**
 
-> **Status real:** projeto em fase inicial. Só existe a estrutura do backend C#
-> (Bloco B0): a API inicia, responde em `GET /health` e publica a documentação
-> OpenAPI. Nenhuma funcionalidade de transporte público está implementada ainda.
+> **Status real (Bloco B6):** o backend C# já responde às consultas públicas de paradas,
+> linhas, destinos e últimas passagens, com dados **simulados** de demonstração, além do
+> `GET /health` e da documentação OpenAPI/Scalar. Previsões de chegada, alternativas de
+> deslocamento, o resumo do totem e as operações administrativas ainda **não** estão
+> implementados. A interface do totem e o componente de voz e IA são de outros integrantes e
+> ainda estão pendentes.
 
 ---
 
@@ -48,25 +51,37 @@ Um totem instalado no ponto de ônibus, que o passageiro usa por voz ou por toqu
 
 | Componente | Responsabilidade | Situação |
 |---|---|---|
-| Backend C# / ASP.NET Core (`backend/`) | API REST, regras de negócio, persistência com EF Core e SQLite | Em desenvolvimento (B0 concluído) |
+| Backend C# / ASP.NET Core (`backend/`) | API REST, regras de negócio, persistência com EF Core e SQLite | Em desenvolvimento (B0 a B6 concluídos: consultas públicas implementadas) |
 | Interface do totem | Tela de consulta acessível | Responsabilidade de outro integrante — pendente |
 | Voz e IA conversacional | Reconhecimento de fala, diálogo e síntese de voz, consumindo a API | Responsabilidade de outro integrante — pendente |
-| Contratos de integração (`contracts/`) | Documentação dos endpoints para os demais componentes | Estrutura inicial criada |
+| Contratos de integração (`contracts/`) | Documentação dos endpoints para os demais componentes | Contrato v1 consolidado e OpenAPI exportado da API (só os endpoints implementados) |
 
 ## Contribuição específica do backend C#
 
-> **Escopo planejado.** Nenhum dos itens abaixo está implementado ainda; hoje só
-> existem a estrutura da API e o endpoint `GET /health`. O andamento de cada item
-> será atualizado aqui conforme os blocos forem concluídos.
+O andamento de cada item é atualizado aqui conforme os blocos são concluídos. Todos os dados
+atuais são **simulados** e identificados como tal nas respostas.
 
-- Cadastro e consulta de paradas, linhas e da associação entre elas.
-- Previsões de chegada por meio de um provedor trocável: um provedor simulado
-  identificado como tal e, opcionalmente, um adaptador para a API Olho Vivo da SPTrans.
-- Registros de passagem com nível de confirmação explícito. No MVP nenhum
-  registro é apresentado como oficial da SPTrans.
-- Alternativas de deslocamento por linhas diretas, ordenadas pelo tempo total estimado.
-- Separação entre consultas públicas e operações administrativas protegidas.
-- Documentação OpenAPI/Scalar para integração com o totem e com a IA.
+**Implementado (até o Bloco B6):**
+
+- Consulta de **paradas**, inclusive a identificação da parada do totem pelo código externo.
+- **Detalhe da parada**, com as linhas que a atendem.
+- Consulta de **linhas**.
+- Consulta de **destinos**.
+- **Últimas passagens** por linha, com nível de confirmação explícito. Nenhum registro é
+  apresentado como oficial da SPTrans.
+- **Health check** (`GET /health`), que verifica o processo e o banco.
+- **Documentação OpenAPI/Scalar** dos endpoints implementados, para integração com o totem e
+  com a IA.
+
+**Planejado para os próximos blocos:**
+
+- **Operações administrativas** protegidas: cadastro de paradas e linhas e registro manual de
+  passagens (B7).
+- **Previsões de chegada** por meio de um provedor trocável: um provedor simulado identificado
+  como tal e, opcionalmente, um adaptador para a API Olho Vivo da SPTrans (B8).
+- **Alternativas de deslocamento** por linhas diretas, ordenadas pelo tempo total estimado (B9).
+- **Resumo agregado do totem**, que reúne parada, previsões e últimas passagens em uma chamada
+  (B9).
 
 Detalhes técnicos e instruções de execução: [backend/README.md](backend/README.md).
 

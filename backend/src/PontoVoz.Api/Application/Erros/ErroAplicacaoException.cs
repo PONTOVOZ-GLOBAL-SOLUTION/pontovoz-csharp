@@ -16,7 +16,7 @@ public enum TipoErroAplicacao
 /// <summary>
 /// Erro esperado de um service, com o <see cref="Codigo"/> estável do catálogo de erros do
 /// contrato (contracts/api-v1.md, seção 7). Não carrega detalhes de HTTP: o B6 monta o
-/// ProblemDetails a partir de <see cref="Tipo"/>, <see cref="Titulo"/>, <see cref="Message"/> e
+/// ProblemDetails a partir de <see cref="Tipo"/>, <see cref="Titulo"/>, <see cref="Exception.Message"/> e
 /// <see cref="Erros"/>. Erros inesperados não usam esta classe.
 /// </summary>
 public sealed class ErroAplicacaoException : Exception

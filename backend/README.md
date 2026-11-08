@@ -5,7 +5,7 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B5 — serviços de aplicação, DTOs e validações.** Hoje o backend:
+**Bloco B6 — Web API pública, ProblemDetails, OpenAPI e testes HTTP.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -19,12 +19,15 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - tem **services de aplicação** que validam os parâmetros, aplicam as regras do contrato e montam
   as respostas (DTOs) de paradas, linhas, destinos e últimas passagens (veja
   [Services](#services-de-aplicação-b5));
-- tem **463 testes**: 278 de domínio, 70 da camada de aplicação, 106 de integração com SQLite real
-  e 9 pela API em execução (`/health` e injeção de dependência).
+- expõe por HTTP as **consultas públicas do B6**: busca de paradas (inclusive pelo
+  `codigoExterno` do totem), detalhe da parada, linhas, destinos e últimas passagens, com erros
+  em ProblemDetails, CORS configurável e documento OpenAPI exportado (veja [Web API](#web-api-b6));
+- tem **521 testes**: 278 de domínio, 70 da camada de aplicação, 106 de integração com SQLite real
+  e 67 pela API em execução (58 deles do B6).
 
-Ainda **não** existem endpoints de transporte público: os services estão prontos, mas os
-controllers que os expõem por HTTP entram no B6. Os endpoints de `/api/v1` descritos em
-[`../contracts/api-v1.md`](../contracts/api-v1.md) continuam **planejados**.
+Previsões (B8), alternativas e resumo (B9) e as rotas administrativas (B7) **ainda não existem**
+e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
+seção 9.
 
 ## Requisitos de ambiente
 
@@ -138,7 +141,8 @@ A API fica disponível em `http://localhost:5080` (somente localhost).
 |---|---|
 | Saúde do processo e do banco | http://localhost:5080/health |
 | Documento OpenAPI | http://localhost:5080/openapi/v1.json |
-| Interface Scalar | http://localhost:5080/scalar |
+| Interface Scalar | http://localhost:5080/scalar (redireciona para `/scalar/`) |
+| Consultas públicas (B6) | http://localhost:5080/api/v1/... (veja [Web API](#web-api-b6)) |
 
 Respostas reais de `GET /health`, registradas nas evidências do B3:
 
@@ -181,6 +185,12 @@ Para rodar só os testes de integração:
 
 ```bash
 dotnet test --filter-namespace "PontoVoz.Tests.Infrastructure"
+```
+
+Para rodar só os testes pela API em execução (HTTP):
+
+```bash
+dotnet test --filter-namespace "PontoVoz.Tests.Api"
 ```
 
 As evidências estão em [Domínio](#evidências-dos-testes) e em
@@ -231,9 +241,10 @@ backend/
 ├─ .config/dotnet-tools.json     ferramenta local dotnet-ef
 ├─ .editorconfig                 padrão de estilo do código
 ├─ docs/evidencias/              evidências de funcionamento por bloco
+├─ scripts/exportar-openapi.ps1  exporta o OpenAPI da API em execução (B6)
 ├─ src/PontoVoz.Api/
 │  ├─ Program.cs                 composição da aplicação e injeção de dependência
-│  ├─ Controllers/               controllers REST (hoje só HealthController)
+│  ├─ Controllers/               controllers REST: Health, Paradas, Linhas e Destinos (B6)
 │  ├─ Domain/                    modelo de domínio (B2)
 │  │  ├─ Entities/               entidades persistentes e associações
 │  │  ├─ ValueObjects/           objetos de valor imutáveis
@@ -253,12 +264,12 @@ backend/
 │  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
 │  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4)
 │  ├─ Security/                  proteção das rotas administrativas (B7)
-│  └─ Middleware/                tratamento global de erros (B6)
+│  └─ Middleware/                ProblemDetails, tratamento global de erros, JSON e CORS (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
    ├─ Domain/                    testes de domínio (B2)
    ├─ Application/               testes dos services e da paginação (B4 e B5)
    ├─ Infrastructure/            testes de integração com SQLite real (B3 e B4)
-   └─ Api/                       testes pela API em execução (B3.1 e B5)
+   └─ Api/                       testes pela API em execução (B3.1, B5 e B6)
 ```
 
 ## Domínio (B2)
@@ -840,15 +851,165 @@ Os testes unitários usam dublês de repositório em memória (`DublesRepositori
 chamadas recebidas para confirmar que uma requisição inválida não consulta o banco. As consultas
 reais continuam testadas contra o SQLite.
 
-### Pendente para o B6
+### Usados pela Web API (B6)
 
-- os controllers de `GET /paradas`, `GET /paradas/{id}`, `GET /linhas`, `GET /destinos` e
-  `GET /paradas/{id}/ultimas-passagens`, que chamam estes services;
-- a conversão de `ErroAplicacaoException` e das exceções de domínio em ProblemDetails (400, 404 e
-  422, com `codigo` e `traceId`), e o 500 genérico;
-- a aplicação de `JsonContrato` na serialização dos controllers;
-- a restrição `int:min(1)` nas rotas;
-- a exportação do OpenAPI com os endpoints implementados.
+Os controllers do B6 chamam estes services sem repetir validação nem regra. A conversão dos
+erros em ProblemDetails, o `JsonContrato` nas respostas, a restrição `int:min(1)` nas rotas e a
+exportação do OpenAPI estão em [Web API](#web-api-b6).
+
+## Web API (B6)
+
+Os controllers expõem os services do B5 por HTTP. Eles só recebem os parâmetros, repassam o
+`CancellationToken` da requisição e devolvem o DTO: não têm LINQ, não usam o `DbContext` e não
+repetem validações. Evidências reais em
+[`docs/evidencias/B6-web-api.md`](docs/evidencias/B6-web-api.md).
+
+### Endpoints
+
+| Método | Rota | Parâmetros | Respostas |
+|---|---|---|---|
+| GET | `/health` | — | 200, 503 |
+| GET | `/api/v1/paradas` | `termo`, `codigoExterno`, `pagina`, `tamanhoPagina` | 200, 400 |
+| GET | `/api/v1/paradas/{id}` | `id` na rota | 200, 404 |
+| GET | `/api/v1/linhas` | `termo`, `pagina`, `tamanhoPagina` | 200, 400 |
+| GET | `/api/v1/destinos` | `termo`, `pagina`, `tamanhoPagina` | 200, 400 |
+| GET | `/api/v1/paradas/{id}/ultimas-passagens` | `id` na rota, `linhaId` opcional | 200, 400, 404, 422 |
+
+Todas podem devolver 500 `ErroInterno`. Paginação: `pagina` ≥ 1 (padrão 1) e `tamanhoPagina` de
+1 a 50 (padrão 20). `termo` tem de 2 a 60 caracteres e não diferencia maiúsculas nem acentos.
+
+**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/previsoes` (B8), `/alternativas` e `/resumo` (B9)
+e `/api/v1/admin/...` (B7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
+a rota só será criada com todas as partes.
+
+### Executar e consultar
+
+Com o banco criado ([Como executar](#como-executar)):
+
+```bash
+dotnet run --project src/PontoVoz.Api --launch-profile http
+```
+
+URL base: `http://localhost:5080` (só localhost). Interface Scalar, para ver e testar as rotas:
+`http://localhost:5080/scalar`.
+
+O totem identifica a sua parada pelo **código**, porque o `id` interno pode mudar quando o banco
+é recriado (contrato, seção 1.2):
+
+```bash
+curl "http://localhost:5080/api/v1/paradas?codigoExterno=SIM-P001"
+```
+
+O `id` está em `itens[0].id`. Com ele, consulte o detalhe e as últimas passagens (troque `1` pelo
+`id` recebido):
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/paradas/1/ultimas-passagens"
+```
+
+Outras consultas:
+
+```bash
+curl "http://localhost:5080/api/v1/paradas?termo=demonstracao"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/linhas?termo=104"
+```
+
+```bash
+curl "http://localhost:5080/api/v1/destinos?termo=norte"
+```
+
+### Erros (ProblemDetails)
+
+Todo erro sai em `application/problem+json`, com `type`, `title`, `status`, `instance`,
+`traceId` e `codigo` (contrato, seção 7). O tratamento fica em um só lugar
+([`Middleware/`](src/PontoVoz.Api/Middleware/README.md)):
+
+| Situação | Status | `codigo` |
+|---|---|---|
+| Parâmetro fora do formato ou da faixa, inclusive valor que não é número (`pagina=abc`) | 400 | `RequisicaoInvalida`, com as mensagens em `errors` |
+| Parada inexistente ou inativa | 404 | `ParadaNaoEncontrada` |
+| `linhaId` inexistente ou inativo | 404 | `LinhaNaoEncontrada` |
+| Caminho sem rota correspondente (`/api/v1/paradas/abc`, `/api/v1/paradas/0`, `/api/v1/rota-inexistente`) | 404 | `RotaNaoEncontrada` |
+| Método não aceito pela rota (`POST /api/v1/paradas`) | 405 | `MetodoNaoPermitido`, com o cabeçalho `Allow` |
+| Linha existente que não atende a parada | 422 | `LinhaNaoAtendeParada` |
+| Erro inesperado | 500 | `ErroInterno`, com mensagem genérica; o erro real fica só no log |
+
+Uma requisição cancelada pelo cliente não vira 500: o `CancellationToken` chega ao service (e
+dele às consultas do EF Core), e o ASP.NET Core encerra a requisição sem resposta.
+
+Exemplo real (`GET /api/v1/paradas?termo=a&tamanhoPagina=100`):
+
+```json
+{"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"A requisição contém parâmetros inválidos.","status":400,"instance":"/api/v1/paradas","errors":{"termo":["O termo deve ter entre 2 e 60 caracteres."],"tamanhoPagina":["O tamanho da página deve estar entre 1 e 50."]},"codigo":"RequisicaoInvalida","traceId":"00-fdd03c62da328d1469a92ff7f54f2130-903ab235e3e7bc53-00"}
+```
+
+### JSON
+
+As respostas usam o mesmo `JsonContrato` dos testes do B5: camelCase, enums como texto, campos
+sem valor como `null` (nunca omitidos), listas vazias como `[]` e horários de negócio em
+`-03:00`. O mesmo padrão vale para os controllers e para o ProblemDetails.
+
+### CORS
+
+O frontend do totem só consegue chamar a API pelo navegador se a sua origem estiver na lista
+`Cors:OrigensPermitidas`. A lista vem **vazia**, e então nenhuma origem externa é liberada. A
+URL definitiva do frontend ainda não foi definida pela equipe. Quando for, informe-a em
+`appsettings.Development.json` ou por variável de ambiente, sem barra no final:
+
+```json
+"Cors": { "OrigensPermitidas": [ "http://localhost:5173" ] }
+```
+
+```bash
+Cors__OrigensPermitidas__0=http://localhost:5173
+```
+
+(`http://localhost:5173` é só um exemplo.) As origens listadas podem fazer apenas `GET`, sem
+credenciais. As rotas públicas continuam sem autenticação.
+
+### Exportar o OpenAPI
+
+O arquivo [`../contracts/openapi/pontovoz-v1.json`](../contracts/openapi/pontovoz-v1.json) é o
+documento gerado pela API, só com os endpoints implementados. Para atualizá-lo depois de mudar
+um endpoint (com a porta 5080 livre), a partir da pasta `backend/`:
+
+```bash
+pwsh ./scripts/exportar-openapi.ps1
+```
+
+O script compila a API, sobe uma instância local em Development, baixa `/openapi/v1.json`,
+confere se é JSON válido, grava o arquivo e encerra a instância. Sem o PowerShell 7, use
+`powershell -ExecutionPolicy Bypass -File .\scripts\exportar-openapi.ps1`. O teste
+`OpenApiExportado_EstaIgualAoDocumentoGeradoPelaApi` falha se o arquivo ficar desatualizado.
+
+### Testes HTTP
+
+Os 58 testes do B6 (`tests/PontoVoz.Tests/Api/`) chamam a API real em memória
+(`WebApplicationFactory`) sobre arquivos SQLite temporários e isolados, com migrations, seed e o
+registro manual dos exemplos do contrato. O relógio da API fica parado no instante dos
+exemplos (10/11/2026, 14h32), e as respostas são comparadas com os JSON de `contracts/` sem os
+ids internos. Os ids usados nas requisições vêm das respostas da própria API. O banco de
+desenvolvimento não é usado.
+
+```bash
+dotnet test --filter-namespace "PontoVoz.Tests.Api"
+```
+
+### O que funciona e o que está pendente
+
+| Funciona (B6) | Pendente |
+|---|---|
+| Cinco consultas públicas e `/health` | Rotas administrativas com chave (B7) |
+| ProblemDetails 400, 404, 422 e 500 | Previsões e o 503 `ProvedorPrevisoesIndisponivel` (B8) |
+| CORS por configuração | Alternativas e resumo (B9) |
+| OpenAPI, Scalar e exportação do documento | URL do frontend em `Cors:OrigensPermitidas` (equipe) |
 
 ## Próximas etapas
 
@@ -858,8 +1019,8 @@ reais continuam testadas contra o SQLite.
 | B2 | Entidades e regras de domínio, com testes (concluído) |
 | B3 | `DbContext`, migration inicial e seed de dados simulados (concluído) |
 | B4 | Repositórios com consultas LINQ, com testes (concluído) |
-| B5 | Services, DTOs e injeção de dependência, com testes (concluído, aguardando revisão) |
-| B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI |
+| B5 | Services, DTOs e injeção de dependência, com testes (concluído) |
+| B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído, aguardando auditoria) |
 | B7 | Endpoints administrativos com chave de acesso |
 | B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo) |
 | B9 | Alternativas de deslocamento e resumo da parada |
