@@ -1,6 +1,8 @@
 using PontoVoz.Api.Application;
+using PontoVoz.Api.Documentacao;
 using PontoVoz.Api.Infrastructure.Persistence;
 using PontoVoz.Api.Middleware;
+using PontoVoz.Api.Security;
 
 using Scalar.AspNetCore;
 
@@ -8,18 +10,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Serviços (injeção de dependência nativa do ASP.NET Core).
 builder.Services.AddWebApiPontoVoz(builder.Configuration);
-builder.Services.AddOpenApi(opcoes => opcoes.AddDocumentTransformer((documento, _, _) =>
-{
-    documento.Info.Title = "PontoVoz API";
-    documento.Info.Version = "v1";
-    documento.Info.Description = "Consultas públicas do totem PontoVoz (CitizenTech FIAP). Lista só os endpoints já implementados; "
-        + "previsões, alternativas, resumo e rotas administrativas estão planejados em contracts/api-v1.md.";
-    return Task.CompletedTask;
-}));
+builder.Services.AddDocumentacaoPontoVoz();
 builder.Services.AddHealthChecks();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddPersistenciaPontoVoz(builder.Configuration, builder.Environment);
 builder.Services.AddAplicacaoPontoVoz();
+builder.Services.AddSegurancaAdministrativa();
 
 var app = builder.Build();
 

@@ -7,7 +7,8 @@ using PontoVoz.Api.Infrastructure.Persistence;
 
 namespace PontoVoz.Api.Infrastructure.Repositories;
 
-public sealed class LinhaRepository(PontoVozDbContext contexto) : ILinhaRepository
+/// <summary>Consultas públicas de linhas (só ativas) e a escrita administrativa do B7 (ativas e inativas).</summary>
+public sealed class LinhaRepository(PontoVozDbContext contexto) : ILinhaRepository, ICadastroLinhaRepository
 {
     public async Task<Pagina<Linha>> BuscarAtivasAsync(string? termo, Paginacao paginacao, CancellationToken cancellationToken) =>
         await contexto.Linhas
@@ -36,4 +37,12 @@ public sealed class LinhaRepository(PontoVozDbContext contexto) : ILinhaReposito
         contexto.ParadasLinhas
             .AsNoTracking()
             .AnyAsync(associacao => associacao.ParadaId == paradaId && associacao.LinhaId == linhaId, cancellationToken);
+
+    public Task<bool> CodigoExisteAsync(string codigo, CancellationToken cancellationToken) =>
+        contexto.Linhas.AnyAsync(linha => linha.Codigo == codigo, cancellationToken);
+
+    public Task<Linha?> ObterParaAlteracaoAsync(int id, CancellationToken cancellationToken) =>
+        contexto.Linhas.FirstOrDefaultAsync(linha => linha.Id == id, cancellationToken);
+
+    public void Adicionar(Linha linha) => contexto.Linhas.Add(linha);
 }

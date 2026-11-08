@@ -7,6 +7,8 @@
     <!-- Comentários XML dos controllers entram no documento OpenAPI; só os membros públicos documentados são exigidos. -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!-- Identificador do armazenamento de user-secrets (Admin:Chave em Development). Não é um segredo. -->
+    <UserSecretsId>pontovoz-api-2026-fiap</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>

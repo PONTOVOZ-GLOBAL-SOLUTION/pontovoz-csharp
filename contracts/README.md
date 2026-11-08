@@ -3,10 +3,10 @@
 Esta pasta reúne os contratos que permitem à interface do totem e ao componente de voz e IA
 consumir o backend C# sem depender de detalhes internos dele.
 
-> **Estado atual (Bloco B6):** o contrato v1 está **consolidado** e serve de base para a implementação.
-> Estão implementados o `GET /health` e as cinco consultas públicas do B6 (paradas, detalhe da
-> parada, linhas, destinos e últimas passagens). Previsões, alternativas, resumo e rotas
-> administrativas continuam **planejados** (B7 a B9). Os JSON de [`exemplos/`](exemplos/) mostram o
+> **Estado atual (Bloco B7):** o contrato v1 está **consolidado** e serve de base para a implementação.
+> Estão implementados o `GET /health`, as cinco consultas públicas do B6 (paradas, detalhe da
+> parada, linhas, destinos e últimas passagens) e as cinco rotas administrativas do B7.
+> Previsões, alternativas e resumo continuam **planejados** (B8 e B9). Os JSON de [`exemplos/`](exemplos/) mostram o
 > formato combinado; os das rotas implementadas são comparados com as respostas reais nos testes
 > do backend.
 
@@ -55,11 +55,11 @@ Para iniciar a API, siga [`../backend/README.md`](../backend/README.md).
 | 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | **Implementado (B6)** |
 | 7 | GET | `/api/v1/paradas/{id}/alternativas?destinoId=` | Planejado (B9) |
 | 8 | GET | `/api/v1/paradas/{id}/resumo` | Planejado (B9) |
-| 9 | POST | `/api/v1/admin/paradas` | Planejado, com chave |
-| 10 | PUT | `/api/v1/admin/paradas/{id}` | Planejado, com chave |
-| 11 | POST | `/api/v1/admin/linhas` | Planejado, com chave |
-| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Planejado, com chave |
-| 13 | POST | `/api/v1/admin/observacoes-passagem` | Planejado, com chave |
+| 9 | POST | `/api/v1/admin/paradas` | **Implementado (B7)**, com chave |
+| 10 | PUT | `/api/v1/admin/paradas/{id}` | **Implementado (B7)**, com chave |
+| 11 | POST | `/api/v1/admin/linhas` | **Implementado (B7)**, com chave |
+| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | **Implementado (B7)**, com chave |
+| 13 | POST | `/api/v1/admin/observacoes-passagem` | **Implementado (B7)**, com chave |
 
 ## Como consumir
 
@@ -219,6 +219,21 @@ Um cadastro de teste, como `TESTE-P003`, vai com `true` e continua marcado como 
 respostas públicas. `origem: "CadastroAdministrativo"` diz só como o dado entrou no sistema;
 nenhum cadastro do MVP é verificado.
 
+Implementadas no B7:
+
+| Rota | Sucesso | Erros |
+|---|---|---|
+| `POST /api/v1/admin/paradas` | 201, com `Location: /api/v1/paradas/{id}` | 400, 401, 403, 409 |
+| `PUT /api/v1/admin/paradas/{id}` | 200 | 400, 401, 403, 404 |
+| `POST /api/v1/admin/linhas` | 201, sem `Location` | 400, 401, 403, 409 |
+| `PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}` | 204, idempotente | 401, 403, 404, 422 |
+| `POST /api/v1/admin/observacoes-passagem` | 201, sem `Location` | 400, 401, 403, 404, 422 |
+
+A chave fica em `Admin:Chave` (user-secrets ou variável de ambiente `Admin__Chave`), nunca em
+arquivo versionado. Como configurar e testar no Scalar: [README do backend](../backend/README.md#rotas-administrativas-b7).
+`origemRegistro` deve ser só um rótulo técnico impessoal; o padrão do campo não impede, sozinho,
+toda informação pessoal (seção 5.6 de [`api-v1.md`](api-v1.md)).
+
 ## Exemplos
 
 | Arquivo | Requisição correspondente |
@@ -277,3 +292,4 @@ revisão humana nem os testes da API.
 | 07/11/2026 | B3.1: o `/health` passa a incluir a verificação `banco-de-dados`, com 503 quando o banco está indisponível. O formato do corpo foi mantido (seção 6 de `api-v1.md`). |
 | 07/11/2026 | B6: cinco consultas públicas implementadas (paradas, detalhe, linhas, destinos e últimas passagens), com ProblemDetails, CORS por `Cors:OrigensPermitidas` e `openapi/pontovoz-v1.json` exportado. Conferências registradas em `api-v1.md`: valores de `type`, 400 de model binding, 404 sem `codigo` para rota fora do padrão e 500 genérico. O resumo fica para o B9, sem parte antecipada no B6. Nenhum campo ou regra dos exemplos mudou. |
 | 07/11/2026 | B6.1: todo erro passa a ter `codigo`. Novos códigos no catálogo (seção 7 de `api-v1.md`): `RotaNaoEncontrada` (404, caminho sem rota correspondente, inclusive `id` fora do padrão) e `MetodoNaoPermitido` (405). Mudança aditiva; nenhum código ou campo existente mudou. |
+| 08/11/2026 | B7: as cinco rotas administrativas implementadas, com a chave da seção 5.1. Conferências registradas em `api-v1.md`: valores de `type` de 401, 403 e 409, erros de corpo (campos obrigatórios, JSON inválido, número como texto, data sem fuso) e 409 também em gravação simultânea. A frase sobre `origemRegistro` foi corrigida: o padrão do campo não impede toda informação pessoal (um número só de dígitos passa); a regra não mudou. |

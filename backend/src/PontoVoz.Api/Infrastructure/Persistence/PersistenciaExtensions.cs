@@ -32,6 +32,12 @@ public static class PersistenciaExtensions
         services.AddScoped<IDestinoRepository, DestinoRepository>();
         services.AddScoped<IRegistroPassagemRepository, RegistroPassagemRepository>();
 
+        // Escrita das rotas administrativas (B7): as mesmas classes, pelas interfaces de cadastro.
+        services.AddScoped<ICadastroParadaRepository, ParadaRepository>();
+        services.AddScoped<ICadastroLinhaRepository, LinhaRepository>();
+        services.AddScoped<ICadastroPassagemRepository, RegistroPassagemRepository>();
+        services.AddScoped<IUnidadeTrabalho, UnidadeTrabalhoEf>();
+
         // O /health passa a verificar também o banco (contrato, seções 1.10 e 6).
         services.AddHealthChecks().AddCheck<BancoDadosHealthCheck>(BancoDadosHealthCheck.Nome);
 

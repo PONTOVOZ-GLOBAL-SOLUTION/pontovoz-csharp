@@ -11,6 +11,9 @@ public enum TipoErroAplicacao
 
     /// <summary>Requisição bem formada que contradiz o estado dos dados (422).</summary>
     RegraNegocio = 3,
+
+    /// <summary>Valor que já existe numa chave única, como o código de uma parada (409).</summary>
+    Conflito = 4,
 }
 
 /// <summary>
@@ -50,6 +53,18 @@ public sealed class ErroAplicacaoException : Exception
 
     public static ErroAplicacaoException DestinoNaoEncontrado(int id) =>
         new(TipoErroAplicacao.NaoEncontrado, "DestinoNaoEncontrado", "Destino não encontrado", $"Não existe destino ativo com o id {id}.");
+
+    /// <summary>404 das rotas administrativas, que também encontram paradas inativas: só quando o id não existe.</summary>
+    public static ErroAplicacaoException ParadaInexistente(int id) =>
+        new(TipoErroAplicacao.NaoEncontrado, "ParadaNaoEncontrada", "Parada não encontrada", $"Não existe parada com o id {id}.");
+
+    /// <summary>404 das rotas administrativas, que também encontram linhas inativas: só quando o id não existe.</summary>
+    public static ErroAplicacaoException LinhaInexistente(int id) =>
+        new(TipoErroAplicacao.NaoEncontrado, "LinhaNaoEncontrada", "Linha não encontrada", $"Não existe linha com o id {id}.");
+
+    /// <summary>409: o código de parada ou de linha já foi usado, inclusive por um cadastro inativo.</summary>
+    public static ErroAplicacaoException CodigoJaCadastrado(string campo, string codigo) =>
+        new(TipoErroAplicacao.Conflito, "CodigoJaCadastrado", "Código já cadastrado", $"O valor {codigo} do campo {campo} já está cadastrado.");
 
     public static ErroAplicacaoException LinhaNaoAtendeParada(int paradaId, int linhaId) =>
         new(TipoErroAplicacao.RegraNegocio, "LinhaNaoAtendeParada", "Linha não atende a parada", $"A linha {linhaId} não atende a parada {paradaId}.");

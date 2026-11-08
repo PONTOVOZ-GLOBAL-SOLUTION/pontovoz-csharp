@@ -52,5 +52,26 @@ public static class MapeamentoDtos
             passagem.DadosSimulados,
             CatalogoAvisos.DaPassagem(passagem.CodigoAviso));
 
+    /// <summary><c>ParadaAdministrativa</c> (seção 5.2): a parada, ativa ou não, com o instante de criação.</summary>
+    public static ParadaAdministrativaDto ParaAdministrativaDto(this Parada parada) =>
+        new(parada.Id, parada.CodigoExterno, parada.Nome, parada.Endereco, parada.Coordenada?.ParaDto(), parada.Origem, parada.DadosSimulados,
+            parada.Ativa, HorarioSaoPaulo.Converter(parada.CriadoEmUtc));
+
+    /// <summary>Linha mais <c>ativa</c> e <c>criadoEm</c> (seção 5.4).</summary>
+    public static LinhaAdministrativaDto ParaAdministrativaDto(this Linha linha) =>
+        new(linha.Id, linha.Codigo, linha.Letreiro, linha.TerminalPrincipal, linha.TerminalSecundario, linha.Sentido, linha.Origem, linha.DadosSimulados,
+            linha.Ativa, HorarioSaoPaulo.Converter(linha.CriadoEmUtc));
+
+    /// <summary>Recibo do registro manual (seção 5.6): a mesma <c>Passagem</c> das consultas, mais <c>paradaId</c>.</summary>
+    public static PassagemRegistradaDto ParaRegistradaDto(this RegistroPassagem passagem, DateTimeOffset referencia)
+    {
+        ArgumentNullException.ThrowIfNull(passagem);
+        PassagemDto dto = passagem.ParaDto(referencia);
+        return new PassagemRegistradaDto(
+            passagem.ParadaId, dto.Id, dto.LinhaId, dto.CodigoLinha, dto.Letreiro, dto.ObservadaEm, dto.RegistradaEm,
+            dto.MinutosDesdeObservacao, dto.Desatualizada, dto.PrefixoVeiculo, dto.NivelConfirmacao, dto.Verificada,
+            dto.OficialSptrans, dto.OrigemRegistro, dto.DadosSimulados, dto.Aviso);
+    }
+
     private static CoordenadaDto ParaDto(this Coordenada coordenada) => new(coordenada.Latitude, coordenada.Longitude);
 }

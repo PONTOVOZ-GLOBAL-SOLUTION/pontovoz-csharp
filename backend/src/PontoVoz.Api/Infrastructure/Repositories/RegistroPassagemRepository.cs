@@ -6,7 +6,7 @@ using PontoVoz.Api.Infrastructure.Persistence;
 
 namespace PontoVoz.Api.Infrastructure.Repositories;
 
-public sealed class RegistroPassagemRepository(PontoVozDbContext contexto) : IRegistroPassagemRepository
+public sealed class RegistroPassagemRepository(PontoVozDbContext contexto) : IRegistroPassagemRepository, ICadastroPassagemRepository
 {
     public async Task<IReadOnlyList<RegistroPassagem>> ListarUltimasPorLinhaAsync(int paradaId, DateTimeOffset referencia, int? linhaId, CancellationToken cancellationToken)
     {
@@ -42,4 +42,7 @@ public sealed class RegistroPassagemRepository(PontoVozDbContext contexto) : IRe
             .ThenBy(passagem => passagem.Linha.Codigo)
             .ToListAsync(cancellationToken);
     }
+
+    /// <summary>Só acrescenta: uma passagem gravada não é alterada nem apagada (contrato, seção 4.6.1).</summary>
+    public void Adicionar(RegistroPassagem passagem) => contexto.RegistrosPassagem.Add(passagem);
 }

@@ -10,7 +10,7 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Ferramentas | ChatGPT (planejamento, elaboração dos prompts e apoio às revisões) e Claude Code, da Anthropic, no aplicativo desktop (implementação). O Claude Code se identificou na sessão como modelo Claude Opus 5.5; a versão do ChatGPT não está registrada. |
 | Integrante responsável | Pendente (nome e RM) |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 22 |
+| Prompts registrados | 26 |
 
 ## Como a IA foi usada
 
@@ -32,7 +32,8 @@ diferentes.
 - diagnosticou o ambiente e propôs a arquitetura (prompts 01 a 04);
 - escreveu o contrato REST, os exemplos JSON e o verificador do contrato (prompts 08 a 11);
 - escreveu todo o código C# do backend: domínio, persistência com EF Core, migrations, seed,
-  repositórios, consultas LINQ, services, controllers e tratamento de erros;
+  repositórios, consultas LINQ, services, controllers, tratamento de erros e a proteção das
+  rotas administrativas;
 - escreveu os testes automatizados, executou-os e fez testes de mutação para conferir se eles
   detectam regressões;
 - preparou a documentação técnica (READMEs e evidências) e este registro;
@@ -94,6 +95,10 @@ reescrito.
 | [20](#prompt-20) | 07/11/2026 | Bloco B5.1: auditoria final, correção documental e publicação | Auditoria, correção documental e publicação | `feat: implement application services and DTO validation` |
 | [21](#prompt-21) | 07/11/2026 | Bloco B6: controllers REST públicos, ProblemDetails, OpenAPI e testes HTTP | Implementação, testes e documentação | — |
 | [22](#prompt-22) | 07/11/2026 | Bloco B6.1: auditoria final e publicação da Web API pública | Auditoria, correção e publicação | `feat: implement public REST API and OpenAPI documentation` |
+| [23](#prompt-23) | 07/11/2026 | Bloco B7: API administrativa, autorização, cadastros e observações | Implementação e testes (interrompida por limite de uso) | — |
+| [24](#prompt-24) | 08/11/2026 | Bloco B7 (09.1): retomada e conclusão após a interrupção | Continuação: testes, documentação e evidências | — |
+| [25](#prompt-25) | 08/11/2026 | Bloco B7.2: pacote ZIP para auditoria independente do código | Preparação para auditoria | — |
+| [26](#prompt-26) | 08/11/2026 | Bloco B7.3: validação final e publicação do B7 | Validação e publicação | `feat: implement secured administrative REST API` |
 
 ---
 
@@ -4652,3 +4657,1143 @@ Repetiu `dotnet restore`, `dotnet build`, `dotnet test` (521 testes aprovados), 
 `dotnet ef` e o verificador do contrato; consultou a API real e o Scalar sem alterar o banco de
 desenvolvimento; atualizou a evidência do B6 e publicou o B6 com o commit `feat: implement public REST API and OpenAPI documentation`, sem trailer,
 e push normal.
+
+---
+
+## Bloco B7 — operações administrativas
+
+<a id="prompt-23"></a>
+
+### Prompt 23 — Bloco B7: API administrativa, autorização, cadastros e observações de passagem
+
+**Data:** 07/11/2026 · **Tipo:** Implementação e testes (interrompida por limite de uso) · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 09 — BLOCO B7: API ADMINISTRATIVA, AUTORIZAÇÃO, CADASTROS E OBSERVAÇÕES DE PASSAGEM
+Atue como engenheiro de software sênior especializado em C#, ASP.NET Core 10, Entity Framework Core, APIs REST, segurança de aplicações e testes automatizados.
+Você é responsável pela execução técnica completa do backend C# do PontoVoz.
+Repositório oficial:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit esperado:
+`4ffef65d3965b1f31779f4be6e5a1598dfb94dea`
+Os blocos B0 a B6 foram concluídos e publicados.
+Sua tarefa é implementar exclusivamente o Bloco B7 — Operações Administrativas.
+Não implemente B8, B9 ou B10. Não faça commit nem push antes da auditoria.
+1. PRIORIDADE ABSOLUTA — ENUNCIADO OFICIAL DA FIAP
+O projeto deve atender aos requisitos de C# Software Development:
+
+* POO — 3,0 pontos.
+* Web API — 2,5 pontos.
+* EF Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade do código — 2,0 pontos.
+
+Também devem estar presentes interfaces, injeção de dependência, testes unitários, documentação de endpoints, README, evidências e integração com a proposta CitizenTech.
+Não adicione funcionalidades desnecessárias e não retire requisitos.
+O contrato REST aprovado é a referência funcional.
+Implemente somente o que estiver previsto para B7.
+2. INSPEÇÃO INICIAL OBRIGATÓRIA
+Antes de modificar arquivos:
+
+1. Confirme o diretório de trabalho.
+2. Confirme branch main.
+3. Confirme HEAD no commit esperado.
+4. Confirme sincronização com origin/main.
+5. Confirme árvore de trabalho limpa.
+6. Leia `contracts/api-v1.md`, especialmente as seções 1.8, 2, 4.6, 5, 7, 8, 9 e 11.
+7. Leia os exemplos JSON das operações administrativas.
+8. Examine o domínio de Parada, Linha, ParadaLinha e PassagemRegistroManual.
+9. Examine os mapeamentos EF Core, o DbContext, os repositórios e a injeção de dependência.
+10. Examine os services existentes do B5.
+11. Examine os Controllers, o tratamento de ProblemDetails e a configuração JSON do B6.
+12. Examine os testes e a exportação OpenAPI existentes.
+
+O contrato efetivamente publicado em main prevalece sobre qualquer pressuposição deste prompt.
+Se houver alguma divergência real, documente-a e preserve a solução já aprovada, fazendo somente os ajustes necessários.
+3. ESCOPO EXATO DO B7
+Implemente estas cinco operações:
+
+1. POST /api/v1/admin/paradas
+2. PUT /api/v1/admin/paradas/{id}
+3. POST /api/v1/admin/linhas
+4. PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}
+5. POST /api/v1/admin/observacoes-passagem
+
+Essas operações são utilizadas por um operador, não pelo passageiro, pelo totem ou diretamente pela IA.
+Não crie endpoints administrativos adicionais.
+Não implemente:
+
+* DELETE.
+* Autenticação com usuários ou JWT.
+* Cadastro de destinos administrativos.
+* Consulta administrativa adicional.
+* Atualização de linhas.
+* Integração SPTrans.
+* Previsões de chegada.
+* Alternativas de deslocamento.
+* Resumo agregado.
+* Interface visual administrativa.
+
+4. AUTORIZAÇÃO ADMINISTRATIVA
+O contrato, seção 5.1, determina:
+Cabeçalho:
+`X-PontoVoz-Admin-Key`
+Configuração:
+`Admin:Chave`
+Implemente `ChaveAdministrativaFilter` ou um componente equivalente que preserve exatamente o comportamento previsto.
+Matriz obrigatória
+Development, sem chave configurada:
+
+* Operações permitidas.
+* Emitir aviso no log a cada inicialização informando que as operações administrativas estão sem proteção por chave.
+
+Development, com chave configurada:
+
+* Exigir cabeçalho correto.
+* Sem chave ou com chave incorreta: 401.
+
+Ambientes diferentes de Development, sem chave configurada:
+
+* Bloquear operações administrativas.
+* Devolver 403 `OperacoesAdministrativasDesabilitadas`.
+
+Ambientes diferentes de Development, com chave configurada:
+
+* Exigir cabeçalho correto.
+* Sem chave ou com chave incorreta: 401 `ChaveAdministrativaInvalida`.
+
+Requisitos de segurança
+
+* A chave nunca poderá ser incluída em arquivos versionados.
+* Utilizar user-secrets ou variável de ambiente, conforme a configuração .NET.
+* Não registrar o valor da chave em logs.
+* Não devolver a chave em erros ou evidências.
+* Utilizar `CryptographicOperations.FixedTimeEquals` ou mecanismo de comparação em tempo constante.
+* Quando devolver 401, incluir o cabeçalho `WWW-Authenticate` no formato previsto no contrato.
+* Os erros devem usar ProblemDetails com `codigo` e `traceId`.
+* Não liberar as operações administrativas em ambientes não Development sem chave configurada.
+
+ATENÇÃO À ORDEM DE EXECUÇÃO:
+A verificação da autorização deve acontecer antes da validação do corpo da requisição.
+Um POST sem autorização e com JSON inválido deve devolver 401 ou 403, e não 400.
+Verifique o ciclo de execução do ASP.NET Core: um Action Filter comum pode executar depois do model binding. Utilize uma abordagem que efetivamente garanta a prioridade da autorização.
+Teste a ordem real por HTTP.
+Não altere o comportamento das rotas públicas.
+5. POST /api/v1/admin/paradas
+Implemente o cadastro administrativo de parada.
+Campos obrigatórios e opcionais
+
+* `codigoExterno`: obrigatório, padrão e limite do contrato.
+* `nome`: obrigatório, de 3 a 120 caracteres.
+* `endereco`: opcional, até 200 caracteres.
+* `coordenada`: opcional.
+* `dadosSimulados`: booleano obrigatório, sem valor padrão presumido.
+
+Sucesso:
+
+* HTTP 201.
+* Resposta `ParadaAdministrativa`.
+* Cabeçalho `Location: /api/v1/paradas/{id}`.
+
+Regras
+
+* A parada nasce ativa.
+* A origem deve ser `CadastroAdministrativo`.
+* `dadosSimulados` corresponde ao valor declarado pelo operador.
+* Um cadastro administrativo não se torna oficialmente verificado.
+* O código não pode usar o prefixo reservado `SIM-`.
+* Dados fictícios não podem receber endereço ou coordenadas reais, conforme a regra do domínio.
+* Código já cadastrado deve devolver 409 `CodigoJaCadastrado`.
+* Validações incorretas devem devolver 400 `RequisicaoInvalida`.
+
+Use o Domain existente e não duplique suas regras.
+A gravação deve ser real no SQLite.
+O cadastro criado precisa aparecer imediatamente nas consultas públicas quando estiver ativo.
+6. PUT /api/v1/admin/paradas/{id}
+Implemente a atualização completa dos campos editáveis da parada.
+Corpo
+
+* `nome`: obrigatório.
+* `endereco`: opcional.
+* `coordenada`: opcional.
+* `ativa`: booleano obrigatório.
+
+Sucesso: HTTP 200, `ParadaAdministrativa`.
+Regras
+
+* Atualizar nome, endereço e coordenada quando válidos.
+* Permitir ativar e desativar.
+* Permitir atualizar uma parada já inativa.
+* Não alterar `codigoExterno`.
+* Não alterar `origem`.
+* Não alterar `dadosSimulados`.
+* Não apagar associações ou passagens anteriores.
+* Parada realmente inexistente: 404 `ParadaNaoEncontrada`.
+* Corpo inválido: 400 `RequisicaoInvalida`.
+
+A atualização deve preservar as regras de domínio para cadastros fictícios.
+IMPORTANTE: a busca sem acentos implementada no B4 deve continuar funcionando após a atualização do nome.
+Teste a atualização do campo normalizado `TextoBusca`.
+Após desativar, a parada deve deixar de aparecer nas consultas públicas, mas continuar disponível para uma atualização administrativa posterior.
+Não implemente exclusão física.
+7. POST /api/v1/admin/linhas
+Implemente o cadastro administrativo de linha.
+Corpo
+
+* `codigo`: obrigatório, padrão definido no contrato.
+* `letreiro`: obrigatório, de 1 a 30 caracteres.
+* `terminalPrincipal`: obrigatório, de 3 a 120 caracteres.
+* `terminalSecundario`: obrigatório, de 3 a 120 caracteres.
+* `sentido`: enum obrigatório.
+* `dadosSimulados`: booleano obrigatório.
+
+Sucesso:
+
+* HTTP 201.
+* Resposta Linha com os campos administrativos previstos.
+* Sem Location, conforme contrato.
+
+Regras
+
+* A linha nasce ativa.
+* `origem` deve ser `CadastroAdministrativo`.
+* A natureza fictícia é definida por `dadosSimulados`.
+* Código e letreiro não podem usar o prefixo reservado `SIM-`.
+* Código duplicado: 409 `CodigoJaCadastrado`.
+* Sentido inválido: 400.
+* Dados ausentes ou fora dos limites: 400.
+* Não converter automaticamente um cadastro administrativo em dado oficial.
+
+A nova linha deve aparecer na consulta pública de linhas.
+Preserve a regra de que cada sentido é representado por um cadastro próprio.
+Não implemente atualização de linha, pois não está prevista neste bloco.
+8. PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}
+Implemente a associação entre uma parada e uma linha.
+Sucesso: HTTP 204, sem corpo.
+Regras
+
+* Confirmar a existência da parada.
+* Confirmar a existência da linha.
+* A parada deve estar ativa.
+* A linha deve estar ativa.
+* A associação deve ser idempotente.
+* Repetir a mesma chamada deve devolver 204.
+* Não criar relações duplicadas.
+* Não apagar relações existentes.
+* Parada inexistente: 404 `ParadaNaoEncontrada`.
+* Linha inexistente: 404 `LinhaNaoEncontrada`.
+* Parada inativa: 422 `ParadaInativa`.
+* Linha inativa: 422 `LinhaInativa`.
+
+Utilize a relação N `ParadaLinha` e suas restrições persistidas.
+Teste a chamada repetida, inclusive em contextos diferentes, para garantir que a idempotência não dependa somente de objetos carregados em memória.
+9. POST /api/v1/admin/observacoes-passagem
+Implemente o registro manual de uma passagem observada.
+Corpo
+
+* `paradaId`: obrigatório.
+* `linhaId`: obrigatório.
+* `observadaEm`: date-time obrigatório com indicação de fuso.
+* `prefixoVeiculo`: opcional, formato definido no contrato.
+* `origemRegistro`: obrigatório, identificador técnico de 3 a 40 caracteres, composto por letras minúsculas, números e hífen.
+
+Sucesso:
+
+* HTTP 201.
+* Resposta Passagem com `paradaId`, no formato contratado.
+* Sem Location.
+
+Regras
+
+* A parada deve existir e estar ativa.
+* A linha deve existir e estar ativa.
+* A linha deve atender à parada.
+* A observação deve estar entre 24 horas antes e 2 minutos depois do horário atual do servidor, inclusive.
+* Fora da janela: HTTP 400.
+* Utilizar TimeProvider para obter o instante de referência.
+* Respeitar a regra temporal já implementada no domínio.
+* Preservar o instante UTC internamente.
+* Converter datas na resposta para o formato previsto.
+* Calcular corretamente `minutosDesdeObservacao`.
+* Calcular corretamente `desatualizada`.
+* O nível de confirmação deve ser `RegistroManual`.
+* `verificada` deve ser false.
+* `oficialSptrans` deve ser false.
+* A identificação de dados simulados deve respeitar o domínio e a origem dos registros.
+* O prefixo do veículo deve respeitar a natureza simulada ou não simulada do registro.
+* `origemRegistro` não pode conter nome, e-mail ou telefone pessoal.
+
+A observação persistida deverá aparecer no endpoint público de últimas passagens, quando seu horário observado já tiver ocorrido.
+Caso a observação esteja dentro da tolerância futura de 2 minutos, ela será aceita no cadastro, mas não aparecerá como passagem ocorrida até chegar seu horário.
+Não renove as passagens antigas do seed.
+Não crie uma API de verificação oficial de passagens.
+10. CAMADAS DA APLICAÇÃO
+Organize a implementação respeitando as camadas existentes.
+Domain
+Reutilize entidades, objetos de valor e regras do B2.
+Evite modificações desnecessárias.
+Application
+Crie somente:
+
+* Interfaces administrativas necessárias.
+* Services administrativos.
+* DTOs de entrada e resposta.
+* Validações que não estejam cobertas pelo domínio.
+* Erros de aplicação apropriados.
+
+Infrastructure
+Implemente operações de persistência necessárias à escrita.
+Respeite EF Core, as migrations, as chaves únicas e as restrições de relacionamento.
+API
+Crie os Controllers administrativos e o filtro de autorização.
+Mantenha os Controllers pequenos.
+Use:
+
+* Interfaces.
+* DI.
+* async/await.
+* CancellationToken.
+* ProblemDetails.
+* JSON no formato do contrato.
+
+Não crie um repositório genérico artificial.
+Não exponha DbContext diretamente nos Controllers.
+11. TRATAMENTO DE ERROS
+Preserve o tratamento centralizado criado no B6.
+Erros administrativos esperados:
+
+* 400 `RequisicaoInvalida`.
+* 401 `ChaveAdministrativaInvalida`.
+* 403 `OperacoesAdministrativasDesabilitadas`.
+* 404 `ParadaNaoEncontrada`.
+* 404 `LinhaNaoEncontrada`.
+* 409 `CodigoJaCadastrado`.
+* 422 `LinhaNaoAtendeParada`.
+* 422 `ParadaInativa`.
+* 422 `LinhaInativa`.
+* 500 `ErroInterno` somente para falhas inesperadas.
+
+Todos os erros devem respeitar a política global de ProblemDetails.
+Inclua `codigo` e `traceId`.
+Não exponha stack traces ou dados sensíveis.
+Para códigos únicos, verifique a existência previamente quando necessário para obter mensagens claras, mas preserve também as restrições do SQLite.
+Se houver colisão de código durante a gravação, a API deve retornar 409 de maneira segura, sem converter a violação de unicidade em erro 500.
+Não transforme toda DbUpdateException em 409; diferencie violação de unicidade de erros inesperados.
+Não exponha mensagens internas do SQLite.
+12. VALIDAÇÃO DE CORPOS JSON
+Os campos obrigatórios precisam ser realmente obrigatórios.
+Cuidado especial com booleanos e enums:
+Se `dadosSimulados` ou `ativa` estiverem ausentes, a API deve devolver 400.
+Não aceite silenciosamente `false` apenas porque esse é o valor padrão de um bool não anulável em C#.
+Se `sentido` estiver ausente ou indefinido, a API deve devolver 400.
+Valide:
+
+* JSON ausente.
+* JSON malformado.
+* Campos obrigatórios omitidos.
+* Tipos incorretos.
+* Enum inválido.
+* Datas sem fuso.
+* Datas fora da janela temporal.
+* Valores fora das faixas previstas.
+* Formatos de código inválidos.
+
+Os erros de validação devem continuar no padrão ProblemDetails do B6, com `errors` apropriado.
+Não permita que entradas inválidas provoquem exceção HTTP 500.
+13. TESTES AUTOMATIZADOS
+Preserve os 521 testes existentes.
+Adicione testes unitários e de integração HTTP relevantes para B7.
+Autorização
+Teste as quatro combinações de ambiente e chave do contrato:
+
+* Development sem chave.
+* Development com chave.
+* Outro ambiente sem chave.
+* Outro ambiente com chave.
+
+Confirme ainda:
+
+* Chave correta.
+* Chave incorreta.
+* Chave ausente.
+* Requisição com corpo inválido e sem autorização.
+* 401 com WWW-Authenticate.
+* 403 com o código correto.
+* Nenhuma informação de chave vazando nos logs ou erros.
+* Rotas públicas continuam funcionando sem chave administrativa.
+
+Cadastro de paradas
+Teste:
+
+* Cadastro válido 201.
+* Location correto.
+* Campo dadosSimulados ausente.
+* Cadastro fictício declarado.
+* Código reservado SIM-.
+* Código duplicado 409.
+* Coordenada inválida.
+* Atualização válida.
+* Desativação e reativação.
+* Atualização de parada inativa.
+* Preservação do código e da natureza.
+* Busca sem acentos após renomear.
+* Preservação do histórico.
+
+Cadastro de linhas
+Teste:
+
+* Cadastro válido 201.
+* dadosSimulados ausente.
+* Sentido ausente ou inválido.
+* Código duplicado.
+* Prefixo reservado.
+* Linha criada visível na consulta pública.
+
+Associação
+Teste:
+
+* Associação válida 204.
+* Associação repetida 204.
+* Ausência de duplicação no SQLite.
+* Parada inexistente.
+* Linha inexistente.
+* Parada inativa.
+* Linha inativa.
+
+Passagens
+Teste:
+
+* Cadastro manual válido 201.
+* Últimas passagens atualizadas.
+* Linha não associada à parada.
+* Janela de 24 horas.
+* Tolerância futura de 2 minutos.
+* Fronteiras exatas da janela.
+* Prefixo de veículo.
+* OrigemRegistro inválida.
+* Dados simulados e não simulados.
+* Nível RegistroManual.
+* Verificada false.
+* OficialSptrans false.
+* Registro futuro aceito mas temporariamente excluído da consulta pública.
+* Registro visível após o horário ocorrer.
+* Desatualização e minutos corretamente calculados.
+
+Utilize FakeTimeProvider ou ferramenta equivalente já presente no projeto.
+Os testes HTTP devem utilizar WebApplicationFactory e SQLite isolado.
+Não altere o banco de desenvolvimento durante os testes.
+Não utilize mocks de banco para afirmar que a persistência real foi verificada.
+Não busque um número arbitrário de testes. O objetivo é cobrir integralmente as regras do contrato.
+14. TESTE DE FLUXO COMPLETO
+Crie pelo menos um teste de integração que execute o fluxo real:
+
+1. Configurar autorização administrativa conforme contrato.
+2. Cadastrar uma parada administrativa fictícia.
+3. Cadastrar uma linha administrativa fictícia.
+4. Associar a linha à parada.
+5. Registrar uma observação manual válida.
+6. Consultar o endpoint público de últimas passagens.
+7. Confirmar que o registro aparece com dados corretos.
+8. Confirmar que nunca é apresentado como verificado.
+9. Desativar a parada.
+10. Confirmar que ela desaparece da consulta pública.
+11. Confirmar que os registros permanecem persistidos.
+
+Esse teste deve usar HTTP e SQLite real.
+Não utilize IDs numéricos fixos.
+15. OPENAPI E SCALAR
+Atualize a documentação automática para incluir as cinco operações administrativas.
+Ao final do B7, a API deverá apresentar:
+
+* Os cinco endpoints públicos do B6.
+* Os cinco endpoints administrativos do B7.
+* GET /health.
+
+Total esperado: 11 operações implementadas, sem contar a interface Scalar e a rota que serve o documento OpenAPI.
+As três operações públicas restantes do contrato continuarão pendentes para B8 e B9.
+Documente:
+
+* Métodos e rotas.
+* DTOs de requisição.
+* DTOs de resposta.
+* Códigos HTTP.
+* Campos obrigatórios.
+* Cabeçalho de chave administrativa.
+* ProblemDetails.
+* Comportamento dos dados simulados.
+
+Se for apropriado, documente a chave como mecanismo de segurança no OpenAPI, sem incluir nenhum valor real.
+Preserve Scalar.
+Execute novamente o script:
+`pwsh ./scripts/exportar-openapi.ps1`
+Confirme que o OpenAPI gerado corresponde ao documento exportado.
+Não documente rotas futuras como implementadas.
+16. CONFIGURAÇÃO E SEGREDOS
+Documente de forma clara como configurar `Admin:Chave`.
+Utilize os recursos nativos de configuração do .NET.
+Não coloque chaves reais no appsettings.json.
+Não coloque segredos no prompts.md.
+Não coloque chaves reais nos testes publicados, evidências ou exemplos de console.
+Se utilizar valores fictícios nos testes, identifique-os como dados de teste.
+Explique no README que o modo Development sem chave é permitido pelo contrato para demonstração local, mas não equivale a segurança adequada para uma API exposta publicamente.
+Não altere a política do contrato por conta própria.
+17. DOCUMENTAÇÃO ACADÊMICA
+Atualize:
+
+* backend/README.md.
+* README principal do repositório, se houver informações de status.
+* Documentação da camada Application.
+* Documentação de Infrastructure quando necessário.
+* contracts/README.md.
+* contracts/api-v1.md, apenas para marcar como implementadas as operações realmente funcionais.
+* contracts/openapi/pontovoz-v1.json.
+* prompts.md.
+
+Crie:
+`backend/docs/evidencias/B7-admin.md`
+Registre evidências reais de:
+
+* Autorização 401 e 403.
+* Cadastro 201.
+* Atualização 200.
+* Associação 204.
+* Observação manual 201.
+* Persistência no SQLite.
+* Integração com consultas públicas.
+* Testes.
+* OpenAPI.
+* Scalar.
+
+Não registre segredos nas capturas.
+Preserve a fidelidade acadêmica do prompts.md e a identificação correta do uso de IA.
+Não reescreva o histórico para ocultar as ferramentas utilizadas.
+18. VALIDAÇÃO FINAL
+Execute:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Confirme os resultados reais.
+Teste a API em execução:
+
+* GET /health.
+* GET /api/v1/paradas.
+* POST /api/v1/admin/paradas.
+* PUT /api/v1/admin/paradas/{id}.
+* POST /api/v1/admin/linhas.
+* PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}.
+* POST /api/v1/admin/observacoes-passagem.
+* GET /api/v1/paradas/{id}/ultimas-passagens.
+* GET /openapi/v1.json.
+* /scalar/.
+
+Use banco isolado nas operações que modificam dados.
+Não altere o histórico da base de desenvolvimento somente para produzir evidências.
+Confirme:
+
+* Ausência de erros e avisos de compilação.
+* Preservação dos testes anteriores.
+* Novos testes aprovados.
+* 11 operações implementadas.
+* Contrato verificado.
+* OpenAPI atualizado.
+* Segurança das operações administrativas.
+* Ausência de segredos versionados.
+* Ausência de alterações inesperadas no banco.
+* Funcionalidades de B8/B9 não antecipadas.
+
+Se encontrar falhas, corrija-as dentro do escopo antes de considerar o bloco concluído.
+19. GIT
+Não faça commit.
+Não execute git push.
+Não utilize force push.
+Não reescreva o histórico.
+Não altere arquivos não relacionados ao B7 sem necessidade.
+Deixe as alterações locais para auditoria antes da publicação.
+20. RELATÓRIO FINAL OBRIGATÓRIO
+Apresente:
+A. Resumo simples do que foi desenvolvido.
+B. Arquivos criados e modificados.
+C. Cinco rotas administrativas e seus comportamentos.
+D. Estratégia de autorização e matriz de ambientes.
+E. DTOs e regras de validação.
+F. Persistência, idempotência e tratamento de duplicidades.
+G. Funcionamento do cadastro de observações.
+H. Integração real entre rotas administrativas e públicas.
+I. Resultados dos testes, com totais aprovados, falhos e ignorados.
+J. Resultado do build, migrations e validação do contrato.
+K. OpenAPI, Scalar e evidências.
+L. Confirmação de ausência de segredos.
+M. Critérios oficiais da FIAP já atendidos e pendentes.
+N. Estado do Git.
+O. Problemas encontrados e correções aplicadas.
+P. Pendências para o B8.
+Inclua uma explicação didática, breve, para que o integrante consiga apresentar:
+
+* O que são as rotas administrativas.
+* Por que elas exigem autorização.
+* Como o cadastro chega ao SQLite.
+* Como as novas informações aparecem nas consultas públicas.
+
+Execute somente B7. Não faça commit, não faça push e não inicie B8.
+Pare ao concluir e aguarde a próxima auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** a ferramenta implementou as cinco
+rotas administrativas, o filtro `ChaveAdministrativaFilter` (autorização antes da leitura do corpo,
+matriz de ambiente e chave, comparação em tempo constante, 401 com `WWW-Authenticate` e 403), os
+services, DTOs e validações administrativos, a gravação com EF Core (repositórios de escrita e
+unidade de trabalho que converte só a violação de unicidade do SQLite) e a documentação OpenAPI
+das rotas. Escreveu os testes HTTP de autorização, cadastros, associação, observações e o fluxo
+completo. A sessão foi **interrompida pelo limite de uso** da ferramenta antes dos testes dos
+services e de concorrência, da exportação do OpenAPI, da documentação, das evidências e deste
+registro. No momento da interrupção, 626 de 627 testes passavam; a única falha era o arquivo
+OpenAPI exportado, ainda desatualizado. Não houve commit.
+
+<a id="prompt-24"></a>
+
+### Prompt 24 — Bloco B7 (09.1): retomada e conclusão após a interrupção por limite de uso
+
+**Data:** 08/11/2026 · **Tipo:** Continuação: testes, documentação e evidências · **Commit:** —
+
+Continuação do prompt 23, enviada depois da interrupção. O trabalho local não commitado foi
+preservado e conferido antes de continuar.
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+PROMPT 09.1 — RETOMADA E CONCLUSÃO DO BLOCO B7 INTERROMPIDO POR LIMITE DE USO
+Estamos retomando o desenvolvimento do B7 após a interrupção por limite de créditos do Claude Code.
+ATENÇÃO: NÃO RECOMECE O B7 DO ZERO.
+O trabalho anterior permanece na pasta local e deve ser preservado.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório:
+`C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz`
+Último commit publicado:
+`4ffef65d3965b1f31779f4be6e5a1598dfb94dea`
+O B7 foi parcialmente implementado, mas ainda não foi commitado nem publicado.
+Sua responsabilidade é continuar exatamente do ponto em que parou, concluir as pendências, corrigir eventuais problemas e apresentar um relatório completo para auditoria.
+Não inicie B8.
+Não faça commit nem push.
+1. PRESERVAÇÃO DO TRABALHO EXISTENTE
+Antes de modificar qualquer arquivo:
+
+1. Confirme o diretório correto.
+2. Examine `git status`.
+3. Confirme a branch main.
+4. Confirme o último commit publicado.
+5. Liste os arquivos modificados e ainda não versionados.
+6. Identifique os componentes B7 já implementados.
+7. Preserve integralmente o trabalho não commitado.
+
+É proibido executar `git reset --hard`, `git clean -fd`, descartar alterações ou recriar o projeto.
+Não sobrescreva arquivos já implementados sem necessidade comprovada.
+Não repita etapas que já foram concluídas corretamente.
+2. ESTADO ANTERIOR À INTERRUPÇÃO
+O relatório anterior informou:
+Implementado:
+
+* As cinco rotas administrativas previstas na seção 5 do contrato.
+* Chave administrativa e matriz de autorização.
+* Validação de campos obrigatórios.
+* Tratamento de códigos duplicados.
+* Validação de datas e fusos.
+* Testes HTTP administrativos.
+* Fluxo integrado de cadastro e consulta pública.
+* OpenAPI gerado pela aplicação com 11 operações.
+
+Testes no momento da interrupção:
+
+* 627 testes.
+* 626 aprovados.
+* Uma falha: o arquivo OpenAPI exportado ainda não havia sido atualizado.
+* Build com zero erros e zero avisos.
+
+Pendências declaradas:
+
+1. Testes unitários dos services administrativos.
+2. Testes de concorrência e violação de unicidade do SQLite.
+3. Exportação atualizada do OpenAPI.
+4. Atualização dos contratos e READMEs.
+5. Evidências do B7.
+6. Registro do prompt em prompts.md.
+7. Validação final de todos os comandos.
+8. Relatório técnico completo.
+
+Confira o estado real antes de assumir que esses números permanecem iguais.
+3. FINALIZE OS TESTES PENDENTES
+Conclua os testes unitários dos services administrativos.
+Cubra, conforme necessário:
+
+* Validação antes de operações de escrita.
+* Cadastro de parada.
+* Atualização de parada.
+* Cadastro de linha.
+* Associação idempotente.
+* Registro de observação.
+* Tratamento de erros esperados.
+* CancellationToken.
+* TimeProvider.
+* Respeito às regras de domínio.
+
+Conclua também os testes de concorrência e restrições SQLite:
+
+* Dois cadastros com o mesmo código.
+* Violação real do índice único.
+* Conversão correta de violação de unicidade em HTTP 409.
+* Exceções de banco não relacionadas à unicidade não convertidas indevidamente em 409.
+* Associação repetida sem duplicação.
+* Preservação da integridade referencial.
+
+Use SQLite real nos testes de persistência.
+Não crie testes artificiais apenas para aumentar a quantidade.
+4. VALIDAÇÃO FINAL DA SEGURANÇA
+Revise os quatro cenários do contrato:
+
+* Development sem chave.
+* Development com chave.
+* Ambiente não Development sem chave.
+* Ambiente não Development com chave.
+
+Confirme:
+
+* Autorização antes de validação do corpo.
+* 401 e 403 conforme o contrato.
+* WWW-Authenticate nos 401.
+* Chave comparada em tempo constante.
+* Ausência de vazamento de segredos.
+* Nenhuma chave real versionada.
+* Rotas públicas continuam acessíveis.
+* Erros em ProblemDetails com codigo e traceId.
+
+Confirme também que a configuração de user-secrets funciona.
+O `UserSecretsId` no projeto não é um segredo e pode ser versionado, desde que o valor real de Admin não seja publicado.
+5. QUESTÃO DO origemRegistro
+O relatório anterior apontou que a expressão regular do contrato aceita uma sequência numérica que poderia coincidir com um telefone.
+A orientação acadêmica é não utilizar informações pessoais nesse campo.
+Não altere silenciosamente a regra contratual.
+Preserve o formato técnico já definido para origemRegistro.
+Documente claramente que o campo deve conter apenas um identificador técnico impessoal, nunca nomes, telefones ou e-mails reais.
+Não afirme que a expressão regular impede absolutamente a entrada de dados pessoais, porque isso não seria verdade.
+Se considerar indispensável ampliar a validação, registre a proposta e seu impacto no contrato como pendência para auditoria, sem mudar unilateralmente o requisito publicado.
+6. EXPORTAÇÃO OPENAPI
+O arquivo OpenAPI exportado está desatualizado.
+Execute o script existente de exportação, respeitando as instruções reais do projeto:
+`pwsh ./scripts/exportar-openapi.ps1`
+Confirme que:
+
+* O documento contém 11 operações implementadas.
+* As cinco rotas administrativas estão presentes.
+* As cinco rotas públicas continuam presentes.
+* `/health` permanece presente.
+* O esquema de segurança administrativa está documentado.
+* Os campos obrigatórios estão corretamente identificados.
+* Campos opcionais não aparecem indevidamente como obrigatórios.
+* Não há valores de chaves reais.
+* As operações B8 e B9 não aparecem como implementadas.
+
+Execute novamente o teste que falhava por divergência do OpenAPI.
+Confirme que o arquivo exportado é idêntico ao documento gerado pela API real.
+7. COMPLETE A DOCUMENTAÇÃO
+Atualize os arquivos relevantes:
+
+* contracts/api-v1.md.
+* contracts/README.md.
+* backend/README.md.
+* README.md da raiz.
+* Application/README.md.
+* Infrastructure/README.md.
+* Security/README.md, conforme o caminho efetivamente utilizado.
+* Middleware/README.md, se necessário.
+* contracts/openapi/pontovoz-v1.json.
+
+A documentação deve explicar:
+
+* As cinco operações administrativas.
+* Os códigos HTTP.
+* O cabeçalho X-PontoVoz-Admin-Key.
+* A matriz de segurança.
+* A configuração Admin usando user-secrets ou variável de ambiente.
+* O comportamento das validações.
+* O uso de SQLite.
+* Os dados simulados.
+* As restrições do registro manual.
+* Como executar os testes.
+* Como testar as operações no Scalar.
+
+Não registre valores secretos.
+Não modifique os requisitos já aprovados sem necessidade.
+8. EVIDÊNCIAS REAIS
+Crie:
+`backend/docs/evidencias/B7-admin.md`
+Inclua somente evidências realmente verificadas:
+
+* 201 para cadastro de parada.
+* 200 para atualização.
+* 201 para cadastro de linha.
+* 204 para associação.
+* 201 para observação manual.
+* 401 com chave inválida ou ausente.
+* 403 quando operações administrativas estiverem desabilitadas.
+* 409 para código duplicado.
+* 422 para regras de negócio.
+* Persistência real no SQLite.
+* Fluxo administrativo até consulta pública.
+* Resultado dos testes.
+* OpenAPI e Scalar.
+* Resultado do build.
+
+Não use dados pessoais reais ou segredos.
+9. REGISTRO ACADÊMICO
+Atualize `prompts.md` com o prompt original do B7, caso ainda não esteja registrado, e identifique esta solicitação como continuação após uma interrupção por limite de uso.
+Preserve o histórico verdadeiro dos prompts e as atribuições já corrigidas.
+Não invente atividades humanas nem omita o uso efetivo das ferramentas.
+Não altere o histórico Git antigo.
+Mantenha a organização profissional do documento.
+10. VALIDAÇÃO FINAL COMPLETA
+Execute:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Confirme os resultados reais.
+Execute também:
+
+* Verificador dos contratos.
+* Testes HTTP das operações administrativas.
+* Testes de segurança.
+* Testes dos services.
+* Testes de integração SQLite.
+* Teste de igualdade entre OpenAPI exportado e OpenAPI gerado.
+* Teste da API real.
+* Verificação de Scalar.
+
+Reproduza o fluxo administrativo completo em um banco de teste isolado:
+
+1. Cadastrar parada.
+2. Cadastrar linha.
+3. Associá-las.
+4. Registrar observação manual.
+5. Consultar as últimas passagens na API pública.
+6. Desativar a parada.
+7. Confirmar ausência nas consultas públicas.
+8. Confirmar preservação dos registros no SQLite.
+
+Não use IDs internos fixos.
+Não altere o banco de desenvolvimento para produzir evidências.
+Se algum teste falhar, identifique a causa e corrija apenas o necessário.
+11. RUBRICA OFICIAL DA FIAP
+Verifique a implementação considerando os critérios obrigatórios:
+
+* POO — 3,0 pontos.
+* Web API — 2,5 pontos.
+* EF Core + LINQ — 1,5 ponto.
+* Async/Await — 1,0 ponto.
+* Qualidade do código — 2,0 pontos.
+
+Confirme também interfaces, injeção de dependência, testes unitários, documentação de endpoints, README, evidências e alinhamento com CitizenTech.
+Não confunda testes aprovados com garantia de nota.
+12. GIT
+Não faça commit.
+Não faça push.
+Não execute force push.
+Não descarte modificações.
+Não reescreva histórico.
+Deixe o B7 concluído localmente para auditoria.
+13. RELATÓRIO FINAL
+Apresente:
+A. Resumo simples do B7 completo.
+B. O que já estava implementado antes da interrupção.
+C. O que foi concluído nesta retomada.
+D. Arquivos criados e modificados.
+E. Cinco rotas administrativas implementadas.
+F. Segurança e matriz de ambientes.
+G. Validações e erros HTTP.
+H. Resultados da persistência e testes de concorrência.
+I. Fluxo completo administrativo → SQLite → API pública.
+J. Total real de testes aprovados, falhos e ignorados.
+K. Resultado de build, EF Core e verificador do contrato.
+L. Estado do OpenAPI e Scalar.
+M. Evidências criadas.
+N. Confirmação de ausência de segredos.
+O. Critérios FIAP implementados e pendentes.
+P. Estado do Git.
+Q. Problemas encontrados e soluções.
+R. Pendências para B8.
+Conclua integralmente o B7, mas não publique ainda. Não inicie B8. Aguarde a auditoria.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code conferiu o estado
+local (branch, commit, arquivos do B7 e testes) sem descartar nada e concluiu o B7:
+- **Testes:** 23 testes dos services administrativos com dublês e 12 testes de concorrência e
+  restrições no SQLite real (código repetido, associação simultânea, chave estrangeira que não
+  vira 409). No total, 663 testes passaram.
+- **OpenAPI:** exportado com as 11 operações; números passaram a ser só números
+  (`NumberHandling.Strict`), e o documento marca os campos obrigatórios corretamente.
+- **Documentação:** contrato, READMEs (raiz, backend, contracts, Application, Infrastructure,
+  Security e Middleware) e `backend/docs/evidencias/B7-admin.md`, com respostas reais em banco
+  isolado, conferência do user-secrets (valor temporário, removido em seguida) e captura do Scalar.
+- **`origemRegistro`:** a frase do contrato que dizia que telefones não passam no padrão foi
+  corrigida; a regra não mudou, e a eventual ampliação ficou como pendência para a auditoria.
+- **Git:** não houve commit.
+
+<a id="prompt-25"></a>
+
+### Prompt 25 — Bloco B7.2: pacote ZIP para auditoria independente do código
+
+**Data:** 08/11/2026 · **Tipo:** Preparação para auditoria · **Commit:** —
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+B7.2 — PREPARAÇÃO PARA AUDITORIA INDEPENDENTE DO CÓDIGO
+O relatório final do B7 foi recebido.
+O B7 está aprovado em princípio, com 663 testes aprovados, mas antes de autorizar o commit e o push faremos uma auditoria independente do código-fonte.
+Sua tarefa agora é preparar um ZIP completo e atualizado do projeto para essa revisão.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base publicado:
+`4ffef65d3965b1f31779f4be6e5a1598dfb94dea`
+1. PRESERVE O ESTADO ATUAL
+Não recomece o B7.
+Não implemente novas funcionalidades.
+Não faça commit ou push.
+Não descarte arquivos modificados ou ainda não versionados.
+Confirme que todas as alterações locais do B7 continuam presentes.
+2. GERE O ZIP PARA AUDITORIA
+Crie um arquivo chamado:
+`PontoVoz-B7-Auditoria.zip`
+Salve-o fora da pasta controlada pelo Git, preferencialmente no diretório pai do projeto.
+O arquivo deve conter a versão atual e completa de:
+
+* README.md da raiz.
+* prompts.md.
+* contracts/, inclusive exemplos e OpenAPI.
+* backend/src/, incluindo Domain, Application, Infrastructure, Controllers, Middleware e Security.
+* backend/tests/.
+* backend/docs/evidencias/.
+* Arquivos de configuração, solução e projetos .NET.
+* Scripts necessários à execução.
+
+Inclua também todos os arquivos novos do B7 que ainda não foram commitados.
+Não utilize somente `git archive HEAD`, pois isso excluiria as alterações locais ainda não publicadas.
+3. NÃO INCLUA INFORMAÇÕES SENSÍVEIS OU ARQUIVOS GERADOS
+Exclua do ZIP:
+
+* .git/
+* bin/
+* obj/
+* *.db
+* *.db-shm
+* *.db-wal
+* .vs/
+* .idea/
+* Arquivos temporários.
+* Arquivos de user-secrets.
+* Tokens, chaves e senhas reais.
+* Logs com informações privadas.
+
+Preserve os exemplos fictícios e as evidências acadêmicas apropriadas.
+4. VERIFIQUE O ZIP
+Antes de concluir:
+
+1. Confirme que o ZIP abre corretamente.
+2. Liste a quantidade de arquivos incluídos.
+3. Confirme que as cinco rotas administrativas e seus testes estão presentes.
+4. Confirme que os arquivos novos do B7 não ficaram de fora.
+5. Confirme ausência de bancos e segredos.
+6. Calcule o SHA-256 do ZIP.
+7. Informe o caminho completo do arquivo.
+8. Informe o estado do Git e o número de arquivos modificados.
+
+Não altere o código somente para gerar o ZIP.
+5. RELATÓRIO FINAL
+Apresente:
+A. Caminho completo do ZIP.
+B. Tamanho do arquivo.
+C. Quantidade de arquivos.
+D. SHA-256.
+E. Confirmação da presença de todos os arquivos do B7.
+F. Confirmação de ausência de segredos e bancos SQLite.
+G. Estado do Git.
+H. Confirmação de que não houve commit nem push.
+Depois de gerar o ZIP, pare e aguarde a auditoria. Não inicie B8.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code gerou
+`PontoVoz-B7-Auditoria.zip` na pasta acima do repositório, a partir da árvore de trabalho
+(arquivos versionados e os novos do B7 ainda não commitados), sem `.git`, binários, bancos
+SQLite, logs nem segredos. Conferiu a integridade, os 183 arquivos, a presença e a igualdade byte
+a byte dos 51 arquivos alterados ou novos do B7, a ausência de bancos e chaves, e informou o
+SHA-256. Nenhum código foi alterado e não houve commit.
+
+<a id="prompt-26"></a>
+
+### Prompt 26 — Bloco B7.3: validação final e publicação do B7
+
+**Data:** 08/11/2026 · **Tipo:** Validação e publicação · **Commit:** `feat: implement secured administrative REST API`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — GLOBAL SOLUTION FIAP 2026.2
+BLOCO B7.3 — VALIDAÇÃO FINAL E PUBLICAÇÃO AUTORIZADA
+O ZIP `PontoVoz-B7-Auditoria.zip` foi recebido e o código-fonte foi auditado.
+A auditoria verificou as cinco rotas administrativas, o filtro de autorização, as regras de negócio, a persistência com EF Core, o tratamento de erros e os testes.
+O B7 está aprovado para publicação, condicionado à última validação automática.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Commit-base esperado:
+`4ffef65d3965b1f31779f4be6e5a1598dfb94dea`
+1. Preserve a implementação aprovada
+Não recomece o B7.
+Não adicione funcionalidades.
+Não altere o contrato sem necessidade.
+Não implemente B8.
+Não descarte arquivos locais.
+Confirme que a pasta de trabalho continua contendo exatamente as alterações aprovadas do B7.
+2. Verificação final obrigatória
+Execute a partir de backend/:
+
+* dotnet restore
+* dotnet build
+* dotnet test
+* dotnet ef migrations list
+* dotnet ef database update
+* dotnet ef migrations has-pending-model-changes
+
+Execute também o verificador dos contratos.
+O último relatório informou 663 testes aprovados, sem falhas ou avisos.
+Informe os resultados reais encontrados agora.
+Confirme que:
+
+* Todas as 11 operações da API permanecem funcionais.
+* Os testes de autorização continuam passando.
+* Os testes de persistência e concorrência continuam passando.
+* O OpenAPI exportado continua igual ao documento gerado pela aplicação.
+* O Scalar continua funcionando.
+* Nenhum segredo está presente nos arquivos versionáveis.
+* O banco de desenvolvimento não sofreu alterações de dados.
+* Nenhum endpoint de B8 ou B9 foi antecipado.
+
+3. Conferência dos requisitos acadêmicos
+Confira novamente a cobertura de:
+
+* POO.
+* Web API.
+* EF Core e LINQ.
+* Async/Await.
+* Qualidade do código.
+* Interfaces.
+* Injeção de dependência.
+* Testes unitários.
+* README.
+* Documentação OpenAPI/Scalar.
+* Evidências de funcionamento.
+
+Não confunda critérios implementados com garantia de nota.
+4. Controle de segurança
+Verifique que:
+
+* A chave administrativa não está no repositório.
+* Os quatro cenários de autorização seguem o contrato.
+* Requisições sem autorização não executam operações de escrita.
+* 401 e 403 são tratados corretamente.
+* A restrição de unicidade produz 409 quando aplicável.
+* A associação repetida permanece idempotente.
+* O registro manual continua não verificado.
+* O histórico é preservado após desativar uma parada.
+
+A limitação conhecida de `origemRegistro` está documentada. Não altere sua expressão regular nesta publicação.
+5. Documentação
+Confirme que os READMEs, contratos, evidências e prompts.md estão atualizados até o B7.
+O arquivo prompts.md deve continuar fiel ao histórico real de utilização do ChatGPT e do Claude Code.
+Não altere registros anteriores para ocultar o uso das ferramentas.
+Registre esta instrução final de publicação de acordo com o padrão existente.
+6. Commit autorizado
+Se todas as verificações passarem, execute o commit com esta mensagem:
+`feat: implement secured administrative REST API`
+Antes de confirmar:
+
+* Inspecione o diff.
+* Confirme a lista de arquivos staged.
+* Exclua bancos, binários, temporários e segredos.
+* Preserve a autoria legítima configurada no Git.
+* Não acrescente trailer automático Co-Authored-By.
+* Não altere commits anteriores.
+
+Confirme que a mensagem gravada é exatamente a autorizada.
+7. Push autorizado
+Depois de um commit válido e testes aprovados, execute push normal para origin/main.
+Não utilize force push.
+Confirme que main e origin/main apontam para o mesmo commit.
+Confirme árvore de trabalho limpa.
+Se encontrar falha relevante que não consiga corrigir com segurança, interrompa a publicação e relate o impedimento.
+8. Relatório final
+Informe:
+A. Resumo simples da publicação.
+B. Total de testes aprovados, falhos e ignorados.
+C. Resultado do build e das migrations.
+D. Resultado do verificador de contratos.
+E. Confirmação de 11 operações no OpenAPI.
+F. Confirmação da segurança administrativa.
+G. Hash completo do commit.
+H. Mensagem gravada.
+I. Resultado do push.
+J. Estado final do Git.
+K. Pendências específicas para B8.
+Não implemente B8. Publique somente o B7 validado e pare.
+````
+
+Durante a execução, o build falhou porque o executável da API estava bloqueado por uma instância
+iniciada em um terminal do VS Code. A ferramenta interrompeu a publicação e pediu autorização para
+encerrar esse processo. O integrante respondeu com a instrução complementar abaixo.
+
+**Instrução complementar (texto integral, como foi enviada):**
+
+````text
+Autorizo você a encerrar o processo PID 39276, desde que confirme novamente que ele pertence exclusivamente à API PontoVoz e está bloqueando a compilação.
+Tente primeiro um encerramento normal. Se necessário, finalize especificamente esse processo, sem interromper outros programas ou serviços.
+Depois, continue automaticamente a execução do B7.3, exatamente de onde parou:
+
+1. Execute novamente restore, build e todos os testes usando os binários recompilados.
+2. Confirme os 663 testes ou a quantidade atual, sem falhas.
+3. Valide migrations, contrato, 11 operações da API, segurança administrativa, OpenAPI e Scalar.
+4. Confirme a ausência de segredos e alterações indevidas no banco.
+5. Registre o B7.3 no prompts.md.
+6. Se todas as verificações passarem, realize o commit e o push já autorizados para origin/main.
+7. Apresente o relatório final com o hash do commit e o estado do Git.
+
+Você tem autorização para resolver bloqueios operacionais semelhantes durante as próximas etapas, desde que confirme que os processos pertencem exclusivamente ao PontoVoz e não comprometa dados ou trabalhos de outras aplicações.
+Não solicite autorização novamente para operações rotineiras necessárias à execução do projeto. Não descarte alterações, não reescreva o histórico e não execute force push.
+Se encontrar um problema relevante que não consiga corrigir com segurança, interrompa a publicação e relate o impedimento.
+Não inicie B8 até concluirmos o B7.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code confirmou que a
+árvore de trabalho era idêntica ao ZIP auditado. Na primeira tentativa, o `dotnet build` falhou
+porque o processo PID 39276 (a API do PontoVoz, iniciada pelo terminal do VS Code) bloqueava o
+executável; a ferramenta não o encerrou sem autorização. Com a autorização, confirmou de novo que o
+processo era só a API do PontoVoz, tentou o encerramento normal e, como a aplicação de console não
+o aceita, finalizou apenas aquele PID. Depois repetiu restore, build completo (0 avisos e 0 erros),
+os 663 testes com os binários recompilados, os comandos `dotnet ef` e o verificador do contrato;
+conferiu na API real, sobre um banco isolado, as 11 operações, a matriz da chave, o 409, a
+associação idempotente, o registro manual não verificado, o histórico após desativar, a ausência
+das rotas do B8 e B9, o OpenAPI igual ao exportado e o Scalar, sem alterar o banco de
+desenvolvimento. Publicou o B7 com o commit `feat: implement secured administrative REST API`, sem trailer, e push normal.

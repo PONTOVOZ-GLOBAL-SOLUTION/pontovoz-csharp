@@ -5,7 +5,7 @@ Implementações técnicas do backend. O domínio (`Domain/`) não depende desta
 | Pasta | Conteúdo | Estado |
 |---|---|---|
 | `Persistence/` | `PontoVozDbContext`, mapeamentos Fluent API, conversor de instantes UTC, coluna de busca normalizada, migrations e seed de dados fictícios | Implementado no B3 e no B4 |
-| `Repositories/` | Implementações das interfaces de `Application/Interfaces`, com EF Core e LINQ | Implementado no B4 |
+| `Repositories/` | Implementações das interfaces de `Application/Interfaces`, com EF Core e LINQ. No B7, as mesmas classes implementam as interfaces de escrita (`ICadastro*Repository`), e `UnidadeTrabalhoEf` grava as mudanças, convertendo só a violação de chave única ou primária do SQLite em `ViolacaoUnicidadeException` | Implementado no B4 e no B7 |
 | `Providers/` | Provedores de previsão de chegada (simulado e adaptador HTTP do Olho Vivo) | Planejado (B8) |
 
 Detalhes da persistência, das tabelas e do seed estão em

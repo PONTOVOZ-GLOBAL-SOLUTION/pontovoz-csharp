@@ -7,7 +7,11 @@ using PontoVoz.Api.Infrastructure.Persistence;
 
 namespace PontoVoz.Api.Infrastructure.Repositories;
 
-public sealed class ParadaRepository(PontoVozDbContext contexto) : IParadaRepository
+/// <summary>
+/// Consultas públicas de paradas (só ativas, sem rastreamento) e a escrita administrativa do B7
+/// (ativas e inativas, rastreadas para o EF Core gravar as mudanças).
+/// </summary>
+public sealed class ParadaRepository(PontoVozDbContext contexto) : IParadaRepository, ICadastroParadaRepository
 {
     public async Task<Pagina<Parada>> BuscarAtivasAsync(string? termo, string? codigoExterno, Paginacao paginacao, CancellationToken cancellationToken)
     {
@@ -33,4 +37,18 @@ public sealed class ParadaRepository(PontoVozDbContext contexto) : IParadaReposi
         contexto.Paradas
             .AsNoTracking()
             .FirstOrDefaultAsync(parada => parada.Id == id && parada.Ativa, cancellationToken);
+
+    public Task<bool> CodigoExternoExisteAsync(string codigoExterno, CancellationToken cancellationToken) =>
+        contexto.Paradas.AnyAsync(parada => parada.CodigoExterno == codigoExterno, cancellationToken);
+
+    /// <summary>
+    /// Carrega as associações porque o domínio as usa para a idempotência da associação e para
+    /// conferir se a linha atende a parada antes de registrar uma passagem.
+    /// </summary>
+    public Task<Parada?> ObterParaAlteracaoAsync(int id, CancellationToken cancellationToken) =>
+        contexto.Paradas
+            .Include(parada => parada.LinhasAssociadas)
+            .FirstOrDefaultAsync(parada => parada.Id == id, cancellationToken);
+
+    public void Adicionar(Parada parada) => contexto.Paradas.Add(parada);
 }

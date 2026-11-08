@@ -61,7 +61,7 @@ internal static class ProblemasHttp
         ValidacaoDominioException erro =>
             Validacao(new Dictionary<string, string[]> { [erro.Campo] = [erro.Message] }),
         RegraNegocioException erro =>
-            Criar(new ProblemDetails(), StatusCodes.Status422UnprocessableEntity, "Regra de negócio não atendida", erro.Codigo, erro.Message),
+            Criar(new ProblemDetails(), StatusCodes.Status422UnprocessableEntity, TituloRegraNegocio(erro.Codigo), erro.Codigo, erro.Message),
         _ => null,
     };
 
@@ -69,7 +69,17 @@ internal static class ProblemasHttp
     {
         TipoErroAplicacao.NaoEncontrado => StatusCodes.Status404NotFound,
         TipoErroAplicacao.RegraNegocio => StatusCodes.Status422UnprocessableEntity,
+        TipoErroAplicacao.Conflito => StatusCodes.Status409Conflict,
         _ => StatusCodes.Status400BadRequest,
+    };
+
+    /// <summary>Título legível dos 422 lançados pelo domínio (catálogo da seção 7).</summary>
+    private static string TituloRegraNegocio(string codigo) => codigo switch
+    {
+        RegraNegocioException.ParadaInativa => "Parada inativa",
+        RegraNegocioException.LinhaInativa => "Linha inativa",
+        RegraNegocioException.LinhaNaoAtendeParada => "Linha não atende a parada",
+        _ => "Regra de negócio não atendida",
     };
 
     private static T Criar<T>(T problema, int status, string titulo, string codigo, string? detalhe)

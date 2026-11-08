@@ -1,8 +1,8 @@
 # Contrato REST v1 do PontoVoz
 
-**Versão do documento:** B6.1, 07/11/2026. As regras são as do B1.3, com dois códigos de erro
-acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 atualizou o
-estado da implementação e registrou as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
+**Versão do documento:** B7, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
+acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 e o B7
+atualizaram o estado da implementação e registraram as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
 O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 
 > **O que já existe e o que é planejado**
@@ -10,8 +10,10 @@ O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 > - **Implementado e testado (B6):** `GET /health`, `GET /api/v1/paradas`,
 >   `GET /api/v1/paradas/{id}`, `GET /api/v1/linhas`, `GET /api/v1/destinos` e
 >   `GET /api/v1/paradas/{id}/ultimas-passagens`.
-> - **Planejado:** previsões (B8), alternativas (B9), resumo (B9) e as rotas administrativas
->   (B7). Elas **ainda não existem** na API e respondem 404 `RotaNaoEncontrada`.
+> - **Implementado e testado (B7):** as cinco rotas administrativas da seção 5, protegidas pela
+>   chave da seção 5.1.
+> - **Planejado:** previsões (B8), alternativas (B9) e resumo (B9). Elas **ainda não existem**
+>   na API e respondem 404 `RotaNaoEncontrada`.
 > - Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado. Os das
 >   rotas implementadas são comparados com as respostas HTTP reais nos testes do backend; os
 >   das rotas planejadas ainda não são resultados de execução.
@@ -720,7 +722,7 @@ usadas pelo totem nem pela IA.**
 
 ### 5.1 Chave administrativa
 
-Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter` (B7):
+Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter` (**implementado no B7**):
 
 | Ambiente | Chave configurada (`Admin:Chave`)? | Resultado |
 |---|---|---|
@@ -738,6 +740,11 @@ Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter` (B7):
   autorização recebe 401 ou 403, nunca 400.
 - Limitações do MVP: chave única e compartilhada, sem identidade individual nem auditoria,
   troca manual e sem limite de requisições.
+- Conferido no B7: o filtro é de **autorização** do ASP.NET Core, executado antes da leitura do
+  corpo, então um JSON inválido sem autorização recebe 401 ou 403. O 401 e o 403 saem em
+  ProblemDetails com `codigo` e `traceId`, e o valor da chave nunca aparece em respostas nem em
+  logs. "Development sem chave" existe só para a demonstração local e **não** é proteção
+  adequada para uma API exposta; qualquer outro ambiente sem chave recusa as rotas (403).
 
 Erros comuns a todas as rotas administrativas: **401** `ChaveAdministrativaInvalida` e
 **403** `OperacoesAdministrativasDesabilitadas`.
@@ -858,9 +865,11 @@ Regras de validação (veja também a seção [4.6.1](#461-regras-de-passagem)):
 - `observadaEm` precisa estar entre **24 horas antes** e **2 minutos depois** do instante do
   servidor. A tolerância de 2 minutos cobre diferenças de relógio. Fora disso: 400. O cálculo
   de minutos e o tratamento de um horário ainda no futuro estão em [4.6.3](#463-regra-temporal-das-observações).
-- `origemRegistro` é um **rótulo técnico**, como `operador-local`. O padrão aceita só letras
-  minúsculas, dígitos e hífen, então nome, e-mail ou telefone de uma pessoa não passam na
-  validação.
+- `origemRegistro` é um **rótulo técnico e impessoal**, como `operador-local`. Ele **nunca**
+  deve conter nome, telefone ou e-mail de uma pessoa. O padrão aceita só letras minúsculas,
+  dígitos e hífen, o que recusa nomes com espaço ou maiúscula, e-mails e telefones formatados.
+  Ele **não** impede todo dado pessoal: uma sequência só de dígitos, como um telefone sem
+  formatação, passa no padrão. Cabe ao operador usar apenas identificadores técnicos (B7).
 - O registro recebe `nivelConfirmacao: "RegistroManual"`, `verificada: false` e
   `oficialSptrans: false`. Não há como uma rota do MVP criar outro nível.
 
@@ -927,7 +936,7 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 
 | Campo | Descrição |
 |---|---|
-| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `https://tools.ietf.org/html/rfc9110#section-15.5.5` (404), `https://tools.ietf.org/html/rfc4918#section-11.2` (422) e `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500). **Não use para decidir lógica.** |
+| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6 e no B7: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `…#section-15.5.2` (401), `…#section-15.5.4` (403), `…#section-15.5.5` (404), `…#section-15.5.6` (405), `…#section-15.5.10` (409), `https://tools.ietf.org/html/rfc4918#section-11.2` (422) e `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500). **Não use para decidir lógica.** |
 | `title` | Resumo legível |
 | `status` | Código HTTP |
 | `detail` | Explicação do caso, sem dados internos nem rastros de pilha |
@@ -976,6 +985,20 @@ Conferido no B6:
 - O 500 tem sempre `title` "Erro interno", `codigo` `ErroInterno` e o `detail` genérico
   "Ocorreu um erro inesperado. Tente novamente mais tarde."; o erro real fica só no log.
 
+Conferido no B7 (rotas administrativas):
+
+- Campos obrigatórios ausentes (inclusive `dadosSimulados`, `ativa` e `sentido`) devolvem 400
+  com "O campo X é obrigatório."; a API não presume `false` nem o primeiro valor de um enum.
+  Todos os erros do corpo vêm juntos em `errors`.
+- Corpo ausente, JSON malformado ou `Content-Type` diferente de JSON devolvem 400
+  `RequisicaoInvalida` com o erro em `errors.corpo`. Um número enviado como texto (`"5"`) e uma
+  data sem fuso também são 400.
+- `CodigoJaCadastrado` (409) vale também quando o código pertence a um cadastro inativo, e
+  também quando duas requisições gravam o mesmo código ao mesmo tempo (o índice único do banco
+  decide; a resposta é 409, não 500).
+- Os 404 administrativos dizem "Não existe parada com o id N." (sem "ativa"), porque as rotas
+  administrativas encontram paradas e linhas inativas (D10); inativas dão 422.
+
 ---
 
 ## 8. Catálogo de avisos
@@ -1016,11 +1039,11 @@ mostrar a `mensagem` como está.
 | 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado (B6)** |
 | 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | Planejado (B9) |
 | 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | Planejado (B9; a parte prevista para o B6 não foi antecipada) |
-| 9 | POST | `/api/v1/admin/paradas` | Chave | Planejado (B7) |
-| 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | Planejado (B7) |
-| 11 | POST | `/api/v1/admin/linhas` | Chave | Planejado (B7) |
-| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Chave | Planejado (B7) |
-| 13 | POST | `/api/v1/admin/observacoes-passagem` | Chave | Planejado (B7) |
+| 9 | POST | `/api/v1/admin/paradas` | Chave | **Implementado (B7)** |
+| 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | **Implementado (B7)** |
+| 11 | POST | `/api/v1/admin/linhas` | Chave | **Implementado (B7)** |
+| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Chave | **Implementado (B7)** |
+| 13 | POST | `/api/v1/admin/observacoes-passagem` | Chave | **Implementado (B7)** |
 | — | GET | `/health` | Público | **Implementado (B0; verificação do banco no B3)** |
 
 Por que as rotas não entram em conflito:

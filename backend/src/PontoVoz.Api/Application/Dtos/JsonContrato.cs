@@ -18,6 +18,8 @@ public static class JsonContrato
         ArgumentNullException.ThrowIfNull(opcoes);
         opcoes.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
         opcoes.DefaultIgnoreCondition = JsonIgnoreCondition.Never;
+        // Números só como números (contrato, seção 1.2): "5" não é aceito onde se espera um inteiro.
+        opcoes.NumberHandling = JsonNumberHandling.Strict;
         opcoes.Converters.Add(new JsonStringEnumConverter());
     }
 

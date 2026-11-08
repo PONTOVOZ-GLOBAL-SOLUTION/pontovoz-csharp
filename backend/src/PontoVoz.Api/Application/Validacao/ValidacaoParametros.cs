@@ -1,7 +1,6 @@
 using System.Text.RegularExpressions;
 
 using PontoVoz.Api.Application.Consultas;
-using PontoVoz.Api.Application.Erros;
 
 namespace PontoVoz.Api.Application.Validacao;
 
@@ -10,12 +9,10 @@ namespace PontoVoz.Api.Application.Validacao;
 /// todos os erros antes de lançar, para o cliente receber de uma vez a lista completa
 /// (<c>errors</c> do ProblemDetails). Não consulta o banco.
 /// </summary>
-internal sealed partial class ValidacaoParametros
+internal sealed partial class ValidacaoParametros : ColetorErros
 {
     public const int TermoMinimo = 2;
     public const int TermoMaximo = 60;
-
-    private readonly Dictionary<string, List<string>> _erros = [];
 
     [GeneratedRegex(@"\A[A-Za-z0-9-]{3,30}\z")]
     private static partial Regex FormatoCodigoExterno();
@@ -84,25 +81,5 @@ internal sealed partial class ValidacaoParametros
         }
 
         return id;
-    }
-
-    /// <summary>Lança <see cref="ErroAplicacaoException"/> de validação se algum parâmetro falhou.</summary>
-    public void Confirmar()
-    {
-        if (_erros.Count > 0)
-        {
-            throw ErroAplicacaoException.Validacao(_erros.ToDictionary(par => par.Key, par => par.Value.ToArray()));
-        }
-    }
-
-    private void Adicionar(string campo, string mensagem)
-    {
-        if (!_erros.TryGetValue(campo, out List<string>? mensagens))
-        {
-            mensagens = [];
-            _erros[campo] = mensagens;
-        }
-
-        mensagens.Add(mensagem);
     }
 }

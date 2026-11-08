@@ -12,6 +12,9 @@ public sealed class PassagemRegistroManual : RegistroPassagem
 {
     public const string CodigoAvisoRegistroManual = "RegistroManualNaoVerificado";
 
+    /// <summary>Mensagem do 400 quando <c>observadaEm</c> está fora da janela de registro (seção 4.6.3).</summary>
+    public const string MensagemForaDaJanela = "A observação deve estar entre 24 horas antes e 2 minutos depois do horário do servidor.";
+
     private string _origemRegistro;
     private bool _dadosSimulados;
 
@@ -55,7 +58,7 @@ public sealed class PassagemRegistroManual : RegistroPassagem
 
         if (!RegraTemporalPassagem.ObservacaoAceitaNoRegistro(observada, registro))
         {
-            throw new ValidacaoDominioException("observadaEm", "A observação deve estar entre 24 horas antes e 2 minutos depois do horário do servidor.");
+            throw new ValidacaoDominioException("observadaEm", MensagemForaDaJanela);
         }
 
         if (!parada.Ativa)

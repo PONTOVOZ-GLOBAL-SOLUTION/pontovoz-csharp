@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Net;
 using System.Text.Json.Nodes;
 
@@ -58,29 +57,6 @@ public sealed class InfraestruturaHttpTests
             throw new NotSupportedException();
     }
 
-    /// <summary>Guarda os logs da API para o teste conferir o que foi registrado.</summary>
-    private sealed class LogsEmMemoria : ILoggerProvider
-    {
-        public ConcurrentQueue<(string Categoria, LogLevel Nivel, string Mensagem)> Entradas { get; } = new();
-
-        public ILogger CreateLogger(string categoryName) => new Registrador(categoryName, Entradas);
-
-        public void Dispose()
-        {
-        }
-
-        private sealed class Registrador(string categoria, ConcurrentQueue<(string, LogLevel, string)> entradas) : ILogger
-        {
-            public IDisposable? BeginScope<TState>(TState state)
-                where TState : notnull => null;
-
-            public bool IsEnabled(LogLevel logLevel) => true;
-
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) =>
-                entradas.Enqueue((categoria, logLevel, formatter(state, exception)));
-        }
-    }
-
     [Fact]
     public async Task ErroInesperado_Responde500GenericoSemDadosSensiveis()
     {
@@ -135,12 +111,12 @@ public sealed class InfraestruturaHttpTests
         // nenhum log de erro e nenhum ProblemDetails 500.
         const string Abortada = "The request was aborted by the client.";
         DateTime limite = DateTime.UtcNow.AddSeconds(10);
-        while (!logs.Entradas.Any(e => e.Mensagem == Abortada) && DateTime.UtcNow < limite)
+        while (!logs.Entradas.Any(e => e.Mensagem.StartsWith(Abortada, StringComparison.Ordinal)) && DateTime.UtcNow < limite)
         {
             await Task.Delay(50, Ct);
         }
 
-        Assert.Contains(logs.Entradas, e => e.Mensagem == Abortada);
+        Assert.Contains(logs.Entradas, e => e.Mensagem.StartsWith(Abortada, StringComparison.Ordinal));
         Assert.DoesNotContain(logs.Entradas, e => e.Nivel >= LogLevel.Error);
         Assert.DoesNotContain(logs.Entradas, e => e.Categoria.EndsWith("TratadorExcecoes", StringComparison.Ordinal));
     }
@@ -201,6 +177,22 @@ public sealed class InfraestruturaHttpTests
 
     // ----- OpenAPI, Scalar e rotas futuras -----
 
+    [Theory]
+    [InlineData("DELETE", "/api/v1/admin/paradas/{parada}")]
+    [InlineData("GET", "/api/v1/admin/paradas")]
+    [InlineData("PUT", "/api/v1/admin/linhas")]
+    public async Task OperacoesAdministrativasForaDoContrato_Respondem405(string metodo, string modelo)
+    {
+        // Sem DELETE, sem consulta administrativa e sem atualização de linha (fora do B7).
+        await using ApiTeste api = await ApiTeste.CriarAsync();
+        int paradaId = await api.IdDaParadaAsync("SIM-P001");
+
+        ApiTeste.Resposta resposta = await api.EnviarAsync(new HttpMethod(metodo), modelo.Replace("{parada}", paradaId.ToString(System.Globalization.CultureInfo.InvariantCulture), StringComparison.Ordinal));
+
+        Assert.Equal(HttpStatusCode.MethodNotAllowed, resposta.Status);
+        Assert.Equal("MetodoNaoPermitido", resposta.Json["codigo"]!.GetValue<string>());
+    }
+
     [Fact]
     public async Task OpenApi_ListaSomenteAsOperacoesImplementadas()
     {
@@ -210,10 +202,26 @@ public sealed class InfraestruturaHttpTests
 
         Assert.Equal(HttpStatusCode.OK, resposta.Status);
         JsonObject caminhos = resposta.Json["paths"]!.AsObject();
+
+        // 11 operações: /health, as 5 consultas públicas do B6 e as 5 rotas administrativas do B7.
+        string[] operacoes = [.. caminhos
+            .SelectMany(par => par.Value!.AsObject().Select(op => $"{op.Key.ToUpperInvariant()} {par.Key}"))
+            .Order(StringComparer.Ordinal)];
         Assert.Equal(
-            ["/api/v1/destinos", "/api/v1/linhas", "/api/v1/paradas", "/api/v1/paradas/{id}", "/api/v1/paradas/{id}/ultimas-passagens", "/health"],
-            caminhos.Select(par => par.Key).Order(StringComparer.Ordinal));
-        Assert.All(caminhos, par => Assert.Equal(["get"], par.Value!.AsObject().Select(op => op.Key)));
+            [
+                "GET /api/v1/destinos",
+                "GET /api/v1/linhas",
+                "GET /api/v1/paradas",
+                "GET /api/v1/paradas/{id}",
+                "GET /api/v1/paradas/{id}/ultimas-passagens",
+                "GET /health",
+                "POST /api/v1/admin/linhas",
+                "POST /api/v1/admin/observacoes-passagem",
+                "POST /api/v1/admin/paradas",
+                "PUT /api/v1/admin/paradas/{id}",
+                "PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}",
+            ],
+            operacoes);
 
         JsonObject respostas = caminhos["/api/v1/paradas/{id}/ultimas-passagens"]!["get"]!["responses"]!.AsObject();
         Assert.Equal(["200", "400", "404", "422", "500"], respostas.Select(par => par.Key).Order(StringComparer.Ordinal));
@@ -259,10 +267,9 @@ public sealed class InfraestruturaHttpTests
     [InlineData("GET", "/api/v1/paradas/{parada}/previsoes")]
     [InlineData("GET", "/api/v1/paradas/{parada}/alternativas?destinoId=1")]
     [InlineData("GET", "/api/v1/paradas/{parada}/resumo")]
-    [InlineData("POST", "/api/v1/admin/paradas")]
-    [InlineData("POST", "/api/v1/admin/linhas")]
-    [InlineData("POST", "/api/v1/admin/observacoes-passagem")]
-    public async Task RotasDeB7AB9_AindaNaoExistem(string metodo, string modelo)
+    [InlineData("GET", "/api/v1/admin/destinos")]
+    [InlineData("POST", "/api/v1/admin/destinos")]
+    public async Task RotasDeB8EB9EAdministrativasExtras_NaoExistem(string metodo, string modelo)
     {
         await using ApiTeste api = await ApiTeste.CriarAsync();
         ApiTeste.Resposta busca = await api.GetAsync("/api/v1/paradas?codigoExterno=SIM-P001");

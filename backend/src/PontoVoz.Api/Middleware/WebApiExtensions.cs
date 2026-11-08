@@ -1,6 +1,7 @@
 using System.Text.Json;
 
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
@@ -17,7 +18,15 @@ public static class WebApiExtensions
     public static IServiceCollection AddWebApiPontoVoz(this IServiceCollection services, IConfiguration configuration)
     {
         // Um só padrão de JSON (JsonContrato) para controllers, ProblemDetails e documento OpenAPI.
-        services.AddControllers()
+        services.AddControllers(opcoes =>
+            {
+                // Corpo com Content-Type que não é JSON: em vez do 415 sem código, o erro fica no
+                // ModelState e sai como 400 RequisicaoInvalida em "corpo" (contrato, seção 7).
+                foreach (IFilterMetadata filtro in opcoes.Filters.Where(filtro => filtro is UnsupportedContentTypeFilter).ToList())
+                {
+                    opcoes.Filters.Remove(filtro);
+                }
+            })
             .AddJsonOptions(opcoes => JsonContrato.Configurar(opcoes.JsonSerializerOptions))
             .ConfigureApiBehaviorOptions(opcoes => opcoes.InvalidModelStateResponseFactory = RespostaDeModelBindingInvalido);
         services.ConfigureHttpJsonOptions(opcoes => JsonContrato.Configurar(opcoes.SerializerOptions));
@@ -53,8 +62,15 @@ public static class WebApiExtensions
         var erros = new ModelStateDictionary();
         foreach (string chave in contexto.ModelState.Where(par => par.Value?.Errors.Count > 0).Select(par => par.Key))
         {
-            string campo = CamelCase(chave);
-            erros.AddModelError(campo, $"O valor informado para {campo} é inválido.");
+            string campo = Campo(chave, contexto);
+            if (erros.ContainsKey(campo))
+            {
+                continue;
+            }
+
+            erros.AddModelError(campo, campo == CampoCorpo
+                ? "O corpo da requisição deve ser um JSON válido, enviado com Content-Type: application/json."
+                : $"O valor informado para {campo} é inválido.");
         }
 
         ValidationProblemDetails problema = contexto.HttpContext.RequestServices
@@ -67,6 +83,27 @@ public static class WebApiExtensions
             StatusCode = StatusCodes.Status400BadRequest,
             ContentTypes = { "application/problem+json" },
         };
+    }
+
+    private const string CampoCorpo = "corpo";
+
+    /// <summary>
+    /// Nome do campo no contrato a partir da chave do ModelState: <c>pagina</c> na query,
+    /// <c>$.dadosSimulados</c> ou <c>$.coordenada.latitude</c> num corpo JSON. Erros do corpo
+    /// inteiro (JSON malformado, Content-Type errado, chave vazia ou com o nome do parâmetro)
+    /// ficam em <c>corpo</c>.
+    /// </summary>
+    private static string Campo(string chave, ActionContext contexto)
+    {
+        bool parametroDeCorpo = contexto.ActionDescriptor.Parameters.Any(parametro =>
+            parametro.BindingInfo?.BindingSource == BindingSource.Body && string.Equals(parametro.Name, chave, StringComparison.Ordinal));
+        if (chave.Length == 0 || chave == "$" || parametroDeCorpo)
+        {
+            return CampoCorpo;
+        }
+
+        string caminho = chave.StartsWith("$.", StringComparison.Ordinal) ? chave[2..] : chave;
+        return string.Join('.', caminho.Split('.').Select(CamelCase));
     }
 
     private static string CamelCase(string nome) => JsonNamingPolicy.CamelCase.ConvertName(nome);

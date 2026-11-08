@@ -5,7 +5,7 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 
 ## Estágio atual
 
-**Bloco B6 — Web API pública, ProblemDetails, OpenAPI e testes HTTP.** Hoje o backend:
+**Bloco B7 — operações administrativas protegidas por chave.** Hoje o backend:
 
 - inicia localmente e responde em `GET /health`, que verifica o processo e o banco SQLite
   (200 quando os dois estão saudáveis, 503 quando o banco está indisponível);
@@ -22,11 +22,13 @@ Backend da Global Solution FIAP 2026.2 (CitizenTech) para a disciplina
 - expõe por HTTP as **consultas públicas do B6**: busca de paradas (inclusive pelo
   `codigoExterno` do totem), detalhe da parada, linhas, destinos e últimas passagens, com erros
   em ProblemDetails, CORS configurável e documento OpenAPI exportado (veja [Web API](#web-api-b6));
-- tem **521 testes**: 278 de domínio, 70 da camada de aplicação, 106 de integração com SQLite real
-  e 67 pela API em execução (58 deles do B6).
+- tem as **cinco rotas administrativas do B7**, usadas pelo operador para cadastrar paradas e
+  linhas, associá-las e registrar observações manuais de passagem, protegidas pela chave
+  `X-PontoVoz-Admin-Key` (veja [Rotas administrativas](#rotas-administrativas-b7));
+- tem **663 testes**: 278 de domínio, 93 da camada de aplicação, 118 de integração com SQLite real
+  e 174 pela API em execução (142 acrescentados no B7).
 
-Previsões (B8), alternativas e resumo (B9) e as rotas administrativas (B7) **ainda não existem**
-e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
+Previsões (B8), alternativas e resumo (B9) **ainda não existem** e respondem 404. O estado de cada rota está em [`../contracts/api-v1.md`](../contracts/api-v1.md),
 seção 9.
 
 ## Requisitos de ambiente
@@ -245,6 +247,8 @@ backend/
 ├─ src/PontoVoz.Api/
 │  ├─ Program.cs                 composição da aplicação e injeção de dependência
 │  ├─ Controllers/               controllers REST: Health, Paradas, Linhas e Destinos (B6)
+│  │  └─ Administracao/          rotas /api/v1/admin (B7)
+│  ├─ Documentacao/              documento OpenAPI: descrição, chave e campos obrigatórios (B7)
 │  ├─ Domain/                    modelo de domínio (B2)
 │  │  ├─ Entities/               entidades persistentes e associações
 │  │  ├─ ValueObjects/           objetos de valor imutáveis
@@ -258,18 +262,18 @@ backend/
 │  │  ├─ Erros/                  erros de aplicação com os códigos do contrato
 │  │  ├─ Interfaces/             interfaces dos repositórios e dos services
 │  │  ├─ Mapeamentos/            entidades → DTOs e horário de São Paulo
-│  │  ├─ Services/               services de consulta
-│  │  └─ Validacao/              validação dos parâmetros
+│  │  ├─ Services/               services de consulta (B5) e administrativos (B7)
+│  │  └─ Validacao/              validação dos parâmetros e dos corpos
 │  ├─ Infrastructure/            EF Core, repositórios e provedores (B3, B4, B8)
 │  │  ├─ Persistence/            DbContext, mapeamentos, conversor UTC, busca, migrations e seed (B3, B4)
-│  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4)
-│  ├─ Security/                  proteção das rotas administrativas (B7)
+│  │  └─ Repositories/           implementações das interfaces com EF Core e LINQ (B4 e B7)
+│  ├─ Security/                  chave das rotas administrativas (B7)
 │  └─ Middleware/                ProblemDetails, tratamento global de erros, JSON e CORS (B6)
 └─ tests/PontoVoz.Tests/         testes xUnit (referencia o projeto da API)
    ├─ Domain/                    testes de domínio (B2)
-   ├─ Application/               testes dos services e da paginação (B4 e B5)
-   ├─ Infrastructure/            testes de integração com SQLite real (B3 e B4)
-   └─ Api/                       testes pela API em execução (B3.1, B5 e B6)
+   ├─ Application/               testes dos services e da paginação (B4, B5 e B7)
+   ├─ Infrastructure/            testes de integração com SQLite real (B3, B4 e B7)
+   └─ Api/                       testes pela API em execução (B3.1, B5, B6 e B7)
 ```
 
 ## Domínio (B2)
@@ -878,8 +882,8 @@ repetem validações. Evidências reais em
 Todas podem devolver 500 `ErroInterno`. Paginação: `pagina` ≥ 1 (padrão 1) e `tamanhoPagina` de
 1 a 50 (padrão 20). `termo` tem de 2 a 60 caracteres e não diferencia maiúsculas nem acentos.
 
-**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/previsoes` (B8), `/alternativas` e `/resumo` (B9)
-e `/api/v1/admin/...` (B7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
+**Ainda não implementadas** (respondem 404 `RotaNaoEncontrada`): `/previsoes` (B8), `/alternativas` e `/resumo` (B9).
+As rotas administrativas estão em [Rotas administrativas](#rotas-administrativas-b7). O resumo estava previsto em parte para o B6, mas não foi antecipado:
 a rota só será criada com todas as partes.
 
 ### Executar e consultar
@@ -1006,10 +1010,149 @@ dotnet test --filter-namespace "PontoVoz.Tests.Api"
 
 | Funciona (B6) | Pendente |
 |---|---|
-| Cinco consultas públicas e `/health` | Rotas administrativas com chave (B7) |
+| Cinco consultas públicas e `/health` | Rotas administrativas com chave (feitas no B7) |
 | ProblemDetails 400, 404, 422 e 500 | Previsões e o 503 `ProvedorPrevisoesIndisponivel` (B8) |
 | CORS por configuração | Alternativas e resumo (B9) |
 | OpenAPI, Scalar e exportação do documento | URL do frontend em `Cors:OrigensPermitidas` (equipe) |
+
+## Rotas administrativas (B7)
+
+Usadas pelo **operador** da demonstração, não pelo totem nem pela IA, para cadastrar paradas e
+linhas, ligar uma linha a uma parada e registrar que um ônibus foi visto. Tudo o que elas gravam
+vai para o mesmo SQLite das consultas públicas e aparece nelas logo em seguida. Evidências reais em
+[`docs/evidencias/B7-admin.md`](docs/evidencias/B7-admin.md).
+
+### Rotas
+
+| Rota | Sucesso | Erros |
+|---|---|---|
+| `POST /api/v1/admin/paradas` | **201** `ParadaAdministrativa`, com `Location: /api/v1/paradas/{id}` | 400, 401, 403, 409 `CodigoJaCadastrado` |
+| `PUT /api/v1/admin/paradas/{id}` | **200** `ParadaAdministrativa` | 400, 401, 403, 404 `ParadaNaoEncontrada` |
+| `POST /api/v1/admin/linhas` | **201** linha com `ativa` e `criadoEm`, sem `Location` | 400, 401, 403, 409 `CodigoJaCadastrado` |
+| `PUT /api/v1/admin/paradas/{id}/linhas/{linhaId}` | **204**, idempotente | 401, 403, 404 `ParadaNaoEncontrada`/`LinhaNaoEncontrada`, 422 `ParadaInativa`/`LinhaInativa` |
+| `POST /api/v1/admin/observacoes-passagem` | **201** `Passagem` mais `paradaId`, sem `Location` | 400, 401, 403, 404, 422 `LinhaNaoAtendeParada`/`ParadaInativa`/`LinhaInativa` |
+
+Não há `DELETE`, consulta administrativa nem atualização de linha (respondem 405 `MetodoNaoPermitido`).
+Desativar uma parada (`"ativa": false`) substitui a exclusão: ela some das consultas públicas, e
+as associações e passagens continuam gravadas.
+
+### Chave administrativa
+
+Cabeçalho `X-PontoVoz-Admin-Key`, comparado em tempo constante com `Admin:Chave`:
+
+| Ambiente | `Admin:Chave` configurada? | Resultado |
+|---|---|---|
+| Development | não | Permitido, com aviso no log a cada inicialização |
+| Development | sim | Exige o cabeçalho; sem ele ou errado: **401** `ChaveAdministrativaInvalida` |
+| Outros | não | **403** `OperacoesAdministrativasDesabilitadas` |
+| Outros | sim | Exige o cabeçalho; sem ele ou errado: **401** `ChaveAdministrativaInvalida` |
+
+- A verificação acontece **antes** da leitura do corpo: sem autorização, a resposta é 401 ou 403
+  mesmo com um JSON inválido.
+- O 401 traz `WWW-Authenticate: ApiKey header="X-PontoVoz-Admin-Key"`. Os erros saem em
+  ProblemDetails com `codigo` e `traceId`, sem o valor da chave; o log também não o registra.
+- **Development sem chave** existe só para a demonstração local, como prevê o contrato. Não é
+  segurança adequada para uma API exposta.
+- Limitações do MVP: chave única e compartilhada, sem usuários, auditoria nem limite de requisições.
+
+Para configurar a chave em Development, use o user-secrets (fica fora do repositório, no perfil do
+usuário). A partir da pasta `backend/`, troque o marcador por um valor seu:
+
+```bash
+dotnet user-secrets set "Admin:Chave" "<CHAVE_ADMINISTRATIVA_LOCAL>" --project src/PontoVoz.Api
+```
+
+Para voltar ao modo sem chave da demonstração local:
+
+```bash
+dotnet user-secrets remove "Admin:Chave" --project src/PontoVoz.Api
+```
+
+Em outro ambiente, use a variável de ambiente `Admin__Chave` (no PowerShell,
+`$env:Admin__Chave = "<CHAVE_ADMINISTRATIVA_LOCAL>"`). Nunca coloque a chave em
+`appsettings*.json`, no código, nos testes ou nas evidências. O `UserSecretsId` do `.csproj` só
+identifica o armazenamento e não é segredo.
+
+### Testar no Scalar
+
+1. Inicie a API (`dotnet run --project src/PontoVoz.Api --launch-profile http`) e abra
+   `http://localhost:5080/scalar`.
+2. As rotas estão no grupo **Administração**. Se houver chave configurada, informe-a no campo de
+   autenticação `ChaveAdministrativa` (ou no cabeçalho `X-PontoVoz-Admin-Key`) do cliente do Scalar.
+3. Em **Test Request**, envie por exemplo o corpo de cadastro de parada:
+
+   ```json
+   {"codigoExterno":"TESTE-P003","nome":"Parada Cadastro de Teste","endereco":null,"coordenada":null,"dadosSimulados":true}
+   ```
+
+As rotas administrativas **gravam** no banco configurado. Para testes manuais, prefira um banco
+de teste (por exemplo, `$env:ConnectionStrings__PontoVoz = "Data Source=C:\temp\pontovoz-teste.db"`
+seguido de `dotnet ef database update --project src/PontoVoz.Api` com a mesma variável), para não
+misturar cadastros de teste com o `pontovoz.db` de desenvolvimento.
+
+Com curl, a observação manual de exemplo (troque `observadaEm` por um horário das últimas 24
+horas e o marcador pela sua chave, ou omita o cabeçalho em Development sem chave):
+
+```bash
+curl -X POST http://localhost:5080/api/v1/admin/observacoes-passagem -H "Content-Type: application/json" -H "X-PontoVoz-Admin-Key: <CHAVE_ADMINISTRATIVA_LOCAL>" -d @../contracts/exemplos/admin-observacao-passagem-requisicao.json
+```
+
+### Validações
+
+- Campos obrigatórios ausentes, inclusive os booleanos `dadosSimulados` e `ativa` e o enum
+  `sentido`, devolvem **400** "O campo X é obrigatório.". A API nunca presume `false` nem o
+  primeiro valor de um enum. Todos os erros do corpo vêm juntos em `errors`.
+- Corpo ausente, JSON malformado ou `Content-Type` que não é JSON: 400 em `errors.corpo`.
+  Número enviado como texto (`"5"`), enum desconhecido e data sem fuso também são 400.
+- Formatos e faixas vêm das regras do domínio (`RegrasCadastro`, `Coordenada`), chamadas pelo
+  service antes de qualquer acesso ao banco: código `^[A-Z0-9-]{3,30}$` sem o prefixo reservado
+  `SIM-`, nome de 3 a 120 caracteres, letreiro de 1 a 30, terminais de 3 a 120, coordenada dentro
+  das faixas. Um cadastro fictício (`dadosSimulados: true`) não pode ter endereço nem coordenada.
+- A ordem é a do contrato: corpo (400), recursos (404), estado (422) e só então a gravação.
+- **Código repetido:** o service consulta antes de gravar (409 claro), e o índice único do SQLite
+  cobre duas gravações ao mesmo tempo: a violação de unicidade (códigos 2067 e 1555 do SQLite)
+  vira 409, enquanto outras falhas do banco, como chave estrangeira, continuam 500.
+- **Associação:** idempotente. A chave composta `(ParadaId, LinhaId)` impede duplicatas mesmo com
+  duas requisições simultâneas; a repetição devolve 204.
+
+### Registro manual de passagem
+
+- `observadaEm` precisa ter fuso (`Z` ou `±hh:mm`) e estar entre **24 horas antes** e **2 minutos
+  depois** do instante do servidor (`TimeProvider`), inclusive. O instante é guardado em UTC e
+  devolvido no horário de São Paulo.
+- O registro sai sempre como `RegistroManual`, com `verificada: false` e `oficialSptrans: false`.
+  `dadosSimulados` é `true` se a parada ou a linha forem fictícias.
+- `prefixoVeiculo` segue a natureza do registro: com `SIM-` em registro fictício e sem ele em
+  registro não fictício.
+- Um horário ainda no futuro (dentro da tolerância de 2 minutos) é aceito, mas só aparece em
+  `ultimas-passagens` quando chegar. As passagens simuladas do seed nunca são renovadas.
+- `origemRegistro` é um **rótulo técnico impessoal**, como `operador-local`. O padrão
+  `^[a-z0-9-]{3,40}$` recusa nomes com espaço ou maiúscula, e-mails e telefones formatados, mas
+  **não** impede toda informação pessoal: uma sequência só de dígitos passa. Nunca use nome,
+  telefone ou e-mail de uma pessoa nesse campo.
+
+### Testes do B7
+
+| Classe | O que cobre |
+|---|---|
+| `AdministracaoAutorizacaoTests` | Matriz de ambiente e chave, ordem antes do corpo, 401 com `WWW-Authenticate`, 403, chave fora de respostas e logs, aviso de inicialização, rotas públicas sem chave |
+| `AdministracaoCadastrosTests` | Paradas (201, `Location`, 400, 409, atualização, desativação, busca sem acentos após renomear, histórico preservado), linhas e associação (204 repetido sem duplicar, 404, 422) |
+| `ObservacoesPassagemHttpTests` | Exemplo do contrato, janela J1 a J5, casos T5 e T6, tolerância futura, prefixo por natureza, `origemRegistro`, fuso obrigatório, 404, 422, gravação em UTC |
+| `AdministracaoFluxoCompletoTests` | Fluxo do operador até a consulta pública e a desativação, com a chave exigida |
+| `AdministracaoServicesTests` | Services sem banco: validação antes de ler ou gravar, erros esperados, `CancellationToken`, leitura única do `TimeProvider` |
+| `UnidadeTrabalhoEfTests` | SQLite real: dois cadastros com o mesmo código, associação simultânea, falha de chave estrangeira que não vira 409 |
+
+```bash
+dotnet test --filter-class "*Administracao*"
+```
+
+```bash
+dotnet test --filter-class "*UnidadeTrabalhoEfTests"
+```
+
+Os testes HTTP usam arquivos SQLite temporários e nunca o `pontovoz.db`. A chave dos testes é um
+valor fictício identificado como tal, e a configuração `Admin:Chave` de cada teste é definida pelo
+próprio teste, para que um user-secret da máquina não mude o resultado.
 
 ## Próximas etapas
 
@@ -1020,8 +1163,8 @@ dotnet test --filter-namespace "PontoVoz.Tests.Api"
 | B3 | `DbContext`, migration inicial e seed de dados simulados (concluído) |
 | B4 | Repositórios com consultas LINQ, com testes (concluído) |
 | B5 | Services, DTOs e injeção de dependência, com testes (concluído) |
-| B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído, aguardando auditoria) |
-| B7 | Endpoints administrativos com chave de acesso |
+| B6 | Endpoints públicos, tratamento de erros e exportação do contrato OpenAPI (concluído) |
+| B7 | Endpoints administrativos com chave de acesso (concluído, aguardando auditoria) |
 | B8 | Provedores de previsão (simulado e adaptador HTTP Olho Vivo) |
 | B9 | Alternativas de deslocamento e resumo da parada |
 | B10 | Documentação final, evidências e entrega |
