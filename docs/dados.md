@@ -4,10 +4,9 @@ Este documento registra a origem de cada dado usado pelo PontoVoz. A regra é
 simples: **nenhum dado é apresentado como real ou oficial sem que a fonte tenha
 sido verificada.**
 
-> **Estado atual (08/11/2026):** os dados da demonstração são **fictícios**: o seed do SQLite
-> (B3), as previsões de chegada do provedor simulado (B8) e os percursos estimados usados nas
-> alternativas (B9). Os registros do seed têm o prefixo `SIM-` e são identificados como simulados.
-> As rotas administrativas (B7) aceitam cadastros enviados pelo operador, que declara em
+> **Estado atual (08/11/2026):** os dados da demonstração são **fictícios**: o seed do SQLite, as
+> previsões de chegada do provedor simulado e os percursos estimados usados nas alternativas. Os registros do seed têm o prefixo `SIM-` e são identificados como simulados.
+> As rotas administrativas aceitam cadastros enviados pelo operador, que declara em
 > `dadosSimulados` se o cadastro é fictício; esses cadastros não são verificados. O adaptador para
 > a API Olho Vivo da SPTrans existe no código, mas está **desligado** e **nunca foi testado contra a
 > API real**. Portanto, o ambiente demonstrado **não tem nenhum dado oficial de chegada** de ônibus.
@@ -18,22 +17,22 @@ sido verificada.**
 |---|---|---|
 | **Dados reais** | Obtidos de uma fonte verificável sobre a operação real do transporte | Nenhum |
 | **Dados públicos** | Publicados oficialmente por órgãos ou empresas, com acesso permitido | Nenhum integrado (ver Olho Vivo abaixo) |
-| **Dados simulados** | Criados só para demonstração | Em uso: seed do SQLite (B3), previsões do provedor simulado (B8) e percursos estimados (B9) |
+| **Dados simulados** | Criados só para demonstração | Em uso: seed do SQLite, previsões do provedor simulado e percursos estimados |
 | **Cadastros administrativos** | Enviados pelo operador, com a natureza declarada em `dadosSimulados` | Possíveis; nunca verificados |
 | **Dados pessoais** | Informações que identificam pessoas | **Não são solicitados** pela API; ver [Dados pessoais](#dados-pessoais) |
 
 ## Dados simulados
 
-- **Seed do SQLite (B3):** paradas, linhas, destinos, percursos e duas observações de passagem
+- **Seed do SQLite:** paradas, linhas, destinos, percursos e duas observações de passagem
   de demonstração. Todos têm código com o prefixo `SIM-` e nomes como "Parada Demonstração
   Centro", com `dadosSimulados: true`. As observações simuladas são criadas uma vez, no
   provisionamento, e nunca são renovadas.
-- **Cadastros administrativos (B7):** o operador declara em `dadosSimulados` se o cadastro é
+- **Cadastros administrativos:** o operador declara em `dadosSimulados` se o cadastro é
   fictício. Nenhum cadastro administrativo é verificado (aviso `CadastroNaoVerificado`).
-- **Previsões de chegada (B8):** calculadas pelo provedor simulado no instante de cada consulta,
+- **Previsões de chegada:** calculadas pelo provedor simulado no instante de cada consulta,
   **sem gravação no banco**. Saem com `origem: "Simulado"`, `dadosSimulados: true`, aviso
   `DadosSimulados` e `nivelConfirmacao: "Previsao"`.
-- **Alternativas de deslocamento (B9):** usam só os percursos estimados cadastrados no seed
+- **Alternativas de deslocamento:** usam só os percursos estimados cadastrados no seed
   (`origemPercurso: "Simulado"`, aviso `PercursoEstimado`), sem trânsito em tempo real, baldeação
   ou rota inventada. Nenhuma alternativa é uma rota oficial da SPTrans.
 - Nenhum nome, código, endereço ou horário real da SPTrans é copiado ou inventado como se fosse real.
@@ -73,7 +72,7 @@ A indisponibilidade do provedor pode ser simulada pela configuração
 |---|---|
 | Token de acesso | **Não solicitado.** A equipe não tem credenciais. |
 | Termos de uso | **Não verificados** |
-| Adaptador no código | Implementado no B8, **desligado por padrão** (`Previsoes:OlhoVivo:Habilitado = false`) |
+| Adaptador no código | Implementado, **desligado por padrão** (`Previsoes:OlhoVivo:Habilitado = false`) |
 | Testes do adaptador | Só com respostas HTTP **simuladas** (`HttpMessageHandler` falso) |
 | Teste real da integração | **Não realizado**. Nenhuma chamada foi feita à SPTrans. |
 | Correspondência entre códigos do PontoVoz e da SPTrans | **Nenhuma declarada** |

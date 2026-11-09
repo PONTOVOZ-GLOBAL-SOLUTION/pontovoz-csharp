@@ -1,29 +1,18 @@
 # Contrato REST v1 do PontoVoz
 
-**Versão do documento:** B9, 08/11/2026. As regras são as do B1.3, com dois códigos de erro
-acrescentados no B6.1 (`RotaNaoEncontrada` e `MetodoNaoPermitido`, seção 7); o B6 ao B9
-atualizaram o estado da implementação e registraram as conferências feitas na API (histórico no [README](README.md#histórico-de-mudanças-do-contrato)).
-O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
+**Versão 1 do contrato** (08/11/2026). Descreve as 13 rotas de negócio e o `GET /health` do
+backend C# do PontoVoz, todas implementadas e testadas neste repositório.
 
-> **O que já existe**
->
-> - **Implementado e testado (B6):** `GET /health`, `GET /api/v1/paradas`,
->   `GET /api/v1/paradas/{id}`, `GET /api/v1/linhas`, `GET /api/v1/destinos` e
->   `GET /api/v1/paradas/{id}/ultimas-passagens`.
-> - **Implementado e testado (B7):** as cinco rotas administrativas da seção 5, protegidas pela
->   chave da seção 5.1.
-> - **Implementado e testado (B8):** `GET /api/v1/paradas/{id}/previsoes`, com o provedor
->   **simulado**. O adaptador Olho Vivo existe, mas está desligado e **nunca foi testado contra a
->   API real** da SPTrans (veja [`../docs/dados.md`](../docs/dados.md)).
-> - **Implementado e testado (B9):** `GET /api/v1/paradas/{id}/alternativas` e
->   `GET /api/v1/paradas/{id}/resumo`. Com isso, as **13 rotas de negócio** do contrato e o
->   `/health` estão implementados; nenhuma rota do contrato continua pendente.
-> - Os exemplos deste documento e de [`exemplos/`](exemplos/) mostram o formato combinado. Os das
->   rotas públicas são comparados com as respostas HTTP reais nos testes do backend.
-> - O documento OpenAPI gerado pela API (`/openapi/v1.json`) descreve apenas o que já foi
->   implementado. A cópia exportada está em [`openapi/pontovoz-v1.json`](openapi/pontovoz-v1.json).
-> - Os horários de **10/11/2026** que aparecem nos exemplos são **fixos e só ilustrativos**.
->   A aplicação calcula todos os horários a partir do relógio do servidor (seção [11](#11-requisitos-para-os-próximos-blocos)).
+- As previsões de chegada vêm de um provedor **simulado**. O adaptador para a API Olho Vivo da
+  SPTrans existe no código, mas está desligado e **nunca foi testado contra a API real** (veja
+  [`../docs/dados.md`](../docs/dados.md)).
+- Os exemplos deste documento e de [`exemplos/`](exemplos/) são comparados com as respostas HTTP
+  reais nos testes do backend.
+- O documento OpenAPI gerado pela API (`/openapi/v1.json`) tem uma cópia exportada em
+  [`openapi/pontovoz-v1.json`](openapi/pontovoz-v1.json).
+- Os horários de **10/11/2026** que aparecem nos exemplos são **fixos e só ilustrativos**. A
+  aplicação calcula todos os horários a partir do relógio do servidor (seção
+  [11](#11-requisitos-técnicos)).
 
 ## Sumário
 
@@ -36,8 +25,8 @@ O congelamento previsto para 12/11/2026 ainda depende da auditoria da equipe.
 7. [Catálogo de erros](#7-catálogo-de-erros)
 8. [Catálogo de avisos](#8-catálogo-de-avisos)
 9. [Conferência das rotas](#9-conferência-das-rotas)
-10. [Divergências em relação ao planejamento](#10-divergências-em-relação-ao-planejamento)
-11. [Requisitos para os próximos blocos](#11-requisitos-para-os-próximos-blocos)
+10. [Registro de decisões](#10-registro-de-decisões)
+11. [Requisitos técnicos](#11-requisitos-técnicos)
 
 ---
 
@@ -85,7 +74,7 @@ O prefixo é reservado ao seed de demonstração. Nenhum código da SPTrans é u
   menos de 1 minuto". As regras de `minutosDesdeObservacao` e `desatualizada` estão em
   [4.6.3](#463-regra-temporal-das-observações).
 - O consumidor deve sempre respeitar o deslocamento informado e não presumir o fuso.
-  O `/health` já implementado responde em UTC (`+00:00`); veja a [divergência D1](#10-divergências-em-relação-ao-planejamento).
+  O `/health` já implementado responde em UTC (`+00:00`); veja a [divergência D1](#10-registro-de-decisões).
 
 ### 1.4 Valores nulos e listas
 
@@ -163,36 +152,35 @@ oficialmente confirmada.**
 ### 1.9 Versionamento
 
 - As rotas de negócio têm o prefixo de versão `/api/v1`. O `/health` é técnico e não tem versão.
-- **Até o congelamento (B6, 12/11/2026):** o contrato pode mudar, e cada mudança é registrada
-  no [histórico](README.md#histórico-de-mudanças-do-contrato).
-- **Depois do congelamento:** só mudanças aditivas (campos, valores de enum documentados,
-  parâmetros opcionais). Uma mudança incompatível exigiria `/api/v2`.
-- O contrato oficial passa a ser o arquivo `contracts/openapi/pontovoz-v1.json`, exportado da
-  API em execução a partir do B6.
+- Na versão 1, só cabem mudanças aditivas (campos, valores de enum documentados, parâmetros
+  opcionais). Uma mudança incompatível exigiria `/api/v2`.
+- O arquivo `contracts/openapi/pontovoz-v1.json` é exportado da API em execução, e um teste do
+  backend falha se ele ficar diferente do documento gerado pela API.
 
 ### 1.10 Cancelamento e serviços externos
 
 - Toda operação recebe o `CancellationToken` da requisição. Se o cliente desistir, o
   processamento é interrompido e **nenhuma resposta** é enviada. Isso não é tratado como erro.
 - O provedor de previsões é o único serviço externo. O **tempo limite** do adaptador Olho Vivo é
-  de 5 segundos por chamada (`Previsoes:OlhoVivo:TempoLimiteSegundos`, definido no B8).
+  de 5 segundos por chamada (`Previsoes:OlhoVivo:TempoLimiteSegundos`).
   O provedor está **indisponível** quando falha, não responde no prazo ou está desligado.
 - Consequência da indisponibilidade, pela regra da seção [2](#2-política-de-respostas):
   - `GET /previsoes` devolve **503**, porque a previsão é todo o conteúdo dele;
   - `GET /alternativas` e `GET /resumo` devolvem **200** com status explícito e avisos, porque
     continuam tendo informação útil.
 - Erros inesperados da própria API, como falha de banco, devolvem **500** em ProblemDetails,
-  sem detalhes internos. Desde o B3, o `/health` também indica quando o banco está
-  indisponível (seção 6).
+  sem detalhes internos. O `/health` também indica quando o banco está indisponível
+  (seção 6).
 
 ### 1.11 Acesso
 
-- **Rotas públicas:** só `GET`, sem autenticação, para o totem e o componente de voz/IA.
+- **Rotas públicas:** só `GET`, sem autenticação, para os clientes da API (por exemplo, a
+  interface de um totem).
 - **Rotas administrativas:** prefixo `/api/v1/admin`, protegidas pelo cabeçalho
   `X-PontoVoz-Admin-Key` (seção [5](#5-operações-administrativas)).
-- **CORS (B6):** as origens do frontend ficam na lista `Cors:OrigensPermitidas`. Só as origens
+- **CORS:** as origens de um frontend ficam na lista `Cors:OrigensPermitidas`. Só as origens
   listadas são liberadas, só para `GET` e sem credenciais. Com a lista vazia (o padrão),
-  nenhuma origem externa é liberada. A equipe ainda precisa informar a origem que usará.
+  nenhuma origem externa é liberada.
 
 ---
 
@@ -318,7 +306,6 @@ Todas as consultas públicas usam `GET` e não exigem autenticação.
 | Erros | **400** `RequisicaoInvalida` (`termo` fora de 2 a 60 caracteres, `codigoExterno` fora do formato, paginação fora da faixa) |
 | Acesso | Público |
 | Dependências | Repositório de paradas (EF Core + LINQ: filtro, projeção, contagem e paginação) |
-| Bloco | B4 (consulta) e B6 (endpoint) |
 
 Exemplos: [`exemplos/paradas-listagem.json`](exemplos/paradas-listagem.json), resposta de
 `GET /api/v1/paradas?termo=demonstracao` (a ordem é pelo nome, por isso a parada 2 vem antes da 1),
@@ -357,7 +344,6 @@ Situações de falha:
 | Erros | **404** `ParadaNaoEncontrada` (inexistente ou inativa) |
 | Acesso | Público |
 | Dependências | Repositório de paradas (consulta com as linhas associadas) |
-| Bloco | B4 e B6 |
 
 Exemplo: [`exemplos/parada-detalhe.json`](exemplos/parada-detalhe.json), resposta de `GET /api/v1/paradas/1`.
 
@@ -373,7 +359,6 @@ Exemplo: [`exemplos/parada-detalhe.json`](exemplos/parada-detalhe.json), respost
 | Erros | **400** `RequisicaoInvalida` |
 | Acesso | Público |
 | Dependências | Repositório de linhas |
-| Bloco | B4 e B6 |
 
 Exemplo de `GET /api/v1/linhas?termo=104`:
 
@@ -410,7 +395,6 @@ Exemplo de `GET /api/v1/linhas?termo=104`:
 | Erros | **400** `RequisicaoInvalida` |
 | Acesso | Público |
 | Dependências | Repositório de destinos. No MVP os destinos vêm só do seed simulado. |
-| Bloco | B4 e B6 |
 
 Exemplo: [`exemplos/destinos-busca.json`](exemplos/destinos-busca.json), resposta de
 `GET /api/v1/destinos?termo=norte`. Se a busca devolver mais de um destino, a IA pede à
@@ -429,7 +413,6 @@ pessoa que escolha. Se não devolver nenhum, a IA informa que o destino não est
 | Erros | **400** `RequisicaoInvalida` · **404** `ParadaNaoEncontrada`, `LinhaNaoEncontrada` · **422** `LinhaNaoAtendeParada` · **503** `ProvedorPrevisoesIndisponivel` |
 | Acesso | Público |
 | Dependências | `IProvedorPrevisaoChegada` (simulado por padrão; Olho Vivo desligado) e repositório de paradas |
-| Bloco | B8 (**implementado**; provedor simulado) |
 
 **`PrevisoesParada`**
 
@@ -467,7 +450,7 @@ Regras:
   O adaptador Olho Vivo continua desligado até ser testado com credenciais
   (veja [`../docs/dados.md`](../docs/dados.md)).
 
-Conferido no B8:
+Notas de implementação:
 
 - Com o relógio controlado em 10/11/2026 às 14h32, a resposta da API é igual a
   [`exemplos/previsoes.json`](exemplos/previsoes.json) (sem os ids internos), e o 503 é igual a
@@ -494,7 +477,6 @@ Conferido no B8:
 | Erros | **400** `RequisicaoInvalida` · **404** `ParadaNaoEncontrada`, `LinhaNaoEncontrada` · **422** `LinhaNaoAtendeParada` |
 | Acesso | Público |
 | Dependências | Repositório de passagens (LINQ com `GroupBy` por linha e o maior `observadaEm`) |
-| Bloco | B4 e B6 |
 
 **`UltimasPassagensParada`**: cabeçalho (3.6), `dadosSimulados`, `consultadoEm`,
 `limiteDesatualizacaoMinutos` (`integer`, `60` no MVP), `passagens: Passagem[]`,
@@ -607,7 +589,7 @@ Casos de teste do cálculo (`intervalo` em segundos, na referência):
 | T6 | 3601 | 60 | true | sim |
 | T7 | 3660 | 61 | true | sim |
 
-Esses casos viram testes de domínio e de serviço com `FakeTimeProvider` (B2 e B5).
+Esses casos são testes de domínio e de serviço com `FakeTimeProvider`.
 
 ### 4.7 `GET /api/v1/paradas/{id}/alternativas` — alternativas até um destino
 
@@ -621,7 +603,6 @@ Esses casos viram testes de domínio e de serviço com `FakeTimeProvider` (B2 e 
 | Erros | **400** `RequisicaoInvalida` (`destinoId` ausente ou inválido) · **404** `ParadaNaoEncontrada`, `DestinoNaoEncontrado` |
 | Acesso | Público |
 | Dependências | `IProvedorPrevisaoChegada`, repositório de percursos estimados (seed) e o serviço de alternativas. Depois da validação (400 → 404), os percursos diretos são lidos primeiro e só então o provedor é consultado, para as linhas desses percursos; com `SemLinhaDireta` o provedor não é consultado. Não há `Task.WhenAll` nesta rota (o paralelismo fica no resumo, 4.8). |
-| Bloco | B9 (**implementado**) |
 
 **Cálculo:**
 
@@ -696,7 +677,7 @@ Exemplos:
 Fora do MVP: baldeações, outros meios de transporte, trânsito em tempo real e rotas que não
 estejam cadastradas. Nenhuma rota é inventada.
 
-Conferido no B9:
+Notas de implementação:
 
 - Com o relógio controlado em 10/11/2026 às 14h32, as respostas da API são iguais a
   `alternativas.json` e, com o provedor indisponível, a `alternativas-sem-comparacao.json`
@@ -723,7 +704,6 @@ Conferido no B9:
 | Erros | **404** `ParadaNaoEncontrada` |
 | Acesso | Público |
 | Dependências | Os mesmos serviços de 4.2, 4.5 e 4.6. Provedor e banco são consultados em paralelo com `Task.WhenAll`; as consultas ao banco são feitas em sequência no mesmo `DbContext`. |
-| Bloco | B9 (**implementado**). O planejamento previa uma parte no B6, que não foi antecipada. |
 
 **`ResumoParada`**
 
@@ -746,7 +726,7 @@ Exemplos: [`exemplos/resumo.json`](exemplos/resumo.json) (`situacao: "Completo"`
 (`situacao: "Parcial"`, `partesIndisponiveis: ["previsoes"]` e aviso `ResumoParcial`). No
 segundo, a parada, as linhas e as últimas passagens continuam disponíveis.
 
-Conferido no B9:
+Notas de implementação:
 
 - As respostas da API são iguais a `resumo.json` e, com o provedor indisponível, a
   `resumo-provedor-indisponivel.json` (sem os ids internos). As três partes são montadas pelos
@@ -768,7 +748,7 @@ usadas pelo totem nem pela IA.**
 
 ### 5.1 Chave administrativa
 
-Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter` (**implementado no B7**):
+Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter`:
 
 | Ambiente | Chave configurada (`Admin:Chave`)? | Resultado |
 |---|---|---|
@@ -786,7 +766,7 @@ Toda rota em `/api/v1/admin` passa pelo filtro `ChaveAdministrativaFilter` (**im
   autorização recebe 401 ou 403, nunca 400.
 - Limitações do MVP: chave única e compartilhada, sem identidade individual nem auditoria,
   troca manual e sem limite de requisições.
-- Conferido no B7: o filtro é de **autorização** do ASP.NET Core, executado antes da leitura do
+- O filtro é de **autorização** do ASP.NET Core, executado antes da leitura do
   corpo, então um JSON inválido sem autorização recebe 401 ou 403. O 401 e o 403 saem em
   ProblemDetails com `codigo` e `traceId`, e o valor da chave nunca aparece em respostas nem em
   logs. "Development sem chave" existe só para a demonstração local e **não** é proteção
@@ -805,7 +785,6 @@ Erros comuns a todas as rotas administrativas: **401** `ChaveAdministrativaInval
 | Sucesso | **201**, `ParadaAdministrativa`, com `Location: /api/v1/paradas/{id}` |
 | Erros | **400** `RequisicaoInvalida` · **401** · **403** · **409** `CodigoJaCadastrado` |
 | Regras | A parada nasce ativa, com `origem: "CadastroAdministrativo"` e o `dadosSimulados` informado, que não muda depois. O operador precisa declarar se o cadastro é fictício; a API não presume nenhum dos dois. As respostas públicas que têm `avisos` passam a incluir `CadastroNaoVerificado` quando envolvem essa parada (seção 8). Um código com o prefixo reservado `SIM-` é recusado com 400. |
-| Bloco | B7 |
 
 `ParadaAdministrativa` = `Parada` mais `ativa` (`boolean`) e `criadoEm` (`date-time`).
 
@@ -850,7 +829,6 @@ Resposta **201**:
 | Sucesso | **200**, `ParadaAdministrativa` |
 | Erros | **400** · **401** · **403** · **404** `ParadaNaoEncontrada` (só quando não existe; paradas inativas podem ser atualizadas) |
 | Regras | O `codigoExterno` e o `dadosSimulados` não mudam. Para trocá-los, cadastre outra parada. Desativar substitui a exclusão: o histórico de passagens é preservado. |
-| Bloco | B7 |
 
 ```json
 {
@@ -871,7 +849,6 @@ Resposta **201**:
 | Sucesso | **201**, `Linha` mais `ativa` e `criadoEm`. Sem `Location`, porque o MVP não tem consulta pública de linha por `id`. |
 | Erros | **400** · **401** · **403** · **409** `CodigoJaCadastrado` |
 | Regras | A linha nasce ativa, com `origem: "CadastroAdministrativo"` e o `dadosSimulados` informado, como na parada (5.2). Códigos e letreiros com o prefixo reservado `SIM-` são recusados com 400. |
-| Bloco | B7 |
 
 ```json
 {
@@ -894,7 +871,6 @@ Resposta **201**:
 | Corpo | — |
 | Sucesso | **204**. É idempotente: repetir a chamada também devolve 204, sem duplicar. |
 | Erros | **401** · **403** · **404** `ParadaNaoEncontrada`, `LinhaNaoEncontrada` · **422** `ParadaInativa`, `LinhaInativa` |
-| Bloco | B7 |
 
 ### 5.6 `POST /api/v1/admin/observacoes-passagem` — registrar observação manual
 
@@ -905,7 +881,6 @@ Resposta **201**:
 | Corpo | `paradaId` (obrigatório) · `linhaId` (obrigatório) · `observadaEm` (`date-time`, obrigatório, com fuso) · `prefixoVeiculo` (`string \| null`, `^[A-Za-z0-9-]{1,20}$`) · `origemRegistro` (obrigatório, `^[a-z0-9-]{3,40}$`) |
 | Sucesso | **201**, `Passagem` mais `paradaId`. Sem `Location`, porque cada observação não tem consulta própria; ela passa a aparecer em `ultimas-passagens`. |
 | Erros | **400** · **401** · **403** · **404** `ParadaNaoEncontrada`, `LinhaNaoEncontrada` · **422** `LinhaNaoAtendeParada`, `ParadaInativa`, `LinhaInativa` |
-| Bloco | B7 |
 
 Regras de validação (veja também a seção [4.6.1](#461-regras-de-passagem)):
 - `observadaEm` precisa estar entre **24 horas antes** e **2 minutos depois** do instante do
@@ -915,7 +890,7 @@ Regras de validação (veja também a seção [4.6.1](#461-regras-de-passagem)):
   deve conter nome, telefone ou e-mail de uma pessoa. O padrão aceita só letras minúsculas,
   dígitos e hífen, o que recusa nomes com espaço ou maiúscula, e-mails e telefones formatados.
   Ele **não** impede todo dado pessoal: uma sequência só de dígitos, como um telefone sem
-  formatação, passa no padrão. Cabe ao operador usar apenas identificadores técnicos (B7).
+  formatação, passa no padrão. Cabe ao operador usar apenas identificadores técnicos.
 - O registro recebe `nivelConfirmacao: "RegistroManual"`, `verificada: false` e
   `oficialSptrans: false`. Não há como uma rota do MVP criar outro nível.
 
@@ -928,30 +903,30 @@ consulta das 14h32. Nos dois casos `desatualizada` é `false`.
 Esta é a forma de mostrar uma passagem recente na demonstração (4.6.2): as observações
 simuladas do seed mantêm o horário original e ficam desatualizadas com o tempo.
 
-Exemplo com curl, válido a partir do B7:
+Exemplo com curl:
 
 ```bash
 curl -X POST http://localhost:5080/api/v1/admin/observacoes-passagem -H "Content-Type: application/json" -H "X-PontoVoz-Admin-Key: <CHAVE_ADMINISTRATIVA_LOCAL>" -d @contracts/exemplos/admin-observacao-passagem-requisicao.json
 ```
 
-O corpo de exemplo tem horário fixo de 10/11/2026. Para executar de verdade, troque `observadaEm`
-por um horário das últimas 24 horas.
+O corpo de exemplo tem horário fixo de 10/11/2026. Para executar, troque `observadaEm` por um
+horário das últimas 24 horas, com fuso.
 
 ---
 
 ## 6. Verificação de saúde
 
-### `GET /health` — **implementado**
+### `GET /health`
 
 | Item | Definição |
 |---|---|
 | Finalidade | Indicar se a API está ativa |
-| Consumidores | Equipe, scripts de demonstração, interface do totem (antes de começar) |
+| Consumidores | Scripts de demonstração, monitoramento e clientes da API (antes de começar) |
 | Sucesso | **200** com `status: "Healthy"` ou `"Degraded"` |
 | Erros | **503** com `status: "Unhealthy"` (no mesmo formato de corpo) |
 | Acesso | Público |
 
-Resposta real com o banco disponível, registrada nas evidências do B3:
+Resposta real com o banco disponível:
 
 ```json
 {"status":"Healthy","escopo":"processo-e-dependencias","verificadoEm":"2026-11-07T21:47:05.9017706+00:00","verificacoes":[{"nome":"banco-de-dados","status":"Healthy"}]}
@@ -964,14 +939,14 @@ Resposta real com o banco indisponível (**503**):
 ```
 
 - **`escopo`:** é `processo` quando não há verificação registrada e `processo-e-dependencias`
-  quando há. Desde o B3, a API sempre registra a verificação `banco-de-dados`.
+  quando há. A API sempre registra a verificação `banco-de-dados`.
 - **`banco-de-dados`:** confere se o SQLite está acessível e se todas as migrations foram
   aplicadas. Ela só lê: não cria o arquivo do banco, não aplica migrations e não roda o seed. A
   resposta não traz caminhos, connection string nem mensagens internas.
 - **Provedor de previsões:** o estado dele **não** entra no `/health`; é informado pelos
   próprios endpoints de negócio.
 
-O formato do corpo não mudou desde o B0. Mudam apenas o valor de `escopo` e o conteúdo de
+O formato do corpo é sempre o mesmo; mudam apenas o valor de `escopo` e o conteúdo de
 `verificacoes`.
 
 ---
@@ -982,7 +957,7 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 
 | Campo | Descrição |
 |---|---|
-| `type` | Link padrão do ASP.NET Core para o status. Conferido no B6 e no B7: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `…#section-15.5.2` (401), `…#section-15.5.4` (403), `…#section-15.5.5` (404), `…#section-15.5.6` (405), `…#section-15.5.10` (409), `https://tools.ietf.org/html/rfc4918#section-11.2` (422), `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500) e `…#section-15.6.4` (503). **Não use para decidir lógica.** |
+| `type` | Link padrão do ASP.NET Core para o status: `https://tools.ietf.org/html/rfc9110#section-15.5.1` (400), `…#section-15.5.2` (401), `…#section-15.5.4` (403), `…#section-15.5.5` (404), `…#section-15.5.6` (405), `…#section-15.5.10` (409), `https://tools.ietf.org/html/rfc4918#section-11.2` (422), `https://tools.ietf.org/html/rfc9110#section-15.6.1` (500) e `…#section-15.6.4` (503). **Não use para decidir lógica.** |
 | `title` | Resumo legível |
 | `status` | Código HTTP |
 | `detail` | Explicação do caso, sem dados internos nem rastros de pilha |
@@ -1003,8 +978,8 @@ Formato **ProblemDetails** (RFC 9457), com dois campos extras:
 | `LinhaNaoAtendeParada` | 422 | A linha existe, mas não atende a parada |
 | `ParadaInativa` | 422 | Operação administrativa que exige parada ativa |
 | `LinhaInativa` | 422 | Operação administrativa que exige linha ativa |
-| `RotaNaoEncontrada` | 404 | O caminho não corresponde a nenhuma rota, inclusive um `id` não numérico ou menor que 1 (incluído no B6.1) |
-| `MetodoNaoPermitido` | 405 | A rota existe, mas não aceita o método usado; os aceitos vêm no cabeçalho `Allow` (incluído no B6.1) |
+| `RotaNaoEncontrada` | 404 | O caminho não corresponde a nenhuma rota, inclusive um `id` não numérico ou menor que 1 |
+| `MetodoNaoPermitido` | 405 | A rota existe, mas não aceita o método usado; os aceitos vêm no cabeçalho `Allow` |
 | `ErroInterno` | 500 | Erro inesperado da API |
 | `ProvedorPrevisoesIndisponivel` | 503 | Só em `GET /previsoes`: o provedor falhou, não respondeu no prazo ou está desligado |
 
@@ -1016,7 +991,7 @@ O `traceId` dos exemplos é o valor ilustrativo da especificação W3C Trace Con
 Diferença entre **400** e **422**: 400 é um valor mal formado ou fora da faixa, verificado sem
 consultar o banco. 422 é uma requisição bem formada que contradiz o estado dos dados.
 
-Conferido no B6:
+Notas de implementação:
 
 - O 400 de validação não tem `detail`; as mensagens ficam em `errors`, como no exemplo. Um valor
   que não é do tipo esperado na query (`pagina=abc`) também devolve 400 `RequisicaoInvalida`,
@@ -1026,12 +1001,11 @@ Conferido no B6:
   `/api/v1/rota-inexistente`, devolve **404** `RotaNaoEncontrada`, com `title` "Rota não
   encontrada". Um método não aceito (por exemplo, `POST /api/v1/paradas`) devolve **405**
   `MetodoNaoPermitido`. Os 404 `ParadaNaoEncontrada` e `LinhaNaoEncontrada` são os de um `id`
-  válido que não existe ou está inativo. No B6, as rotas ainda não implementadas (B7 a B9) também
-  respondiam `RotaNaoEncontrada`; desde o B9, todas as rotas do contrato existem.
+  válido que não existe ou está inativo.
 - O 500 tem sempre `title` "Erro interno", `codigo` `ErroInterno` e o `detail` genérico
   "Ocorreu um erro inesperado. Tente novamente mais tarde."; o erro real fica só no log.
 
-Conferido no B7 (rotas administrativas):
+Notas de implementação (rotas administrativas):
 
 - Campos obrigatórios ausentes (inclusive `dadosSimulados`, `ativa` e `sentido`) devolvem 400
   com "O campo X é obrigatório."; a API não presume `false` nem o primeiro valor de um enum.
@@ -1077,23 +1051,23 @@ mostrar a `mensagem` como está.
 
 | # | Método | Rota | Acesso | Estado |
 |---|---|---|---|---|
-| 1 | GET | `/api/v1/paradas` | Público | **Implementado (B6)** |
-| 2 | GET | `/api/v1/paradas/{id}` | Público | **Implementado (B6)** |
-| 3 | GET | `/api/v1/linhas` | Público | **Implementado (B6)** |
-| 4 | GET | `/api/v1/destinos` | Público | **Implementado (B6)** |
-| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | **Implementado (B8)** |
-| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado (B6)** |
-| 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | **Implementado (B9)** |
-| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | **Implementado (B9)** |
-| 9 | POST | `/api/v1/admin/paradas` | Chave | **Implementado (B7)** |
-| 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | **Implementado (B7)** |
-| 11 | POST | `/api/v1/admin/linhas` | Chave | **Implementado (B7)** |
-| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Chave | **Implementado (B7)** |
-| 13 | POST | `/api/v1/admin/observacoes-passagem` | Chave | **Implementado (B7)** |
-| — | GET | `/health` | Público | **Implementado (B0; verificação do banco no B3)** |
+| 1 | GET | `/api/v1/paradas` | Público | **Implementado** |
+| 2 | GET | `/api/v1/paradas/{id}` | Público | **Implementado** |
+| 3 | GET | `/api/v1/linhas` | Público | **Implementado** |
+| 4 | GET | `/api/v1/destinos` | Público | **Implementado** |
+| 5 | GET | `/api/v1/paradas/{id}/previsoes` | Público | **Implementado** |
+| 6 | GET | `/api/v1/paradas/{id}/ultimas-passagens` | Público | **Implementado** |
+| 7 | GET | `/api/v1/paradas/{id}/alternativas` | Público | **Implementado** |
+| 8 | GET | `/api/v1/paradas/{id}/resumo` | Público | **Implementado** |
+| 9 | POST | `/api/v1/admin/paradas` | Chave | **Implementado** |
+| 10 | PUT | `/api/v1/admin/paradas/{id}` | Chave | **Implementado** |
+| 11 | POST | `/api/v1/admin/linhas` | Chave | **Implementado** |
+| 12 | PUT | `/api/v1/admin/paradas/{id}/linhas/{linhaId}` | Chave | **Implementado** |
+| 13 | POST | `/api/v1/admin/observacoes-passagem` | Chave | **Implementado** |
+| — | GET | `/health` | Público | **Implementado** (com a verificação do banco) |
 
 Por que as rotas não entram em conflito:
-- `{id}` e `{linhaId}` têm a restrição `int:min(1)` (aplicada no B6 às rotas implementadas). Um
+- `{id}` e `{linhaId}` têm a restrição `int:min(1)`. Um
   texto nunca é confundido com um `id`; o que não corresponde ao padrão recebe 404
   `RotaNaoEncontrada` (seção 7).
 - Os sufixos de `/paradas/{id}/...` (`previsoes`, `ultimas-passagens`, `alternativas`,
@@ -1105,20 +1079,18 @@ Por que as rotas não entram em conflito:
   `/swagger` redirecionam para `/scalar`; esses atalhos não são operações da API e não aparecem no
   documento OpenAPI.
 
-Todas as rotas atendem a uma das quatro funções do totem (previsão, última passagem,
-alternativas e resumo), à identificação da parada ou ao cadastro mínimo necessário para a
-demonstração. Nenhuma rota sai do tema de mobilidade urbana.
+Todas as rotas atendem a uma das quatro funções da consulta no ponto (previsão, última
+passagem, alternativas e resumo), à identificação da parada ou ao cadastro mínimo necessário para
+a demonstração. Nenhuma rota sai do tema de mobilidade urbana.
 
 ---
 
-## 10. Divergências em relação ao planejamento
+## 10. Registro de decisões
 
-Mudanças em relação à Etapa 01.1 e ao rascunho B1. Nenhuma altera a lista de 13 endpoints.
-A coluna **B1** mostra o que o rascunho anterior dizia. A coluna **B1.1** mostra a decisão
-consolidada na revisão B1.1, aprovada com um ajuste. O ajuste da consolidação B1.2 está em D16,
-e as correções da B1.3 estão em D17 a D19.
+Decisões tomadas na consolidação do contrato, comparando a proposta inicial com a regra adotada e
+a justificativa técnica. Os códigos D1 a D19 são citados no restante deste documento e no código.
 
-| # | Planejamento (Etapa 01.1) | B1 | B1.1 (consolidado) | Justificativa técnica | Arquivos | Impacto na implementação |
+| # | Proposta inicial | Primeira versão do contrato | Decisão adotada | Justificativa técnica | Arquivos | Impacto na implementação |
 |---|---|---|---|---|---|---|
 | D1 | Datas "com deslocamento de fuso" | Saída de negócio em `-03:00`; `/health` em UTC | **Mantido** | O totem e a IA usam horário local. O `/health` é técnico e já foi publicado; os dois formatos são ISO 8601 válidos. | `api-v1.md` 1.3, 6 | B5/B6: um conversor único de UTC para `America/Sao_Paulo` na saída dos DTOs. `/health` sem mudança. |
 | D2 | Endpoint 5 com **503** quando o provedor falha | 200 com `status: "ProvedorIndisponivel"` | **Revertido para 503** em `/previsoes`. Resumo e alternativas continuam 200 com status explícito. | A previsão é todo o conteúdo do endpoint 5; sem ela, a requisição não foi atendida. Os endpoints compostos ainda têm informação útil (seção 2). | `api-v1.md` 1.7, 1.10, 2, 4.5, 4.7, 4.8, 7; `README.md`; `erro-provedor-previsoes-indisponivel.json` | B6: exceção de domínio `ProvedorPrevisoesIndisponivelException` convertida em 503 pelo tratador global. B8/B9: o service do resumo e o das alternativas capturam a indisponibilidade e a transformam em status. |
@@ -1142,23 +1114,22 @@ e as correções da B1.3 estão em D17 a D19.
 
 ---
 
-## 11. Requisitos para os próximos blocos
+## 11. Requisitos técnicos
 
-Regras que o contrato pressupõe, com o bloco responsável. O estado em 08/11/2026 (B9) está na
-nota logo abaixo da tabela.
+Regras que o contrato pressupõe para a implementação, com a forma de testá-las. Todas estão
+implementadas e cobertas por testes ou por revisão, como indica a nota abaixo da tabela.
 
-| # | Requisito | Bloco | Como testar |
-|---|---|---|---|
-| R1 | O provedor simulado calcula todos os horários a partir do `TimeProvider`. Cada linha simulada tem um intervalo e uma defasagem fixos; a próxima chegada é o próximo horário dessa sequência a partir de agora. Nunca devolve previsão vencida. | B8 | Com `FakeTimeProvider` em datas diferentes, as previsões são sempre futuras e repetem o mesmo padrão |
-| R2 | Os horários fixos de 10/11/2026 existem **só nos exemplos de `contracts/`**. Nenhum horário fixo vai para o código, o seed ou os testes de regra. | B2 a B9 | Revisão de código e testes com datas variadas |
-| R3 | O seed é **idempotente** e identifica cada dado por chave estável. No **provisionamento inicial** de um banco vazio, cria os cadastros de demonstração e as observações simuladas iniciais, com horário calculado uma única vez em relação ao instante do provisionamento, nunca com data fixa (4.6.2, situação 1). | B3 | Com `FakeTimeProvider`: provisionar um banco vazio cria as observações com horários relativos; executar o seed de novo, em outro instante, mantém a mesma quantidade de registros e os mesmos `observadaEm` |
-| R4 | Numa **inicialização posterior**, com o banco já provisionado, o seed não cria, não altera e não apaga passagens (4.6.2, situação 2). Não existe opção para renovar observações simuladas. Depois do provisionamento, uma nova passagem só nasce pelo registro manual administrativo (5.6), com `RegistroManual` e `origemRegistro` identificados (situação 3). | B3 e B7 | Teste: reiniciar o host com o banco provisionado, mesmo sem uma das observações simuladas, mantém as passagens iguais |
-| R5 | `minutosDesdeObservacao` e `desatualizada` seguem 4.6.3: minutos nunca negativos, desatualização pelo intervalo exato e registro no futuro fora da consulta. As observações simuladas antigas continuam visíveis com `desatualizada: true`. | B2 e B5 | Casos J1 a J5 e T1 a T7 de 4.6.3 com `FakeTimeProvider` |
-| R6 | O provedor simulado terá uma opção para simular a indisponibilidade, usada nos testes e na demonstração do 503 e do resumo parcial. | B8 | Teste dos dois comportamentos |
-| R7 | A busca por `termo` usa uma coluna normalizada (minúsculas e sem acentos), porque o SQLite não ignora acentos. | B3/B4 | Teste: `demonstracao` encontra `Demonstração` |
-| R8 | O adaptador Olho Vivo só faz sentido para códigos reais da SPTrans. Para os dados `SIM-`, as previsões vêm sempre do provedor simulado. | B8 | Documentado em `docs/dados.md` quando o adaptador existir |
+| # | Requisito | Como testar |
+|---|---|---|
+| R1 | O provedor simulado calcula todos os horários a partir do `TimeProvider`. Cada linha simulada tem um intervalo e uma defasagem fixos; a próxima chegada é o próximo horário dessa sequência a partir de agora. Nunca devolve previsão vencida. | Com `FakeTimeProvider` em datas diferentes, as previsões são sempre futuras e repetem o mesmo padrão |
+| R2 | Os horários fixos de 10/11/2026 existem **só nos exemplos de `contracts/`**. Nenhum horário fixo vai para o código, o seed ou os testes de regra. | Revisão de código e testes com datas variadas |
+| R3 | O seed é **idempotente** e identifica cada dado por chave estável. No **provisionamento inicial** de um banco vazio, cria os cadastros de demonstração e as observações simuladas iniciais, com horário calculado uma única vez em relação ao instante do provisionamento, nunca com data fixa (4.6.2, situação 1). | Com `FakeTimeProvider`: provisionar um banco vazio cria as observações com horários relativos; executar o seed de novo, em outro instante, mantém a mesma quantidade de registros e os mesmos `observadaEm` |
+| R4 | Numa **inicialização posterior**, com o banco já provisionado, o seed não cria, não altera e não apaga passagens (4.6.2, situação 2). Não existe opção para renovar observações simuladas. Depois do provisionamento, uma nova passagem só nasce pelo registro manual administrativo (5.6), com `RegistroManual` e `origemRegistro` identificados (situação 3). | Teste: reiniciar o host com o banco provisionado, mesmo sem uma das observações simuladas, mantém as passagens iguais |
+| R5 | `minutosDesdeObservacao` e `desatualizada` seguem 4.6.3: minutos nunca negativos, desatualização pelo intervalo exato e registro no futuro fora da consulta. As observações simuladas antigas continuam visíveis com `desatualizada: true`. | Casos J1 a J5 e T1 a T7 de 4.6.3 com `FakeTimeProvider` |
+| R6 | O provedor simulado terá uma opção para simular a indisponibilidade, usada nos testes e na demonstração do 503 e do resumo parcial. | Teste dos dois comportamentos |
+| R7 | A busca por `termo` usa uma coluna normalizada (minúsculas e sem acentos), porque o SQLite não ignora acentos. | Teste: `demonstracao` encontra `Demonstração` |
+| R8 | O adaptador Olho Vivo só faz sentido para códigos reais da SPTrans. Para os dados `SIM-`, as previsões vêm sempre do provedor simulado. | Documentado em `docs/dados.md` quando o adaptador existir |
 
-Estado (B9): R1, R6 implementados no B8; R3 e R4 no B3 e no B7; R5 no B2 e no B5; R7 no B4. R2 é
-seguido: nenhum horário fixo está no código, no seed ou nos testes de regra (só os testes que
+Estado: R1, R3 a R7 implementados e testados. R2 é seguido: nenhum horário fixo está no código, no seed ou nos testes de regra (só os testes que
 comparam com os exemplos usam o instante deles). R8: adaptador Olho Vivo implementado, desligado
 por padrão e testado só com respostas simuladas; os dados `SIM-` nunca são enviados à SPTrans.

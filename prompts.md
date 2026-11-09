@@ -11,7 +11,7 @@ do material oficial da FIAP de registrar os prompts utilizados e compreender o c
 | Equipe | Albert Katri (RM556544), Bruno Biletsky (RM554739) e Paulo Akira (RM556840), informados pelo integrante no prompt 35 |
 | Integrante responsável | Paulo Akira (RM556840): C# Software Development, backend deste repositório (informado no prompt 41). Componentes de Albert Katri e Bruno Biletsky pendentes. |
 | Período | 06/11/2026 em diante |
-| Prompts registrados | 41 |
+| Prompts registrados | 42 |
 
 ## Como a IA foi usada
 
@@ -115,6 +115,7 @@ reescrito.
 | [39](#prompt-39) | 08/11/2026 | Bloco B11: investigação da falha intermitente e fechamento | Diagnóstico e validação | — |
 | [40](#prompt-40) | 08/11/2026 | Bloco B11.1: pacote ZIP final para auditoria independente | Preparação para auditoria | — |
 | [41](#prompt-41) | 08/11/2026 | Bloco B11.2: ajustes finais e publicação definitiva | Correção, validação e publicação | `chore: finalize C# Global Solution submission` |
+| [42](#prompt-42) | 08/11/2026 | Revisão final da documentação acadêmica e publicação | Revisão de documentação e publicação | `docs: finalize academic documentation for C# delivery` |
 
 ---
 
@@ -9752,3 +9753,300 @@ correções de documentação, sem mudar funcionalidades:
 - **Validação e publicação:** build limpo, suíte completa com relatório TRX, verificador do contrato,
   OpenAPI, links, busca de segredos e banco de desenvolvimento conferidos antes do commit
   `chore: finalize C# Global Solution submission`, publicado com push normal.
+
+<a id="prompt-42"></a>
+
+### Prompt 42 — Revisão final da documentação acadêmica e publicação
+
+**Data:** 08/11/2026 · **Tipo:** Revisão de documentação e publicação · **Commit:** `docs: finalize academic documentation for C# delivery`
+
+**Instrução original (texto integral, como foi enviada):**
+
+````text
+PONTOVOZ — REVISÃO FINAL DA DOCUMENTAÇÃO ACADÊMICA E PUBLICAÇÃO
+Atue como revisor técnico sênior de entregas acadêmicas de Engenharia de Software, com especialização em C#/.NET, documentação de APIs e qualidade de software.
+Repositório:
+https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp
+Diretório local:
+C:\Users\paulo\Projetos\GS-CitizenTech-PontoVoz
+Último commit publicado informado:
+5df676d9eaeab6eeb8931510215d992083831163
+Referência obrigatória:
+PDF oficial da Global Solution FIAP 2026.2, especialmente páginas 14, 17–21 e 30.
+OBJETIVO
+Fazer a revisão editorial e acadêmica definitiva do repositório C#.
+O projeto já foi desenvolvido, testado, auditado e publicado.
+Agora quero que os arquivos públicos apresentem apenas:
+
+* A proposta CitizenTech.
+* O backend efetivamente implementado.
+* A fundamentação técnica.
+* Os requisitos atendidos da disciplina C#.
+* As instruções de execução.
+* A documentação dos endpoints.
+* As evidências necessárias.
+* As limitações técnicas reais.
+* A identificação da equipe.
+
+Não quero relatórios internos de planejamento misturados à documentação principal, instruções pessoais para desenvolver o trabalho, estados antigos de pendências ou documentos redundantes sem utilidade para a avaliação.
+A documentação precisa ser profissional, técnica, objetiva, natural e suficientemente detalhada para que o professor identifique com facilidade os cinco critérios avaliados.
+Esta revisão não autoriza inventar fatos, entrevistas, autoria, atribuições, funcionalidades, testes ou integrações.
+Não iniciar Testing & Quality Assurance.
+1. ESTADO INICIAL
+Antes de modificar:
+
+1. Confirme branch main e commit atual.
+2. Verifique a árvore de trabalho.
+3. Leia todos os arquivos de documentação.
+4. Identifique todos os links entre eles.
+5. Compare os documentos com o PDF oficial.
+6. Confirme quais arquivos são exigidos, quais comprovam requisitos e quais servem apenas como notas internas.
+
+Não reescreva histórico Git e não altere código funcional sem necessidade comprovada.
+2. FICHA CITIZENTECH — VERSÃO DEFINITIVA
+Utilize os dados abaixo:
+Nome: PontoVoz — Totem Inteligente de Mobilidade Urbana.
+Cidade: São Paulo, SP.
+Bairro de referência: Vila Inglesa.
+Problema: dificuldade de acesso a informações claras sobre paradas, linhas, previsão de chegada e alternativas de ônibus, especialmente para quem encontra barreiras no uso de aplicativos móveis.
+Cidadão beneficiado: passageiros de transporte público, incluindo idosos, pessoas com deficiência visual, usuários sem smartphone e pessoas que não conhecem bem a região.
+Solução proposta: um totem de consulta de transporte público, com interface acessível, que poderá utilizar os serviços do backend C#.
+Componente efetivamente implementado neste repositório: API REST em C#/.NET para consulta de paradas, linhas, previsões simuladas, passagens, destinos e alternativas de deslocamento.
+Não afirmar que o totem físico, a interface visual ou o reconhecimento de voz estão implementados neste repositório.
+Não afirmar que a integração com outras disciplinas foi realizada sem evidência.
+Jornada de referência
+Utilize este cenário, com redação natural:
+Uma pessoa que utiliza transporte público na região da Vila Inglesa precisa chegar a um destino. Atualmente, consulta um aplicativo como o Moovit para identificar a parada e o ônibus mais convenientes, acompanha a previsão de chegada e se desloca até o ponto para aguardar.
+A proposta do PontoVoz é disponibilizar informações semelhantes diretamente no ponto de ônibus, de maneira acessível, reduzindo a dependência de consultas pelo celular.
+Trate isso como cenário de uso e referência para definição do problema.
+Não o apresente como entrevista, pesquisa de campo ou resultado de validação realizada.
+Não invente nome, idade, deficiência, depoimento, data de entrevista, resultados de pesquisa ou observações não fornecidas.
+Não inclua endereço residencial, rua ou número de imóvel no repositório.
+O bairro Vila Inglesa é suficiente para contextualizar territorialmente o projeto.
+3. NÃO EXPOR A ORGANIZAÇÃO INTERNA DAS DISCIPLINAS
+Não há necessidade de explicar no README que os integrantes estão fazendo disciplinas separadamente.
+Não inclua essa informação.
+A página 30 não exige descrever quais outras disciplinas consomem a API.
+A página 20 apresenta um modelo sugerido com o campo "O que cada parte faz".
+Para este repositório, descreva de maneira objetiva a função do backend C# na solução.
+Não invente componentes dos outros integrantes, aplicativos prontos ou integrações.
+Não declare que a API é consumida atualmente por partes cuja integração não foi demonstrada.
+A descrição deve se concentrar no componente entregue, sem discutir a organização operacional da equipe.
+4. IDENTIFICAÇÃO DA EQUIPE
+Preserve os dados conhecidos:
+Albert Katri — RM556544
+Bruno Biletsky — RM554739
+Paulo Akira — RM556840
+Não invente divisão de tarefas ou atribuições individuais.
+Se o PDF de C# não exigir atribuições individuais, mantenha uma seção simples "Integrantes", com nome e RM.
+Remova a coluna "Componente" se ela não for necessária.
+Não mantenha células "Pendente" que não sejam exigidas pelo enunciado.
+Não atribua aos colegas trabalhos que não foram confirmados.
+Não inclua o estado de Testing & Quality Assurance no README de C#, pois é outra entrega.
+5. ODS E INDICADORES
+Mantenha ODS 10 e ODS 11, incluindo as metas 10.2 e 11.2.
+Explique de maneira objetiva como o backend e a proposta PontoVoz podem contribuir para essas metas.
+A justificativa deve ser consistente com as funcionalidades implementadas.
+Não diga que a equipe já aprovou formalmente o texto sem confirmação.
+Não mantenha observações internas como "aprovação pendente" no README.
+Quanto aos indicadores:
+
+* Preserve resultados técnicos efetivamente medidos e suas fontes.
+* Use indicadores de impacto social apenas como indicadores propostos para uma implantação piloto.
+* Não invente metas numéricas alcançadas, pesquisas ou benefícios comprovados.
+* Não apresente latência de API como comprovação de impacto social.
+
+6. LIMPEZA DA DOCUMENTAÇÃO
+Revise cuidadosamente:
+
+* README.md.
+* backend/README.md.
+* READMEs das camadas.
+* contracts/README.md.
+* contracts/api-v1.md.
+* docs/dados.md.
+* backend/docs/.
+* backend/docs/evidencias/.
+* INDICE-ENTREGA.md.
+* Demais arquivos Markdown versionados.
+
+Remover da documentação principal
+
+* Textos escritos para orientar o aluno durante o desenvolvimento.
+* Checklists de tarefas futuras que não pertencem à entrega.
+* Expressões como "aguardando auditoria" quando a etapa foi concluída.
+* Quadros históricos do tipo "implementado versus pendente no B4".
+* Relatórios cronológicos dos blocos B0 a B11 dentro dos READMEs.
+* Explicações redundantes.
+* Linguagem promocional.
+* Frases artificiais e excessivamente elaboradas.
+* Referências desnecessárias a decisões antigas do planejamento.
+* Instruções para executar trabalhos de outras disciplinas.
+* Campos pendentes sem necessidade acadêmica.
+
+Preservar obrigatoriamente
+
+* Descrição da solução.
+* Instruções reproduzíveis.
+* Arquitetura e conceitos relevantes.
+* Regras de negócio.
+* Contrato da API.
+* OpenAPI e Scalar.
+* Exemplos HTTP corretos.
+* Evidências de funcionamento.
+* Testes e seus resultados verdadeiros.
+* Limitações relevantes.
+* Explicação sobre dados simulados.
+* Requisitos de segurança.
+* Rastreabilidade dos cinco critérios C#.
+* Informações exigidas no PDF.
+
+Não reduza a documentação a ponto de o professor precisar investigar sozinho onde os requisitos foram implementados.
+O README principal deve ser conciso; a documentação técnica pode ser detalhada onde agrega valor.
+7. ARQUIVOS INTERNOS DE ORIENTAÇÃO
+Examine especialmente:
+`backend/docs/GUIA-APRESENTACAO-CSHARP.md`
+Esse arquivo foi criado para orientar o estudo e a apresentação, não consta entre os entregáveis obrigatórios de C#.
+Verifique se há outros documentos com a mesma finalidade exclusivamente interna.
+Para documentos realmente internos, sem evidência exigida:
+
+1. Preserve uma cópia fora do repositório, em uma pasta pessoal de apoio à apresentação.
+2. Retire-os da entrega versionada, se não forem necessários para compreender ou validar o projeto.
+3. Atualize todas as referências e links.
+4. Não apague documentos que sejam necessários como evidência técnica.
+5. Não exclua registros para ocultar o processo de autoria ou desenvolvimento.
+
+O índice de evidências pode permanecer, pois facilita a correção do professor.
+Preserve os arquivos de evidência técnica necessários para comprovar os critérios da FIAP.
+Se algum relatório histórico puder ser retirado sem perda de evidência, explique a decisão no relatório final antes de efetuar a exclusão.
+8. REGISTRO DO USO DE IA
+A página 21 do PDF solicita o registro dos prompts em `prompts.md`.
+Portanto:
+
+* Mantenha prompts.md no repositório.
+* Preserve os registros anteriores, sem reescrita ou supressão.
+* Registre fielmente esta instrução.
+* Não falsifique autoria.
+* Não reescreva commits anteriores.
+* Não declare participação manual que não ocorreu.
+
+O README principal não precisa reproduzir o histórico completo das interações de desenvolvimento. Uma referência objetiva ao registro de prompts é suficiente.
+9. ORGANIZAÇÃO DEFINITIVA DOS READMES
+README principal
+Apresente preferencialmente:
+
+1. Identificação do projeto.
+2. Ficha CitizenTech.
+3. Problema e jornada de referência.
+4. Proposta da solução.
+5. ODS e contribuição.
+6. Funcionalidades implementadas.
+7. Tecnologias e arquitetura.
+8. Instruções para executar.
+9. Instruções para testar.
+10. Endpoints e documentação.
+11. Correspondência com os cinco critérios de C#.
+12. Evidências.
+13. Dados e limitações.
+14. Integrantes.
+15. Referência ao registro de prompts.
+
+Não utilize a estrutura de blocos B0–B11 como narrativa principal.
+README técnico do backend
+Organize por assuntos:
+
+* Requisitos.
+* Execução e configuração.
+* Arquitetura.
+* Domínio e POO.
+* Web API.
+* Persistência e LINQ.
+* Async/Await.
+* Segurança.
+* Testes.
+* Dados simulados e limitações.
+
+Concentre aqui os detalhes que seriam excessivos no README principal.
+10. QUALIDADE E PRECISÃO
+O professor deve identificar com facilidade:
+POO — 3,0 pontos.
+Web API — 2,5 pontos.
+EF Core + LINQ — 1,5 ponto.
+Async/Await — 1,0 ponto.
+Qualidade — 2,0 pontos.
+Mantenha uma tabela com referências reais aos arquivos, classes, métodos, testes e evidências.
+Não afirme que há previsões oficiais da SPTrans.
+Não afirme que o adaptador Olho Vivo foi validado externamente.
+Não afirme que os dados fictícios representam paradas reais.
+Não remova a informação sobre a falha intermitente registrada no B11; preserve o resultado real da validação.
+Não altere números de testes ou medições sem nova execução.
+11. VALIDAÇÃO DEPOIS DA REVISÃO
+Ao concluir:
+
+1. Confira todos os arquivos modificados, movidos e excluídos.
+2. Verifique todos os links relativos.
+3. Valide a documentação contra o PDF.
+4. Confirme que não houve alterações no código funcional.
+5. Faça build limpo.
+6. Execute a suíte completa de testes.
+7. Execute o verificador de contrato.
+8. Confirme as 14 operações OpenAPI.
+9. Confirme que o primeiro acesso em Development continua funcionando.
+10. Confirme que nenhum banco real de desenvolvimento foi alterado.
+11. Verifique a ausência de segredos e arquivos indevidos.
+
+Não gere novas funcionalidades.
+Não faça mudanças cosméticas no código.
+Não afirme que verificou algo que não executou.
+12. PUBLICAÇÃO
+Se os critérios técnicos e documentais forem atendidos, e não houver problemas relevantes:
+
+* Revise os arquivos staged.
+* Registre este prompt fielmente.
+* Faça commit com mensagem apropriada de revisão da documentação acadêmica.
+* Use autoria legítima.
+* Faça push normal para origin/main.
+* Não utilize force push.
+* Confirme main e origin/main sincronizados.
+* Confirme árvore limpa.
+
+Se encontrar algum requisito do PDF que não possa ser atendido sem inventar informações, registre a lacuna no relatório final e não a apresente como resolvida.
+13. RELATÓRIO FINAL
+Apresente:
+A. Arquivos mantidos e sua finalidade.
+B. Arquivos simplificados ou retirados e justificativa.
+C. Estrutura definitiva do repositório.
+D. Situação da ficha CitizenTech.
+E. Atendimento dos cinco critérios C#.
+F. Resultado dos testes e do build.
+G. Estado do OpenAPI e da documentação Scalar.
+H. Verificação de segurança.
+I. Pendências acadêmicas reais, caso existam.
+J. Commit e push.
+K. Confirmação de que o repositório está pronto para o envio de C#.
+Não inicie Testing & Quality Assurance.
+Esta revisão deve encerrar definitivamente a documentação pública do backend C#. Priorize conformidade com o PDF, precisão técnica, clareza, organização e preservação das evidências necessárias ao professor.
+````
+
+**Resultado (resumo escrito pela ferramenta; não é transcrição):** o Claude Code revisou a
+documentação pública sem alterar código, configuração nem testes:
+
+- **README principal:** reorganizado na ordem pedida, com a ficha CitizenTech definitiva (bairro de
+  referência Vila Inglesa), a jornada de referência apresentada como cenário de uso (não como
+  pesquisa), as justificativas dos ODS 10.2 e 11.2, a tabela dos cinco critérios com arquivos,
+  classes, testes e evidências, os indicadores técnicos medidos e os de impacto como propostos
+  para um piloto, as limitações e a seção de integrantes só com nome e RM.
+- **README do backend:** reescrito por assunto (requisitos, execução e configuração, arquitetura,
+  domínio e POO, Web API, persistência e LINQ, Async/Await, segurança, testes e limitações), sem a
+  narrativa por blocos e sem os quadros históricos, com as contagens de testes por classe tiradas
+  do relatório TRX e o registro da falha intermitente preservado.
+- **Contrato e demais documentos:** retiradas as referências de planejamento (quadro de estado por
+  bloco, linhas "Bloco", notas "Conferido no B…", cronograma e histórico de mudanças), mantendo a
+  estrutura que o verificador confere, os códigos R1 a R8 e D1 a D19 e as regras; READMEs das
+  camadas, `docs/dados.md` e o índice de evidências atualizados.
+- **Guia de apresentação:** copiado para uma pasta pessoal fora do repositório e retirado da
+  entrega versionada, por ser um material de estudo, não um entregável.
+- **Validação:** build limpo, 816 testes aprovados com relatório TRX, verificador do contrato,
+  OpenAPI com 14 operações igual ao exportado, primeiro acesso em Development criando o banco, 243
+  links e âncoras conferidos, busca de segredos e banco de desenvolvimento inalterado, antes do
+  commit `docs: finalize academic documentation for C# delivery`, publicado com push normal.

@@ -1,68 +1,80 @@
 # PontoVoz — Totem Inteligente de Mobilidade Urbana
 
-**Global Solution FIAP 2026.2** · Engenharia de Software · Tema **CitizenTech** · Disciplina deste
-repositório: **C# Software Development** (backend)
+**Global Solution FIAP 2026.2** · Engenharia de Software · Tema **CitizenTech** · Disciplina:
+**C# Software Development**
+
+Este repositório contém o backend em C#/.NET 10 do PontoVoz: uma API REST para consulta de paradas,
+linhas, previsões de chegada simuladas, últimas passagens, destinos e alternativas de deslocamento,
+com persistência em SQLite pelo Entity Framework Core, documentação OpenAPI/Scalar e 816 testes
+automatizados.
 
 ## Ficha da CitizenTech
 
 | Campo | Conteúdo |
 |---|---|
-| Nome da CitizenTech | PontoVoz — Totem Inteligente de Mobilidade Urbana |
-| Cidade e bairro | São Paulo, SP · bairro: **Pendente** — a equipe deve indicar o ponto de ônibus real escolhido |
-| Cidadão beneficiado | Passageiros de ônibus, com atenção a idosos, pessoas com deficiência visual, pessoas sem smartphone ou sem internet móvel e quem não conhece as linhas da região |
-| Problema, em uma frase | No ponto de ônibus, quem não tem smartphone ou tem deficiência visual não consegue saber quando a linha chega nem qual linha leva mais rápido ao seu destino. |
-| Como funciona | A proposta é um totem no ponto, usado por toque ou voz, que consultaria esta API para informar as próximas chegadas, a última passagem registrada de cada linha e as linhas diretas até um destino, ordenadas pelo menor tempo total (espera + percurso). Neste repositório está o backend; o totem não faz parte dele. |
-| O que cada parte faz | **Backend C# (este repositório):** disponibiliza uma API REST, com as regras, a persistência e os dados da demonstração, que pode ser utilizada por outras partes da solução. A integração efetiva com as entregas das outras disciplinas ainda **não foi confirmada**: os integrantes desenvolvem suas disciplinas separadamente, a partir da mesma ideia do PontoVoz. **Demais partes:** **Pendente** — a equipe deve descrever o que cada disciplina entrega e se ela usa esta API. |
+| Nome | PontoVoz — Totem Inteligente de Mobilidade Urbana |
+| Cidade e bairro | São Paulo, SP · bairro de referência: Vila Inglesa |
+| Cidadão beneficiado | Passageiros de transporte público, incluindo idosos, pessoas com deficiência visual, usuários sem smartphone e pessoas que não conhecem bem a região |
+| Problema, em uma frase | É difícil obter informações claras sobre paradas, linhas, previsão de chegada e alternativas de ônibus, especialmente para quem encontra barreiras no uso de aplicativos móveis. |
+| Como funciona | A solução proposta é um totem de consulta no ponto de ônibus, com interface acessível, que poderá utilizar os serviços do backend C# para mostrar as próximas chegadas, a última passagem registrada de cada linha e as linhas diretas até um destino, ordenadas pelo menor tempo total (espera + percurso). |
+| O que cada parte faz | **Backend C# (este repositório):** API REST que organiza paradas, linhas, destinos, percursos, previsões e passagens, aplica as regras de negócio e informa em cada resposta a origem dos dados e os avisos sobre dados simulados. O totem e sua interface são a proposta de uso da API e não fazem parte deste repositório. |
 | Link do repositório | https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp |
-| Indicador de impacto | Ver [Indicadores](#indicadores). Nenhum indicador de impacto social foi medido; os indicadores técnicos medidos estão na mesma seção. |
-| ODS conectados | ODS 10 (meta 10.2) e ODS 11 (meta 11.2) — ver [ODS](#objetivos-de-desenvolvimento-sustentável-ods) |
+| Indicador de impacto | Indicadores propostos para uma implantação piloto, em [Indicadores](#indicadores) |
+| ODS conectados | ODS 10 (meta 10.2) e ODS 11 (meta 11.2) |
 
-### Validação com o cidadão
+## Problema e jornada de referência
 
-**Pendente — preencher pela equipe:** data e local da conversa com uma pessoa que usa o ponto de
-ônibus escolhido, o perfil dela (sem nome nem dados pessoais), o que ela faz hoje para saber quando
-o ônibus chega e o que a atrapalha. Até esse registro, a descrição do problema é a hipótese de
-trabalho da equipe, não um resultado de pesquisa.
+Muitas pessoas que usam ônibus não sabem quanto tempo falta para a linha chegar nem se existe uma
+opção melhor para o seu destino. Os aplicativos de mobilidade resolvem parte disso, mas exigem
+smartphone, internet móvel e familiaridade com a tecnologia, e nem sempre são acessíveis a pessoas
+com deficiência visual.
 
-## 1. Problema e proposta
+**Jornada de referência** (cenário de uso que orienta o projeto, não uma pesquisa de campo): uma
+pessoa que usa transporte público na região da Vila Inglesa precisa chegar a um destino. Hoje, ela
+consulta um aplicativo de mobilidade, como o Moovit, para identificar a parada e o ônibus mais
+convenientes, acompanha a previsão de chegada e vai até o ponto para aguardar. O PontoVoz propõe
+oferecer informações semelhantes no próprio ponto de ônibus, de forma acessível, reduzindo a
+dependência do celular.
 
-Em São Paulo, quem espera o ônibus muitas vezes não sabe quanto tempo falta para a linha chegar
-nem se existe uma opção melhor para o seu destino. Os aplicativos de mobilidade exigem smartphone,
-internet móvel e familiaridade com tecnologia, e nem sempre são acessíveis a pessoas com
-deficiência visual.
+## Proposta da solução
 
-A proposta é um totem no ponto de ônibus que responde por voz ou por toque. Este repositório
-contém o backend em C#/.NET 10: a API que o totem consulta. A interface e a voz não fazem parte
-deste repositório.
+Um totem de consulta instalado no ponto de ônibus, com interface acessível, que poderá utilizar os
+serviços deste backend para informar:
 
-### Objetivos de Desenvolvimento Sustentável (ODS)
+1. **Previsão de chegada:** quantos minutos faltam para cada linha.
+2. **Última passagem registrada:** quando cada linha foi vista pela última vez, com o nível de
+   confirmação, sem apresentar registros não verificados como oficiais.
+3. **Alternativas de deslocamento:** as linhas diretas até um destino, comparadas pelo tempo total
+   estimado (espera + percurso), e não apenas por quem chega primeiro.
 
-| ODS | Meta | Como o backend contribui |
+O totem físico, a interface visual e o reconhecimento de voz **não** estão implementados neste
+repositório; o componente entregue é o backend C#.
+
+## ODS e contribuição
+
+| ODS | Meta | Contribuição |
 |---|---|---|
-| **ODS 10 — Redução das desigualdades** | 10.2: até 2030, empoderar e promover a inclusão social, econômica e política de todos, independentemente de idade, gênero, deficiência, raça, etnia, origem, religião, condição econômica ou outra | A API entrega a informação de transporte pronta para ser exibida em tela grande ou lida em voz alta pelo totem, sem exigir smartphone, plano de dados nem leitura de tela pequena. Cada resposta diz se o dado é simulado ou não verificado, para que a informação falada ao passageiro não pareça oficial quando não é. |
-| **ODS 11 — Cidades e comunidades sustentáveis** | 11.2: até 2030, proporcionar o acesso a sistemas de transporte seguros, acessíveis, sustentáveis e a preço acessível para todos, melhorando a segurança rodoviária por meio da expansão dos transportes públicos, com especial atenção para as necessidades das pessoas em situação de vulnerabilidade, mulheres, crianças, pessoas com deficiência e idosos | As previsões, as últimas passagens e as alternativas pelo menor tempo total tornam o ônibus mais previsível no próprio ponto, o que ajuda a planejar a viagem; quando falta informação, a resposta avisa em vez de esconder. |
+| **ODS 10 — Redução das desigualdades** | 10.2: até 2030, empoderar e promover a inclusão social, econômica e política de todos, independentemente da idade, gênero, deficiência, raça, etnia, origem, religião, condição econômica ou outra | A API entrega a informação de transporte pronta para ser exibida em tela ou lida em voz alta no ponto, sem exigir smartphone nem plano de dados, o que pode ampliar o acesso de idosos, pessoas com deficiência visual e quem não tem celular. Cada resposta indica se o dado é simulado ou não verificado. |
+| **ODS 11 — Cidades e comunidades sustentáveis** | 11.2: até 2030, proporcionar o acesso a sistemas de transporte seguros, acessíveis, sustentáveis e a preço acessível para todos, melhorando a segurança rodoviária por meio da expansão dos transportes públicos, com especial atenção para as necessidades das pessoas em situação de vulnerabilidade, mulheres, crianças, pessoas com deficiência e idosos | Previsões, últimas passagens e alternativas pelo menor tempo total tornam o ônibus mais previsível no próprio ponto e ajudam a planejar a viagem; quando falta informação, a resposta avisa em vez de esconder. |
 
-> A redação das justificativas precisa da aprovação final da equipe.
-
-## 2. Funcionalidades implementadas
+## Funcionalidades implementadas
 
 | Rota | O que faz |
 |---|---|
-| `GET /api/v1/paradas` | Busca paradas por texto (sem diferenciar acentos) ou pelo código do totem |
+| `GET /api/v1/paradas` | Busca paradas por texto (sem diferenciar acentos) ou pelo código da parada |
 | `GET /api/v1/paradas/{id}` | Detalhe da parada, com as linhas que a atendem |
 | `GET /api/v1/linhas` · `GET /api/v1/destinos` | Busca de linhas e de destinos |
 | `GET /api/v1/paradas/{id}/previsoes` | Próximas chegadas, calculadas por um provedor **simulado** no instante da consulta; 503 quando o provedor está indisponível |
-| `GET /api/v1/paradas/{id}/ultimas-passagens` | Última passagem registrada de cada linha, com o nível de confirmação (nunca apresentada como oficial) |
-| `GET /api/v1/paradas/{id}/alternativas?destinoId=` | Linhas diretas até o destino, ordenadas pelo menor tempo total (espera + percurso); linhas sem previsão ficam sem posição |
+| `GET /api/v1/paradas/{id}/ultimas-passagens` | Última passagem registrada de cada linha, com o nível de confirmação |
+| `GET /api/v1/paradas/{id}/alternativas?destinoId=` | Linhas diretas até o destino, ordenadas pelo menor tempo total; linhas sem previsão ficam sem posição |
 | `GET /api/v1/paradas/{id}/resumo` | Parada, previsões e últimas passagens numa resposta; com o provedor indisponível, responde como resumo parcial |
 | `POST`/`PUT /api/v1/admin/...` (5 rotas) | Cadastro e atualização de paradas, cadastro de linhas, associação e registro manual de passagens, protegidos pela chave `X-PontoVoz-Admin-Key` |
 | `GET /health` | Verifica o processo e o banco SQLite |
 
-**Exclusão lógica:** não há rota `DELETE`. Uma parada é retirada das consultas pelo
-`PUT /api/v1/admin/paradas/{id}` com `"ativa": false`, e o histórico de passagens é preservado
-(as chaves estrangeiras não permitem apagar em cascata).
+Não há rota `DELETE`: uma parada é retirada das consultas pelo `PUT /api/v1/admin/paradas/{id}`
+com `"ativa": false` (exclusão lógica), e o histórico de passagens é preservado.
 
-## 3. Tecnologias e arquitetura
+## Tecnologias e arquitetura
 
 | Tecnologia | Uso |
 |---|---|
@@ -78,34 +90,16 @@ Controllers (API REST)  →  Application (services, DTOs, validação)  →  Dom
                            Infrastructure (EF Core/SQLite, repositórios LINQ, provedores de previsão)
 ```
 
-- **Domain:** entidades, objetos de valor e regras de negócio, sem dependência de ASP.NET Core ou
-  EF Core.
-- **Application:** services que validam, aplicam as regras e montam as respostas; interfaces dos
-  repositórios e do provedor de previsões.
-- **Infrastructure:** `PontoVozDbContext`, mapeamentos, migrations, seed, repositórios com LINQ e
-  os provedores de previsão (simulado e adaptador Olho Vivo desligado).
-- **API:** controllers, tratamento central de erros, segurança administrativa e documentação.
+As camadas são ligadas por injeção de dependência no
+[`Program.cs`](backend/src/PontoVoz.Api/Program.cs). Arquitetura, pastas e detalhes de cada camada:
+[backend/README.md](backend/README.md#arquitetura).
 
-As camadas são pastas de um mesmo projeto, ligadas por injeção de dependência no
-[`Program.cs`](backend/src/PontoVoz.Api/Program.cs). Versões dos pacotes e detalhes de cada camada:
-[backend/README.md](backend/README.md).
+## Como executar
 
-## 4. Como executar
-
-### Pré-requisitos
-
-| Item | Versão |
-|---|---|
-| .NET SDK | **10** (10.0.100 ou superior na linha 10.0). Confira com `dotnet --list-sdks`; download em https://dotnet.microsoft.com/download/dotnet/10.0 |
-| IDE (opcional) | **Visual Studio 2026** (18.0 ou superior), VS Code com a extensão C# Dev Kit, ou JetBrains Rider. Versões anteriores do Visual Studio não têm suporte ao .NET 10. |
-| Git | Qualquer versão recente |
-
-Não é preciso instalar banco de dados, Docker nem ferramentas globais. Com um SDK anterior ao 10
-(por exemplo, só o .NET 8), o build não funciona.
-
-### Pela linha de comando
-
-A partir da pasta do repositório clonado:
+Pré-requisitos: Git e o **.NET SDK 10** (10.0.100 ou superior na linha 10.0; confira com
+`dotnet --list-sdks`). Opcionalmente, Visual Studio 2026 (18.0 ou superior), VS Code com C# Dev
+Kit ou JetBrains Rider; versões anteriores do Visual Studio não têm suporte ao .NET 10. Não é
+preciso instalar banco de dados nem Docker.
 
 ```bash
 git clone https://github.com/PONTOVOZ-GLOBAL-SOLUTION/pontovoz-csharp.git
@@ -123,154 +117,108 @@ dotnet build
 dotnet run --project backend/src/PontoVoz.Api --launch-profile http
 ```
 
-Em Development, a API cria o banco SQLite na primeira execução (aplica as migrations e o seed de
-demonstração), sem nenhum comando extra. Nas execuções seguintes, o banco existente é mantido.
-
-### Pelo Visual Studio 2026
-
-Abra `PontoVoz.sln` (na raiz), escolha `PontoVoz.Api` como projeto de inicialização e o perfil
-`http`, e execute com F5. O perfil está configurado para abrir o Scalar no navegador, e a API cria o
-banco na primeira execução, como pela linha de comando. Esse fluxo não foi testado no Visual Studio
-2026; a linha de comando foi testada (veja
-[B11-validacao.md](backend/docs/evidencias/B11-validacao.md)).
-
-### Endereços
+Em Development, a API cria o banco SQLite na primeira execução, aplicando as migrations e os dados
+de demonstração. No Visual Studio 2026, abra `PontoVoz.sln`, escolha `PontoVoz.Api` como projeto de
+inicialização e execute com o perfil `http`.
 
 | Recurso | Endereço |
 |---|---|
-| Interface Scalar (documentação) | http://localhost:5080/scalar — `http://localhost:5080/` e `/swagger` também levam a ela |
+| Interface Scalar | http://localhost:5080/scalar (também por `http://localhost:5080/` e `/swagger`) |
 | Documento OpenAPI | http://localhost:5080/openapi/v1.json |
 | Saúde do processo e do banco | http://localhost:5080/health |
 | Exemplo de consulta | http://localhost:5080/api/v1/paradas?codigoExterno=SIM-P001 |
 
-O roteiro de demonstração (consultas do passageiro, operador e falha controlada) e o comando
-`dotnet ef database update`, para criar o banco sem iniciar a API, estão em
-[backend/README.md](backend/README.md#roteiro-de-demonstração). O arquivo
-[`PontoVoz.Api.http`](backend/src/PontoVoz.Api/PontoVoz.Api.http) tem exemplos das 14 operações
-para o Visual Studio, o VS Code ou o Rider.
+Configuração, criação do banco com `dotnet ef database update` e roteiro de demonstração:
+[backend/README.md](backend/README.md#execução-e-configuração).
 
-## 5. Como testar
+## Como testar
 
-A partir da raiz do repositório (ou da pasta `backend/`):
+A partir da raiz do repositório:
 
 ```bash
 dotnet test
 ```
 
-Os 816 testes cobrem o domínio, os services, a persistência com SQLite real e isolado por teste e
-a API em memória, com as respostas comparadas aos exemplos do contrato. Não usam o banco de
-desenvolvimento nem acessam serviços externos. Filtros por grupo:
-[backend/README.md](backend/README.md#testes).
+Os 816 testes cobrem o domínio, os services, a persistência com SQLite real e isolado por teste e a
+API em memória, com as respostas comparadas aos exemplos do contrato. Não usam o banco de
+desenvolvimento nem serviços externos. Grupos e filtros: [backend/README.md](backend/README.md#testes).
 
-## 6. Documentação dos endpoints
+## Endpoints e documentação
 
 - **Scalar:** `http://localhost:5080/scalar`, com a API em execução em Development.
-- **Contrato REST:** [contracts/api-v1.md](contracts/api-v1.md), com regras, erros, avisos e
-  exemplos JSON em [contracts/exemplos/](contracts/exemplos/).
-- **OpenAPI exportado da API:** [contracts/openapi/pontovoz-v1.json](contracts/openapi/pontovoz-v1.json)
-  (14 operações: 8 públicas de negócio, 5 administrativas e o `/health`).
+- **Contrato REST:** [contracts/api-v1.md](contracts/api-v1.md), com regras, erros e avisos;
+  exemplos JSON em [contracts/exemplos/](contracts/exemplos/); guia de consumo em
+  [contracts/README.md](contracts/README.md).
+- **OpenAPI exportado da API:** [contracts/openapi/pontovoz-v1.json](contracts/openapi/pontovoz-v1.json),
+  com 14 operações (8 públicas de negócio, 5 administrativas e o `/health`).
+- **Exemplos prontos:** [`backend/src/PontoVoz.Api/PontoVoz.Api.http`](backend/src/PontoVoz.Api/PontoVoz.Api.http),
+  com as 14 operações.
 
-## 7. Evidências dos critérios da disciplina
+## Critérios de C# Software Development
 
-| Critério | Código | Testes | Explicação e evidência |
+Os caminhos de código partem de `backend/src/PontoVoz.Api/`, e os de teste, de
+`backend/tests/PontoVoz.Tests/`.
+
+| Critério | Onde está no código | Testes | Explicação e evidência |
 |---|---|---|---|
-| POO (3,0) | `Domain/Entities/` (`EntidadeBase`, `RegistroPassagem` e subclasses), `Domain/ValueObjects/` | `tests/PontoVoz.Tests/Domain/` | [Guia, itens 3 e 9](backend/docs/GUIA-APRESENTACAO-CSHARP.md#9-onde-existem-herança-e-polimorfismo) · [Domínio (B2)](backend/README.md#domínio-b2) |
-| Web API (2,5) | `Controllers/`, `Middleware/`, `Security/` | `tests/PontoVoz.Tests/Api/` | [Guia, itens 6 e 18](backend/docs/GUIA-APRESENTACAO-CSHARP.md#6-o-papel-da-api) · [B6](backend/docs/evidencias/B6-web-api.md), [B10](backend/docs/evidencias/B10-validacao-final.md#as-14-operações) |
-| EF Core + LINQ (1,5) | `Infrastructure/Persistence/`, `Infrastructure/Repositories/` | `tests/PontoVoz.Tests/Infrastructure/`, `MigracaoAutomaticaTests` | [Guia, itens 10 e 11](backend/docs/GUIA-APRESENTACAO-CSHARP.md#11-onde-o-linq-aparece) · [B3](backend/docs/evidencias/B3-persistencia.md), [B4](backend/docs/evidencias/B4-consultas-linq.md) |
-| Async/Await (1,0) | Repositórios (`ToListAsync`), `Application/Services/ResumoParadaService.cs` (`Task.WhenAll`) | `ResumoParadaServiceTests`, testes de cancelamento | [Guia, itens 12 e 13](backend/docs/GUIA-APRESENTACAO-CSHARP.md#12-onde-o-asyncawait-aparece) · [B9](backend/docs/evidencias/B9-alternativas-resumo.md#instante-único-e-paralelismo) |
-| Qualidade do código (2,0) | Camadas, `TratadorExcecoes`, `ChaveAdministrativaFilter` | 816 testes | [Guia, item 19](backend/docs/GUIA-APRESENTACAO-CSHARP.md#19-como-os-testes-comprovam-as-regras) · [B11](backend/docs/evidencias/B11-validacao.md) |
+| **POO (3,0)** | `Domain/Entities/`: `EntidadeBase` e `RegistroPassagem` (abstratas), `PassagemSimulada` e `PassagemRegistroManual` (`override`), `Parada` (encapsulamento e fábricas como `CadastrarAdministrativa`); `Domain/ValueObjects/` (`Coordenada`, `AlternativaDeslocamento`); interfaces em `Application/Interfaces/` | `Domain/` (278 testes), por exemplo `RegistroPassagemTests` | [Domínio e POO](backend/README.md#domínio-e-poo) |
+| **Web API (2,5)** | `Controllers/` (7 controllers, 14 operações), `Middleware/TratadorExcecoes.cs` (ProblemDetails), `Security/ChaveAdministrativaFilter.cs`, `Documentacao/DocumentacaoOpenApi.cs` | `Api/` (222 testes), por exemplo `ConsultasPublicasHttpTests` e `AdministracaoAutorizacaoTests` | [Web API](backend/README.md#web-api) · [B6](backend/docs/evidencias/B6-web-api.md) · [B10](backend/docs/evidencias/B10-validacao-final.md#as-14-operações) |
+| **EF Core + LINQ (1,5)** | `Infrastructure/Persistence/` (`PontoVozDbContext`, configurações, migrations, seed); `Infrastructure/Repositories/` (por exemplo `RegistroPassagemRepository.ListarUltimasPorLinhaAsync`, com `GroupBy` traduzido para SQL) | `Infrastructure/` (172 testes), `Api/MigracaoAutomaticaTests` | [Persistência e LINQ](backend/README.md#persistência-e-linq) · [B3](backend/docs/evidencias/B3-persistencia.md) · [B4](backend/docs/evidencias/B4-consultas-linq.md) |
+| **Async/Await (1,0)** | Repositórios (`ToListAsync`, `CountAsync`), `Infrastructure/Repositories/UnidadeTrabalhoEf.cs` (`SaveChangesAsync`), `Application/Services/ResumoParadaService.cs` (`Task.WhenAll`), `CancellationToken` do controller ao EF Core | `Application/ResumoParadaServiceTests`, testes de cancelamento em `Api/` | [Async/Await](backend/README.md#asyncawait) · [B9](backend/docs/evidencias/B9-alternativas-resumo.md#instante-único-e-paralelismo) |
+| **Qualidade do código (2,0)** | Camadas separadas, injeção de dependência em `Program.cs`, tratamento central de erros, validação antes do banco, segredos fora do repositório | 816 testes; verificador do contrato (`contracts/verificador/`) | [Segurança](backend/README.md#segurança) · [Testes](backend/README.md#testes) · [B11](backend/docs/evidencias/B11-validacao.md) |
 
-Os caminhos de código partem de `backend/src/PontoVoz.Api/`. Exemplos de POO no código:
+## Evidências
 
-```csharp
-// Abstração e herança: Domain/Entities/RegistroPassagem.cs
-public abstract class RegistroPassagem : EntidadeBase
-{
-    public abstract NivelConfirmacao NivelConfirmacao { get; }
-    public abstract bool DadosSimulados { get; }
-}
+- **Índice por critério:** [backend/docs/evidencias/INDICE-ENTREGA.md](backend/docs/evidencias/INDICE-ENTREGA.md).
+- **Validação final:** execução num clone novo, as 14 operações, a consulta do passageiro, o fluxo
+  administrativo e a indisponibilidade do provedor em
+  [B10-validacao-final.md](backend/docs/evidencias/B10-validacao-final.md); build e testes na raiz e
+  em `backend/`, criação do banco na inicialização e o resultado completo dos testes em
+  [B11-validacao.md](backend/docs/evidencias/B11-validacao.md).
+- **Capturas do Scalar e evidências por etapa:** [backend/docs/evidencias/](backend/docs/evidencias/).
 
-// Polimorfismo por sobrescrita: Domain/Entities/PassagemSimulada.cs
-public override NivelConfirmacao NivelConfirmacao => NivelConfirmacao.ObservacaoSimulada;
-public override bool DadosSimulados => true;
-
-// Polimorfismo por interface: três implementações de IProvedorPrevisaoChegada
-public sealed class ProvedorPrevisaoSimulado(IOptionsMonitor<OpcoesPrevisoes> opcoes) : IProvedorPrevisaoChegada
-```
-
-(trechos resumidos; os arquivos têm o código completo). O índice das evidências está em
-[backend/docs/evidencias/INDICE-ENTREGA.md](backend/docs/evidencias/INDICE-ENTREGA.md), e o guia
-para explicar o código, em [backend/docs/GUIA-APRESENTACAO-CSHARP.md](backend/docs/GUIA-APRESENTACAO-CSHARP.md).
-
-## Indicadores
+### Indicadores
 
 | Indicador | Tipo | Situação |
 |---|---|---|
-| Testes automatizados aprovados | Técnico, medido | 816 de 816 (0 falhas, 0 ignorados), em [B11-validacao.md](backend/docs/evidencias/B11-validacao.md) |
-| Tempo de resposta das rotas públicas (local, banco SQLite de demonstração) | Técnico, medido | Ver [B11-validacao.md](backend/docs/evidencias/B11-validacao.md#tempo-de-resposta-local); mede o backend numa máquina de desenvolvimento, não a experiência no ponto |
-| Consultas feitas por pessoas sem smartphone | Impacto, exige piloto | Meta para um piloto — sem dados coletados |
-| Tempo de espera percebido no ponto | Impacto, exige pesquisa com usuários | Meta para um piloto — sem dados coletados |
-| Avaliação de acessibilidade por pessoas com deficiência visual | Impacto, exige pesquisa com usuários | Meta para um piloto — sem dados coletados |
+| Testes automatizados aprovados | Técnico, medido | 816 de 816 na validação final, com relatório TRX ([B11-validacao.md](backend/docs/evidencias/B11-validacao.md)) |
+| Tempo de resposta das rotas públicas | Técnico, medido numa máquina de desenvolvimento | Média de 5 a 7 ms por rota em 50 requisições locais ([B11-validacao.md](backend/docs/evidencias/B11-validacao.md#tempo-de-resposta-local)); não representa a experiência no ponto |
+| Consultas feitas por pessoas sem smartphone | Impacto, proposto para piloto | Não medido |
+| Tempo de espera percebido no ponto | Impacto, proposto para piloto | Não medido |
+| Avaliação de acessibilidade por pessoas com deficiência visual | Impacto, proposto para piloto | Não medido |
 
-## 8. Dados e limitações
+## Dados e limitações
 
 - **Dados de demonstração:** o seed (paradas, linhas, destinos, percursos e passagens) e as
-  previsões de chegada são fictícios. Os registros do seed usam o prefixo `SIM-` e saem com
-  `dadosSimulados: true`, `origem: "Simulado"` e o aviso `DadosSimulados`.
-- **Cadastros administrativos:** o operador pode cadastrar paradas, linhas e passagens e declara em
-  `dadosSimulados` se o cadastro é fictício. Esses cadastros não são verificados (aviso
-  `CadastroNaoVerificado`).
-- **SPTrans:** não há dados oficiais de chegada integrados ao ambiente demonstrado. O adaptador da
-  API Olho Vivo existe no código, mas está desligado por padrão e nunca foi validado com
-  credenciais oficiais.
+  previsões de chegada são fictícios e não representam paradas ou linhas reais. Os registros do
+  seed usam o prefixo `SIM-` e saem com `dadosSimulados: true`, `origem: "Simulado"` e o aviso
+  `DadosSimulados`.
+- **Cadastros administrativos:** o operador declara em `dadosSimulados` se o cadastro é fictício;
+  esses cadastros não são verificados (aviso `CadastroNaoVerificado`).
+- **SPTrans:** não há dados oficiais de chegada integrados. O adaptador da API Olho Vivo existe no
+  código, mas está desligado por padrão e nunca foi validado com credenciais oficiais.
 - **Dados pessoais:** a API não pede dados de passageiros, e a demonstração não deve receber dados
-  pessoais reais. O campo `origemRegistro` do registro manual recusa nomes com espaço ou
-  maiúscula, e-mails e telefones formatados, mas essa validação não garante, sozinha, a exclusão de
-  toda informação pessoal (uma sequência só de dígitos é aceita). Por isso, o operador deve usar
+  pessoais reais. O campo `origemRegistro` do registro manual recusa nomes, e-mails e telefones
+  formatados, mas não garante, sozinho, a exclusão de toda informação pessoal; o operador deve usar
   apenas rótulos técnicos, como `operador-local`.
-- **Segurança administrativa:** chave única e compartilhada, sem usuários, auditoria nem limite de
-  requisições. Em Development sem chave configurada, as rotas administrativas ficam liberadas para a
-  demonstração local.
-- **Banco automático:** a criação do banco na inicialização vale só em Development
-  (`Banco:AplicarMigracoesAoIniciar`); nos outros ambientes, o banco precisa ser preparado com
-  `dotnet ef database update`.
-- **Escopo:** o backend não inclui a interface do totem, o reconhecimento de voz nem a IA
-  conversacional.
+- **Segurança administrativa:** chave única e compartilhada, sem usuários nem auditoria. Em
+  Development sem chave configurada, as rotas administrativas ficam liberadas para a demonstração
+  local.
+- **Ambiente:** testado no Windows 11 com o .NET SDK 10.0.403. Uma execução da suíte, na validação
+  final, teve uma falha intermitente não identificada, seguida de 28 execuções completas aprovadas
+  ([B11-validacao.md](backend/docs/evidencias/B11-validacao.md#falha-intermitente-observada)).
 
-Detalhes sobre a origem de cada dado: [docs/dados.md](docs/dados.md).
+Origem de cada dado: [docs/dados.md](docs/dados.md).
 
-## 9. Integrantes
+## Integrantes
 
-| Nome | RM | Componente |
-|---|---|---|
-| Albert Katri | RM556544 | Pendente |
-| Bruno Biletsky | RM554739 | Pendente |
-| Paulo Akira | RM556840 | C# Software Development (backend deste repositório). Também ficará responsável por Testing & Quality Assurance, entrega ainda **não iniciada**. |
-
-> **Pendente antes do envio à FIAP:** confirmar o componente ou a disciplina de Albert Katri e de
-> Bruno Biletsky.
+| Nome | RM |
+|---|---|
+| Albert Katri | RM556544 |
+| Bruno Biletsky | RM554739 |
+| Paulo Akira | RM556840 |
 
 ## Uso de inteligência artificial
 
-O uso de IA está registrado em [prompts.md](prompts.md), com o texto integral de cada prompt: o
-ChatGPT apoiou o planejamento, a elaboração dos prompts e as revisões, e o Claude Code executou a
-implementação, os testes e a documentação.
-
-## Estrutura do repositório
-
-```
-pontovoz-csharp/
-├─ README.md          ← este arquivo
-├─ PontoVoz.sln       ← solução (Visual Studio 2026, dotnet build e dotnet test na raiz)
-├─ global.json        ← versão do SDK e plataforma de testes
-├─ .config/           ← ferramenta local dotnet-ef
-├─ prompts.md         ← registro do uso de IA
-├─ docs/dados.md      ← dados reais, públicos e simulados
-├─ contracts/         ← contrato REST, exemplos JSON, OpenAPI exportado e verificador
-└─ backend/           ← código .NET 10
-   ├─ README.md       ← detalhes técnicos de cada parte
-   ├─ PontoVoz.slnx   ← a mesma solução, no formato novo, para quem trabalha dentro de backend/
-   ├─ docs/           ← guia de apresentação e evidências
-   ├─ src/PontoVoz.Api/     ← API (Controllers, Application, Domain, Infrastructure, Security, Middleware)
-   └─ tests/PontoVoz.Tests/ ← testes automatizados
-```
+O uso de ferramentas de IA no desenvolvimento está registrado em [prompts.md](prompts.md), com o
+texto integral de cada prompt.
