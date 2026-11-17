@@ -47,4 +47,3 @@ execução e de validação, com a data em que foi produzido.
 | [`../../../contracts/api-v1.md`](../../../contracts/api-v1.md) | Contrato REST, erros, avisos e exemplos |
 | [`../../../docs/dados.md`](../../../docs/dados.md) | Origem dos dados e situação da integração Olho Vivo |
 | [`../../../prompts.md`](../../../prompts.md) | Resumo do uso de IA e perguntas de estudo e debate (exemplos ilustrativos) |
-| [`../../../docs/prompts-registro-historico.md`](../../../docs/prompts-registro-historico.md) | Registro histórico com o texto integral dos prompts usados no desenvolvimento |
