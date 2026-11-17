@@ -46,4 +46,4 @@ execução e de validação, com a data em que foi produzido.
 | [`../../README.md`](../../README.md) | Documentação técnica: execução, arquitetura, domínio, Web API, persistência, async, segurança e testes |
 | [`../../../contracts/api-v1.md`](../../../contracts/api-v1.md) | Contrato REST, erros, avisos e exemplos |
 | [`../../../docs/dados.md`](../../../docs/dados.md) | Origem dos dados e situação da integração Olho Vivo |
-| [`../../../prompts.md`](../../../prompts.md) | Resumo do uso de IA e perguntas de estudo e debate (exemplos ilustrativos) |
+| [`../../../prompts.md`](../../../prompts.md) | Registro do uso de IA e perguntas de estudo e debate |
