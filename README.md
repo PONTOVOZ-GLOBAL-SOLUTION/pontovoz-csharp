@@ -48,7 +48,15 @@ serviços deste backend para informar:
    estimado (espera + percurso), e não apenas por quem chega primeiro.
 
 O totem físico, a interface visual e o reconhecimento de voz **não** estão implementados neste
-repositório; o componente entregue é o backend C#.
+repositório; o componente entregue é o backend C#. Nenhum totem foi instalado, e não há GPS nem
+dados de chegada em tempo real.
+
+**Cenários de referência:** o backend usa a Vila Inglesa como região de referência do problema. A
+interface visual demonstrativa, desenvolvida por integrantes da equipe fora deste repositório,
+usa a região da Avenida Paulista/MASP como cenário ilustrativo no vídeo do protótipo. Os dois são
+cenários ilustrativos da mesma proposta: os dados de demonstração do backend são fictícios (códigos
+`SIM-`) e não representam paradas reais de nenhuma das duas regiões. A integração entre essa
+interface e este backend não foi demonstrada.
 
 ## ODS e contribuição
 
@@ -204,6 +212,9 @@ Os caminhos de código partem de `backend/src/PontoVoz.Api/`, e os de teste, de
 - **Segurança administrativa:** chave única e compartilhada, sem usuários nem auditoria. Em
   Development sem chave configurada, as rotas administrativas ficam liberadas para a demonstração
   local.
+- **Validação com o cidadão:** a jornada de referência é um cenário de uso. O projeto não registra
+  conversa com um passageiro real, que as páginas 17 a 19 do edital orientam fazer; o problema
+  descrito é a hipótese de trabalho da equipe.
 - **Ambiente:** testado no Windows 11 com o .NET SDK 10.0.403. Uma execução da suíte, na validação
   final, teve uma falha intermitente não identificada, seguida de 28 execuções completas aprovadas
   ([B11-validacao.md](backend/docs/evidencias/B11-validacao.md#falha-intermitente-observada)).
@@ -216,9 +227,13 @@ Origem de cada dado: [docs/dados.md](docs/dados.md).
 |---|---|
 | Albert Katri | RM556544 |
 | Bruno Biletsky | RM554739 |
-| Paulo Akira | RM556840 |
+| Guilherme Gomes Oliveira | RM554606 |
+| Paulo Akira Okama | RM556840 |
 
 ## Uso de inteligência artificial
 
-O uso de ferramentas de IA no desenvolvimento está registrado em [prompts.md](prompts.md), com o
-texto integral de cada prompt.
+O [prompts.md](prompts.md) resume como a IA foi usada no desenvolvimento (ChatGPT no planejamento e
+nas revisões; Claude Code na implementação, nos testes e na documentação) e reúne perguntas de
+estudo e debate sobre os conteúdos da disciplina, identificadas como exemplos ilustrativos. O texto
+integral dos prompts usados está em
+[docs/prompts-registro-historico.md](docs/prompts-registro-historico.md).
