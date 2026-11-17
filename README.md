@@ -230,10 +230,9 @@ Origem de cada dado: [docs/dados.md](docs/dados.md).
 | Guilherme Gomes Oliveira | RM554606 |
 | Paulo Akira Okama | RM556840 |
 
+
 ## Uso de inteligência artificial
 
-O [prompts.md](prompts.md) resume como a IA foi usada no desenvolvimento (ChatGPT no planejamento e
-nas revisões; Claude Code na implementação, nos testes e na documentação) e reúne perguntas de
-estudo e debate sobre os conteúdos da disciplina, identificadas como exemplos ilustrativos. O texto
-integral dos prompts usados está em
-[docs/prompts-registro-historico.md](docs/prompts-registro-historico.md).
+Ferramentas de inteligência artificial foram utilizadas como apoio ao aprendizado, à discussão de alternativas técnicas e ao desenvolvimento do projeto, contribuindo para a compreensão e aplicação dos conceitos estudados.
+
+Os exemplos de perguntas voltadas ao estudo e debate estão organizados no arquivo [prompts.md](prompts.md).
